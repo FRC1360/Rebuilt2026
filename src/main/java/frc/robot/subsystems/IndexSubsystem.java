@@ -5,13 +5,24 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 public class IndexSubsystem extends SubsystemBase {
   /** Creates a new IndexSubsystem. */
-  public IndexSubsystem() {}
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  SparkFlex rightMotor;
+  SparkFlex leftMotor;
+
+  public IndexSubsystem() {
+    rightMotor = new SparkFlex(0, MotorType.kBrushless);
+    leftMotor = new SparkFlex(0, MotorType.kBrushless);
+    
+    leftMotor.setInverted(true);
+  }
+
+  public void setMotorSpeed(double speed) {
+    rightMotor.set(speed);
+    leftMotor.set(speed);
   }
 }
