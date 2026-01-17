@@ -20,8 +20,8 @@ public class FlywheelSubsystem extends SubsystemBase {
   private final SparkMax flywheelMotor;
   private final RelativeEncoder flywheelEncoder;
   
-  public final PIDController flywheelPID;
-  public final SimpleMotorFeedforward flywheelFF;
+  private final PIDController flywheelPID;
+  private final SimpleMotorFeedforward flywheelFF;
   
   private static final int flywheelmotorID = 0; //edit this yesyes
   private static final double kP = 0.0;
@@ -53,6 +53,14 @@ public class FlywheelSubsystem extends SubsystemBase {
   
   public double getFlywheelSpeed() {
     return flywheelEncoder.getVelocity();
+  }
+
+  public PIDController getFlywheelPID() {
+    return flywheelPID;
+  }
+
+  public SimpleMotorFeedforward getFlywheelFF() {
+    return flywheelFF;
   }
 
   @Override
