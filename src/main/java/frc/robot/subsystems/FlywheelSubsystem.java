@@ -23,7 +23,7 @@ public class FlywheelSubsystem extends SubsystemBase {
   private final PIDController flywheelPID;
   private final SimpleMotorFeedforward flywheelFF;
   
-  private static final int flywheelmotorID = 0; //edit this yesyes
+  private static final int flywheelmotorID = 0; //edit this yesyesyes
   private static final double kP = 0.0;
   private static final double kI = 0.0;
   private static final double kD = 0.0;
@@ -36,7 +36,7 @@ public class FlywheelSubsystem extends SubsystemBase {
     
     SparkMaxConfig config = new SparkMaxConfig();
     config.idleMode(IdleMode.kCoast);
-    config.smartCurrentLimit(40);
+    config.smartCurrentLimit(20);
     
     flywheelMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     
