@@ -4,14 +4,57 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.RelativeEncoder;
+
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class FlywheelSubsystem extends SubsystemBase {
-  /** Creates a new FlywheelSubsystem. */
-  public FlywheelSubsystem() {}
+  private final SparkMax flywheelMotor;
+  private final RelativeEncoder flywheelEncoder;
+  
+  public final PIDController flywheelPID;
+  public final SimpleMotorFeedforward flywheelFF;
+  
+  private static final int flywheelmotorID = 0; //edit this yesyes
+  private static final double kP = 0.0;
+  private static final double kI = 0.0;
+  private static final double kD = 0.0;
+  private static final double kS = 0.0;
+  private static final double kV = 0.0;
+  private static final double kA = 0.0;
+  
+  public FlywheelSubsystem() {
+    flywheelMotor = new SparkMax(flywheelmotorID, MotorType.kBrushless);
+    
+    SparkMaxConfig config = new SparkMaxConfig();
+    config.idleMode(IdleMode.kCoast);
+    config.smartCurrentLimit(40);
+    
+    flywheelMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    
+    flywheelEncoder = flywheelMotor.getEncoder();
+    
+    flywheelPID = new PIDController(kP, kI, kD);
+    
+    flywheelFF = new SimpleMotorFeedforward(kS, kV, kA);
+  }
+
+  public void setFlywheelSpeed(double speed) {
+    flywheelMotor.set(speed);
+  }
+  
+  public double getFlywheelSpeed() {
+    return flywheelEncoder.getVelocity();
+  }
 
   @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
+  public void periodic() {}
 }
