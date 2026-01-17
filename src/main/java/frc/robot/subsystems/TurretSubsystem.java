@@ -16,7 +16,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 
 public class TurretSubsystem extends SubsystemBase {
-  private final TalonFX turretMotor = new TalonFX(Constants.TurretConstants.TurretMotorID);
+  private final TalonFX turretMotor = new TalonFX(0);
   private final MotionMagicVoltage turretRequest = new MotionMagicVoltage(0);
   private double targetAngle;
   
