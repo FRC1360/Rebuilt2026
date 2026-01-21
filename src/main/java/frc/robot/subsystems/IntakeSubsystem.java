@@ -41,16 +41,16 @@ public class IntakeSubsystem extends SubsystemBase {
 
   //Probably not needed
   public void setPivotSpeed(double speed) { 
-    pivot.set (speed);
+    pivot.set(speed);
   }
 
   public PIDController getPidController () {
 
-  return this.pivotPID;
+    return this.pivotPID;
   }
 
 
-    public double getPivotPosition() {
+  public double getPivotPosition() {
         return pivot.getEncoder().getPosition();
         
     }
