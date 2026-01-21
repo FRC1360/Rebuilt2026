@@ -16,4 +16,10 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+
+  public static class IndexConstants {
+    public static final int hopperConveyorID = 0;
+    public static final int magazineConveyorID = 0;
+    public static final int magazineRollerID = 0;
+  }
 }
