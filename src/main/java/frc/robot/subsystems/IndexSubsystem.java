@@ -44,18 +44,18 @@ public class IndexSubsystem extends SubsystemBase {
     magazineRollerMotor.configure(magazineRollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  public void setHopperConveyorSpeed(double speed) {
-    hopperConveyorMotor.set(speed);
-    SmartDashboard.putNumber("Subsystems/IndexSubsystem/hopperConveyorSpeed", speed);
+  public void setHopperConveyorSpeed(double voltage) {
+    hopperConveyorMotor.setVoltage(voltage);
+    SmartDashboard.putNumber("Subsystems/IndexSubsystem/hopperConveyorSpeed", voltage);
   }
 
-  public void setMagazineConveyorSpeed(double speed) {
-    magazineConveyorMotor.set(speed);
-    SmartDashboard.putNumber("Subsystems/IndexSubsystem/magazineConveyorSpeed", speed);
+  public void setMagazineConveyorSpeed(double voltage) {
+    magazineConveyorMotor.setVoltage(voltage);
+    SmartDashboard.putNumber("Subsystems/IndexSubsystem/magazineConveyorSpeed", voltage);
   }
 
-  public void setMagazineRollerSpeed(double speed) {
-    magazineRollerMotor.set(speed);
-    SmartDashboard.putNumber("Subsystems/IndexSubsystem/magazineRollerSpeed", speed);
+  public void setMagazineRollerSpeed(double voltage) {
+    magazineRollerMotor.setVoltage(voltage);
+    SmartDashboard.putNumber("Subsystems/IndexSubsystem/magazineRollerVoltage", voltage);
   }
 }
