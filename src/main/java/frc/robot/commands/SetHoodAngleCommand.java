@@ -82,8 +82,8 @@ public class SetHoodAngleCommand extends Command {
     public void execute() {
         pidControllerOutput = m_hoodPidController.calculate(m_hoodSubsystem.getCurrentAngle(), targetAngleDegrees);
         feedForwardControllerOutput = m_hoodFeedforward.calculate(
-        Units.degreesToRadians(m_hoodSubsystem.getCurrentAngle()),
-        0.0
+            Units.degreesToRadians(m_hoodSubsystem.getCurrentAngle()),
+            0.0
         );
 
         hoodPIDOutputPublisher.set(pidControllerOutput);
