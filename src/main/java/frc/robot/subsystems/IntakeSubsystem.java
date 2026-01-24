@@ -11,6 +11,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
@@ -19,7 +20,7 @@ import edu.wpi.first.math.controller.PIDController;
 
 public class IntakeSubsystem extends SubsystemBase {
 
-  private double intakeSpeed = 0.0;
+  private double intakeSpeed = 0.2;
 
   private double kP = 0.0;
   private double kI = 0.0;
@@ -31,11 +32,8 @@ public class IntakeSubsystem extends SubsystemBase {
   private double kA = 0.0;
   private double kV = 0.0;
 
-  private int wheelId = 0; 
-  public int pivotId = 0;
-
-  private SparkFlex wheel = new SparkFlex(wheelId, MotorType.kBrushless);
-  private SparkFlex pivot = new SparkFlex(pivotId, MotorType.kBrushless);
+  private SparkFlex wheel = new SparkFlex(Constants.IntakeConstants.WHEEL_ID, MotorType.kBrushless);
+  private SparkFlex pivot = new SparkFlex(Constants.IntakeConstants.PIVOT_ID, MotorType.kBrushless);
 
   private ArmFeedforward pivotFeedForward = new ArmFeedforward(kG, kS, kV, kA);
 
