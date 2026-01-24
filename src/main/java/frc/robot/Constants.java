@@ -16,7 +16,7 @@ public final class Constants {
 
     public static final class IntakeConstants {
 
-    public static final int WHEEL_ID = 15;
+    public static final int WHEEL_ID = 60;
     public static final int PIVOT_ID = 0;
     public static final double PIVOT_GEAR_RATIO = 0.0;
     
