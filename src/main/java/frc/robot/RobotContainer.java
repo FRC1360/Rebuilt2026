@@ -6,9 +6,7 @@ package frc.robot;
 
 import frc.robot.subsystems.FlywheelSubsystem;
 
-import org.littletonrobotics.urcl.URCL;
-
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -31,9 +29,8 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
-    configureBindings(
-      
-    );
+    //_flywheelSubsystem.setDefaultCommand(new InstantCommand(() -> m_flywheelSubsystem.setFlywheelVoltage(0), m_flywheelSubsystem));
+    configureBindings();
   }
 
   /**
@@ -50,7 +47,9 @@ public class RobotContainer {
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    m_joystick.leftBumper().onTrue(Commands.runOnce(URCL::start));
+    //m_joystick.().whileTrue(new InstantCommand(() -> m_flywheelSubsystem.setFlywheelVoltage(1),m_flywheelSubsystem))
+     // .whileFalse(new InstantCommand( () -> m_flywheelSubsystem.setFlywheelSpeed(0), m_flywheelSubsystem));
+
 
 
     /*
@@ -59,11 +58,16 @@ public class RobotContainer {
     * Joystick B = dynamic forward
     * Joystick X = dyanmic reverse
     */
+
     
     m_joystick.y().whileTrue(m_flywheelSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
     m_joystick.a().whileTrue(m_flywheelSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     m_joystick.b().whileTrue(m_flywheelSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
     m_joystick.x().whileTrue(m_flywheelSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+    m_joystick.leftBumper().onTrue(Commands.runOnce(() -> DataLogManager.start()));
+    m_joystick.rightBumper().onTrue(Commands.runOnce(() -> DataLogManager.stop()));
+    m_joystick.leftTrigger(0).onTrue(Commands.runOnce(() -> System.out.println(DataLogManager.getLog())));
   }
 
   /**
