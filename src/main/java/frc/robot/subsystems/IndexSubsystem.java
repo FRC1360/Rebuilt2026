@@ -15,47 +15,30 @@ import frc.robot.Constants;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class IndexSubsystem extends SubsystemBase {
+
+  private SparkFlex indexMotor;
+  private SparkFlexConfig indexConfig;
+
   /** Creates a new IndexSubsystem. */
 
-  private SparkFlex hopperConveyorMotor;
-  private SparkFlex magazineConveyorMotor;
-  private SparkFlex magazineRollerMotor;
-
-  private SparkFlexConfig hopperConveyorConfig;
-  private SparkFlexConfig magazineConveyorConfig;
-  private SparkFlexConfig magazineRollerConfig;
-
   public IndexSubsystem() {
-    hopperConveyorMotor = new SparkFlex(Constants.IndexConstants.hopperConveyorID, MotorType.kBrushless);
-    magazineConveyorMotor = new SparkFlex(Constants.IndexConstants.magazineConveyorID, MotorType.kBrushless);
-    magazineRollerMotor = new SparkFlex(Constants.IndexConstants.magazineRollerID, MotorType.kBrushless);
+    indexMotor = new SparkFlex(Constants.IndexConstants.hopperConveyorID, MotorType.kBrushless);
+    indexConfig = new SparkFlexConfig();
 
-    hopperConveyorConfig = new SparkFlexConfig();
-    magazineConveyorConfig = new SparkFlexConfig();
-    magazineRollerConfig = new SparkFlexConfig();
-
-    magazineConveyorConfig.idleMode(IdleMode.kBrake);
-    hopperConveyorMotor.configure(magazineConveyorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-    hopperConveyorConfig.idleMode(IdleMode.kBrake);
-    magazineConveyorMotor.configure(hopperConveyorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-    magazineRollerConfig.idleMode(IdleMode.kBrake);
-    magazineRollerMotor.configure(magazineRollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    indexConfig.idleMode(IdleMode.kBrake);
+    indexMotor.configure(indexConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  public void setHopperConveyorSpeed(double voltage) {
-    hopperConveyorMotor.setVoltage(voltage);
-    SmartDashboard.putNumber("Subsystems/IndexSubsystem/hopperConveyorSpeed", voltage);
+  public void setIndexVoltage(double volts) {
+    indexMotor.setVoltage(volts);
   }
 
-  public void setMagazineConveyorSpeed(double voltage) {
-    magazineConveyorMotor.setVoltage(voltage);
-    SmartDashboard.putNumber("Subsystems/IndexSubsystem/magazineConveyorSpeed", voltage);
+  public void setIndexSpeed(double speed) {
+    indexMotor.set(speed);
   }
 
-  public void setMagazineRollerSpeed(double voltage) {
-    magazineRollerMotor.setVoltage(voltage);
-    SmartDashboard.putNumber("Subsystems/IndexSubsystem/magazineRollerVoltage", voltage);
+  @Override
+  public void periodic() {
+    SmartDashboard.putNumber("Subsystems/IndexSubsystem/indexVoltage", indexMotor.getBusVoltage());
   }
 }
