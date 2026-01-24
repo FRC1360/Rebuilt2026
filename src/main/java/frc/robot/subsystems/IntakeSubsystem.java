@@ -20,7 +20,7 @@ import edu.wpi.first.math.controller.PIDController;
 
 public class IntakeSubsystem extends SubsystemBase {
 
-  private double intakeSpeed = 0.2;
+  private double intakeSpeed = 0.5;
 
   private double kP = 0.0;
   private double kI = 0.0;
