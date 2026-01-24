@@ -16,9 +16,9 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
-  /* 
+ 
   public static class TurretConstants {
-    public static final int TurretMotorID = 0;
+    public static final int TurretMotorID = 10;
     
     public static final double Max_v = 0.0;
     public static final double Max_a = 0.0;
@@ -30,5 +30,4 @@ public final class Constants {
     public static final double kG = 0.0;
     
   }
-    */
 }
