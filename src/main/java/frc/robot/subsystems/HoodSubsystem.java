@@ -4,58 +4,60 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 // import com.revrobotics.spark.SparkMax;
 
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 
  
 public class HoodSubsystem extends SubsystemBase {
-  private TalonFX hoodmotor;
-  public TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
-  public Slot0Configs slot0Configs = talonFXConfigs.Slot0;
+
+    private final TalonFX hoodMotor;
+
+    private final FeedbackConfigs motorFeedbackConfigs;
+    private final MotorOutputConfigs motorOutputConfigs;
+
+    private final double kConversonFactor = (164.0 / 12.0) / 360.0;
+    private final double kInitialAngle = 75.0;
 
   
   /** Creates a new HoodSubsystem. */
   
-  public HoodSubsystem(TalonFX hoodmotor) {
-    var hoodMConfigs = new TalonFXConfiguration();
-    this.hoodmotor = hoodmotor;
-    slot0Configs.kP = 2.4; // An error of 1 rotation results in 2.4 V output
-    slot0Configs.kI = 0; // no output for integrated error
-    slot0Configs.kD = 0.1;     // A velocity of 1 rps results in 0.1 V output
-    slot0Configs.kS = 0.0;
-    slot0Configs.kV = 0.0;
-    slot0Configs.kG = 0.0;
-    slot0Configs.kA = 0.0;
-    MotionMagicConfigs hoodConfigs = hoodMConfigs.MotionMagic;
-    hoodConfigs.MotionMagicCruiseVelocity = 0.0;
-    hoodConfigs.MotionMagicExpo_kV = 0.0;
-    hoodConfigs.MotionMagicExpo_kA = 0.0;
-    hoodConfigs.MotionMagicJerk = 0.0;
-    
-  }
+    public HoodSubsystem() {
+        hoodMotor = new TalonFX(50);
 
-  void MoveToAngle(double angle,double speed){
-    
-    MotionMagicVoltage m_request = new MotionMagicVoltage(0);
-    double rotation = angle/360; // turn degrees into rotation for built in PID
-    hoodmotor.setControl(m_request.withPosition(rotation));
-  }
+        motorFeedbackConfigs = new FeedbackConfigs()
+            .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
+            .withSensorToMechanismRatio(kConversonFactor);
 
+        motorOutputConfigs = new MotorOutputConfigs()
+            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withNeutralMode(NeutralModeValue.Brake);
 
-  @Override
-  public void periodic() {
-    
-    // This method will be called once per scheduler run
-    
+        hoodMotor.getConfigurator().apply(motorFeedbackConfigs);
+        hoodMotor.getConfigurator().apply(motorOutputConfigs);
+        hoodMotor.setPosition(kInitialAngle);
+    }
 
-  }
+    @Override
+    public void periodic() { 
+        SmartDashboard.putNumber("Subsystems/HoodSubsystem/Current Position Degrees", hoodMotor.getPosition().getValueAsDouble());
+    }
+
+    public void setHoodMotorVoltage(double volts) {
+        hoodMotor.setVoltage(volts);
+    }
+
+    public double getCurrentAngle() {
+        return hoodMotor.getPosition().getValueAsDouble();
+    }
 }
 
