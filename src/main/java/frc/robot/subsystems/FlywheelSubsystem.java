@@ -48,6 +48,7 @@ public class FlywheelSubsystem extends SubsystemBase {
 
 
     motorEncoderConfig.velocityConversionFactor((4 * Math.PI) / (60 * 12));
+    motorEncoderConfig.positionConversionFactor((4 * Math.PI) / (12));
 
     config.idleMode(IdleMode.kCoast);
     // config.smartCurrentLimit(40);
@@ -80,7 +81,7 @@ public class FlywheelSubsystem extends SubsystemBase {
           log.motor("flywheel")
               .voltage(Volts.of(flywheelMotor.getAppliedOutput() * RobotController.getBatteryVoltage()))
               .linearPosition(Distance.ofBaseUnits(flywheelEncoder.getPosition(), Feet))
-              .linearVelocity(LinearVelocity.ofBaseUnits(flywheelEncoder.getPosition(), Feet.per(Second)));
+              .linearVelocity(LinearVelocity.ofBaseUnits(flywheelEncoder.getVelocity(), Feet.per(Second)));
         },
         // Tell SysId to make generated commands require this subsystem, suffix test state in
         // WPILog with this subsystem's name ("shooter")
