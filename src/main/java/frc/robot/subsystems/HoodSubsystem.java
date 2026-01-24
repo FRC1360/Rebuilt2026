@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -29,7 +30,7 @@ public class HoodSubsystem extends SubsystemBase {
     private final FeedbackConfigs motorFeedbackConfigs;
     private final MotorOutputConfigs motorOutputConfigs;
 
-    private final double kConversonFactor = (164.0 / 12.0) / 360.0;
+    private final double kConversonFactor = ((164.0 / 12.0) * (60.0 / 18.0)) / 360.0;
     private final double kInitialAngle = 75.0;
 
   
@@ -40,7 +41,7 @@ public class HoodSubsystem extends SubsystemBase {
             .withSensorToMechanismRatio(kConversonFactor);
 
         motorOutputConfigs = new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withInverted(InvertedValue.Clockwise_Positive)
             .withNeutralMode(NeutralModeValue.Brake);
 
         hoodMotor.getConfigurator().apply(motorFeedbackConfigs);
@@ -60,14 +61,17 @@ public class HoodSubsystem extends SubsystemBase {
     public double getCurrentAngle() {
         return hoodMotor.getPosition().getValueAsDouble();
     }
+    public double getCurrentVelocity() {
+        return hoodMotor.getVelocity().getValueAsDouble();
+    }
 
     private SysIdRoutine sysIdRoutine = new SysIdRoutine(
         new SysIdRoutine.Config(
             Volts.of(0.1).per(Second),  // Ramp Rate of 0.1V/s
             Volts.of(0.4),              // Dynamic Step Voltage of 0.4V
-            null,                         // Use default timeout (10 s)
+            Seconds.of(10),                         // Use default timeout (10 s)
             // Log state with SignalLogger class
-            state -> SignalLogger.writeString("SysIdRotation_State", state.toString())
+            state -> SignalLogger.writeString("Hood_SysID_State", state.toString())
         ),
         new SysIdRoutine.Mechanism(
          (volts) -> hoodMotor.setControl(hoodVoltageRequest.withOutput(volts.in(Volts))),

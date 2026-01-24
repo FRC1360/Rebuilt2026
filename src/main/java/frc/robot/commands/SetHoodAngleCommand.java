@@ -4,9 +4,9 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
@@ -17,9 +17,12 @@ import frc.robot.subsystems.HoodSubsystem;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class SetHoodAngleCommand extends Command {
 
-    private final double default_kP = 0.0;
-    private final double default_kI = 0.0;
+    private final double default_kP = 0.5;
+    private final double default_kI = 1.0;
     private final double default_kD = 0.0;
+
+    private final double default_maxVelocity = 10.0;
+    private final double default_maxAcceleration = 100.0;
 
     private final NetworkTable loggingTable;
     private final DoublePublisher hoodPIDOutputPublisher;
@@ -30,9 +33,10 @@ public class SetHoodAngleCommand extends Command {
     private final DoubleEntry kD_Entry;
 
     private final HoodSubsystem m_hoodSubsystem;
-    private final PIDController m_hoodPidController;
-    private final ArmFeedforward m_hoodFeedforward;
+    private final ProfiledPIDController m_hoodPidController;
+    private final SimpleMotorFeedforward m_hoodFeedforward;
 
+    private double lastVelocity;
     private double targetAngleDegrees;
     private double pidControllerOutput;
     private double feedForwardControllerOutput;
@@ -42,12 +46,17 @@ public class SetHoodAngleCommand extends Command {
         // Use addRequirements() here to declare subsystem dependencies.
         this.m_hoodSubsystem = hoodSubsystem;
 
-        this.m_hoodPidController = new PIDController(
+        this.m_hoodPidController = new ProfiledPIDController(
             default_kP,
             default_kI,
-            default_kD
+            default_kD,
+            new TrapezoidProfile.Constraints(default_maxVelocity, default_maxAcceleration)
         );
-        this.m_hoodFeedforward = new ArmFeedforward(0.0, 0.0, 0.0, 0.0);
+        this.m_hoodFeedforward = new SimpleMotorFeedforward(
+            0.159,
+            0.012661,
+            0.0
+        );
 
         loggingTable = NetworkTableInstance.getDefault().getTable("Commands/"+getName());
         hoodPIDOutputPublisher = loggingTable.getDoubleTopic("Hood PID Output").publish();
@@ -74,23 +83,32 @@ public class SetHoodAngleCommand extends Command {
         m_hoodPidController.setP(kP_Entry.get());
         m_hoodPidController.setI(kI_Entry.get());
         m_hoodPidController.setD(kD_Entry.get());
-        m_hoodPidController.reset();
+        m_hoodPidController.reset(
+            m_hoodSubsystem.getCurrentAngle(),
+            m_hoodSubsystem.getCurrentVelocity()
+        );
+        m_hoodPidController.setGoal(targetAngleDegrees);
+
+        lastVelocity = m_hoodSubsystem.getCurrentVelocity();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        pidControllerOutput = m_hoodPidController.calculate(m_hoodSubsystem.getCurrentAngle(), targetAngleDegrees);
-        feedForwardControllerOutput = m_hoodFeedforward.calculate(
-            Units.degreesToRadians(m_hoodSubsystem.getCurrentAngle()),
-            0.0
+        
+        pidControllerOutput = m_hoodPidController.calculate(m_hoodSubsystem.getCurrentAngle());
+        feedForwardControllerOutput = m_hoodFeedforward.calculateWithVelocities(
+            lastVelocity,
+            m_hoodPidController.getSetpoint().velocity
         );
 
-        hoodPIDOutputPublisher.set(pidControllerOutput);
-        hoodSetpointPublisher.set(targetAngleDegrees);
+        hoodPIDOutputPublisher.set(feedForwardControllerOutput);
+        hoodSetpointPublisher.set(m_hoodPidController.getSetpoint().position);
         hoodCurrentAnglePublisher.set(m_hoodSubsystem.getCurrentAngle());
 
         m_hoodSubsystem.setHoodMotorVoltage(pidControllerOutput + feedForwardControllerOutput);
+
+        lastVelocity = m_hoodSubsystem.getCurrentVelocity();
     }
 
     // Called once the command ends or is interrupted.

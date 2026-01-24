@@ -8,8 +8,11 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.SetHoodAngleCommand;
 import frc.robot.subsystems.HoodSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -41,15 +44,27 @@ public class RobotContainer {
    */
   private void configureBindings() {
     m_hoodSubsystem.setDefaultCommand(
-      new SetHoodAngleCommand(m_hoodSubsystem, 70)
+        new InstantCommand(() -> m_hoodSubsystem.setHoodMotorVoltage(0), m_hoodSubsystem)
     );
 
     m_driverController.a().whileTrue(
-      new SetHoodAngleCommand(m_hoodSubsystem, 65)
+      m_hoodSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+    );
+    m_driverController.b().whileTrue(
+      m_hoodSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+    );
+    m_driverController.x().whileTrue(
+      m_hoodSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse)
+    );
+    m_driverController.y().whileTrue(
+      m_hoodSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward)
     );
 
-    m_driverController.y().whileTrue(
-      new SetHoodAngleCommand(m_hoodSubsystem, 57)
+    m_driverController.leftBumper().whileTrue(
+      new SetHoodAngleCommand(m_hoodSubsystem, 70)
+    );
+    m_driverController.rightBumper().whileTrue(
+      new SetHoodAngleCommand(m_hoodSubsystem, 50)
     );
   }
 
