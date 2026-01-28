@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import frc.robot.subsystems.FlywheelSubsystem;
+
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.SetHoodAngleCommand;
 import frc.robot.subsystems.HoodSubsystem;
@@ -11,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
@@ -22,11 +27,12 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
+  private final FlywheelSubsystem m_flywheelSubsystem = new FlywheelSubsystem();
   private final HoodSubsystem m_hoodSubsystem = new HoodSubsystem();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  private final CommandXboxController m_joystick =
+      new CommandXboxController(0);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -72,6 +78,8 @@ public class RobotContainer {
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
+   * 
+  
    */
   public Command getAutonomousCommand() {
     return null;   
