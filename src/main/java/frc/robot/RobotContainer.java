@@ -8,8 +8,15 @@ import frc.robot.subsystems.FlywheelSubsystem;
 
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.SetHoodAngleCommand;
+import frc.robot.subsystems.HoodSubsystem;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
@@ -21,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final FlywheelSubsystem m_flywheelSubsystem = new FlywheelSubsystem();
+  private final HoodSubsystem m_hoodSubsystem = new HoodSubsystem();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_joystick =
@@ -28,8 +36,6 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Configure the trigger bindings
-    //_flywheelSubsystem.setDefaultCommand(new InstantCommand(() -> m_flywheelSubsystem.setFlywheelVoltage(0), m_flywheelSubsystem));
     configureBindings();
   }
 
@@ -43,31 +49,29 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
+    m_hoodSubsystem.setDefaultCommand(
+        new InstantCommand(() -> m_hoodSubsystem.setHoodMotorVoltage(0), m_hoodSubsystem)
+    );
 
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    //m_joystick.().whileTrue(new InstantCommand(() -> m_flywheelSubsystem.setFlywheelVoltage(1),m_flywheelSubsystem))
-     // .whileFalse(new InstantCommand( () -> m_flywheelSubsystem.setFlywheelSpeed(0), m_flywheelSubsystem));
+    m_driverController.a().whileTrue(
+      m_hoodSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+    );
+    m_driverController.b().whileTrue(
+      m_hoodSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+    );
+    m_driverController.x().whileTrue(
+      m_hoodSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse)
+    );
+    m_driverController.y().whileTrue(
+      m_hoodSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward)
+    );
 
-
-
-    /*
-    * Joystick Y = quasistatic forward
-    * Joystick A = quasistatic reverse
-    * Joystick B = dynamic forward
-    * Joystick X = dyanmic reverse
-    */
-
-    
-    m_joystick.y().whileTrue(m_flywheelSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    m_joystick.a().whileTrue(m_flywheelSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    m_joystick.b().whileTrue(m_flywheelSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    m_joystick.x().whileTrue(m_flywheelSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
-    m_joystick.leftBumper().onTrue(Commands.runOnce(() -> DataLogManager.start()));
-    m_joystick.rightBumper().onTrue(Commands.runOnce(() -> DataLogManager.stop()));
-    m_joystick.leftTrigger(0).onTrue(Commands.runOnce(() -> System.out.println(DataLogManager.getLog())));
+    m_driverController.leftBumper().whileTrue(
+      new SetHoodAngleCommand(m_hoodSubsystem, 70)
+    );
+    m_driverController.rightBumper().whileTrue(
+      new SetHoodAngleCommand(m_hoodSubsystem, 50)
+    );
   }
 
   /**
@@ -77,6 +81,7 @@ public class RobotContainer {
    * 
   
    */
-  //public Command getAutonomousCommand() {
-  //}
+  public Command getAutonomousCommand() {
+    return null;   
+  }
 }
