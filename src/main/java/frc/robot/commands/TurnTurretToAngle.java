@@ -16,7 +16,7 @@ public class TurnTurretToAngle extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        turretSubsystem.setAngle(target);
+        turretSubsystem.setVoltage(target);
     }
 
     // Called every time the scheduler runs while the command is scheduled.

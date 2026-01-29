@@ -4,50 +4,93 @@
 
 package frc.robot.subsystems;
 
-import frc.robot.Constants;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.hardware.TalonFX;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.EncoderConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 public class TurretSubsystem extends SubsystemBase {
-  private final TalonFX turretMotor = new TalonFX(0);
-  private final MotionMagicVoltage turretRequest = new MotionMagicVoltage(0);
-  private double targetAngle;
-  
-  public TurretSubsystem() { 
-    var turretConfigs = new TalonFXConfiguration();
 
-    Slot0Configs slot0Configs = turretConfigs.Slot0;
-    slot0Configs.kS = 0.0;
-    slot0Configs.kV = 0.0;
-    slot0Configs.kA = 0.0;
-    slot0Configs.kP = 0.0;
-    slot0Configs.kI = 0.0;
-    slot0Configs.kD = 0.0;
+   private final SparkMax motor;  
+   private final EncoderConfig encoderConfig; 
+   private final SparkMaxConfig motorConfig;
+   private static final int TurretMotorID = 0;
+   private static final double gearRatio = (1.0 / 7.0) * 360.0;
+   private final SysIdRoutine routine;   
+      
+   private final NetworkTable loggingTable;
+   private final DoublePublisher turretPosDoublePublisher;
 
-    MotionMagicConfigs turrConfigs = turretConfigs.MotionMagic;
-    turrConfigs.MotionMagicCruiseVelocity = 0.0;
-    turrConfigs.MotionMagicExpo_kV = 0.0;
-    turrConfigs.MotionMagicExpo_kA = 0.0;
-    turrConfigs.MotionMagicJerk = 0.0;
-    turretMotor.getConfigurator().apply(turrConfigs);
+   public TurretSubsystem() { 
+      motor = new SparkMax(TurretMotorID, MotorType.kBrushless);
+      motorConfig = new SparkMaxConfig(); 
+      encoderConfig = new EncoderConfig();
+         
+      encoderConfig.velocityConversionFactor(gearRatio / 60.0); // per minute to per second
+      encoderConfig.positionConversionFactor(gearRatio); 
+      motorConfig.idleMode(IdleMode.kBrake);
+      motorConfig.apply(encoderConfig);
+            
+      motor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    targetAngle = 0.0;
+      routine = new SysIdRoutine(
+      new SysIdRoutine.Config(
+        Volts.of(0.5).per(Second),
+        Volts.of(3.5),
+        Seconds.of(10)
+      ),
+      new SysIdRoutine.Mechanism(
+        (voltage) -> motor.setVoltage(voltage),
+        // Tell SysId how to record a frame of data for each motor on the mechanism being
+        log -> {
+          // Record a frame for the turret motor.
+          log.motor("turret")
+              .voltage(Volts.of(motor.getAppliedOutput() * RobotController.getBatteryVoltage()))
+              .angularPosition(Angle.ofBaseUnits(motor.getEncoder().getPosition(), Degrees))
+              .angularVelocity(AngularVelocity.ofBaseUnits(motor.getEncoder().getVelocity(), Degrees.per(Second)));
+        },
+        // Tell SysId to make generated commands require this subsystem, suffix test state in
+        // WPILog with this subsystem's name ("turret")
+        this));
+        
+        loggingTable = NetworkTableInstance.getDefault().getTable("Subsystems/" + getName());
+        turretPosDoublePublisher = loggingTable.getDoubleTopic("Current position").publish(); 
+      }
+      
+   public void setVoltage(double volts) {
+      motor.setVoltage(volts);
+   }
+
+   @Override
+   public void periodic() {
+      turretPosDoublePublisher.accept(motor.getEncoder().getPosition());
+   }
+   
+   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return routine.quasistatic(direction);
   }
-  
-  public void setAngle(double angle) {
-    this.targetAngle = angle;
-    turretMotor.setControl(turretRequest.withPosition(this.targetAngle / 360)); //Converts rotations to angle
-  }
 
-  @Override
-  public void periodic() {
-    SmartDashboard.putNumber("Current Turret Target Angle", targetAngle);
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) { 
+    return routine.dynamic(direction);
   }
 }

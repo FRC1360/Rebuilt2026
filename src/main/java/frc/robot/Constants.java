@@ -19,6 +19,8 @@ public final class Constants {
  
   public static class TurretConstants {
     public static final int TurretMotorID = 10;
+    public static final double velocityConversionFactor = 0; 
+    public static final double positionConversionFactor = 0;
     
     public static final double Max_v = 0.0;
     public static final double Max_a = 0.0;
