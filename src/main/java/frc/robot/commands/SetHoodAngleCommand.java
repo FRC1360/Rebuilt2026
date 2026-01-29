@@ -31,6 +31,8 @@ public class SetHoodAngleCommand extends Command {
     private final DoubleEntry kP_Entry;
     private final DoubleEntry kI_Entry;
     private final DoubleEntry kD_Entry;
+    private final DoubleEntry maxAcceleration_Entry;
+    private final DoubleEntry maxVelocity_Entry;
 
     private final HoodSubsystem m_hoodSubsystem;
     private final ProfiledPIDController m_hoodPidController;
@@ -65,6 +67,8 @@ public class SetHoodAngleCommand extends Command {
         kP_Entry = loggingTable.getDoubleTopic("kP").getEntry(default_kP);
         kI_Entry = loggingTable.getDoubleTopic("kI").getEntry(default_kI);
         kD_Entry = loggingTable.getDoubleTopic("kD").getEntry(default_kD);
+        maxVelocity_Entry = loggingTable.getDoubleTopic("Max Velocity").getEntry(default_maxVelocity);
+        maxAcceleration_Entry = loggingTable.getDoubleTopic("Max Acceleration").getEntry(default_maxAcceleration);
 
         kP_Entry.set(default_kP);
         kI_Entry.set(default_kI);
@@ -83,6 +87,9 @@ public class SetHoodAngleCommand extends Command {
         m_hoodPidController.setP(kP_Entry.get());
         m_hoodPidController.setI(kI_Entry.get());
         m_hoodPidController.setD(kD_Entry.get());
+        m_hoodPidController.setConstraints(
+            new TrapezoidProfile.Constraints(default_maxVelocity, default_maxAcceleration)
+        );
         m_hoodPidController.reset(
             m_hoodSubsystem.getCurrentAngle(),
             m_hoodSubsystem.getCurrentVelocity()

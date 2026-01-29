@@ -19,14 +19,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
 
-public class FlywheelCommand extends Command {
-    @SuppressWarnings("PMD.UnusedPrivateField")
-    private final double default_kP = 0.0;
+public class SetFlywheelVelocityCommand extends Command {
+    private final double default_kP = 0.05;
     private final double default_kI = 0.0;
-    private final double default_kD = 0.0;
+    private final double default_kD = 0.003;
 
     private final NetworkTable loggingTable;
-    private final DoublePublisher flyWheelPIDOutputPublisher;
+    private final DoublePublisher flyWheelVoltageOutputPublisher;
     private final DoublePublisher flyWheelSetTargetVelocityPublisher;
     private final DoublePublisher flyWheelVelocityPublisher;
     private final DoubleEntry kP_Entry;
@@ -37,6 +36,7 @@ public class FlywheelCommand extends Command {
     private final PIDController m_flyWheelPidController;
     private final SimpleMotorFeedforward m_flyWheelFeedForward;
 
+    private double lastFlywheelVelocity;
     private double targetFlyWheelVelocity;
     private double pidControllerOutput;
     private double feedForwardControllerOutput;
@@ -47,13 +47,17 @@ public class FlywheelCommand extends Command {
    * @param subsystem The subsystem used by this command.
    */
 
-  public FlywheelCommand(FlywheelSubsystem subsystem, double targetVelocity) {
+  public SetFlywheelVelocityCommand(FlywheelSubsystem subsystem, double targetVelocity) {
     m_flywheelSubsystem = subsystem;
     m_flyWheelPidController = new PIDController(default_kP, default_kI, default_kD);
-    m_flyWheelFeedForward = new SimpleMotorFeedforward(0.0, 0.0, 0.0);
+    m_flyWheelFeedForward = new SimpleMotorFeedforward(
+      0.05901,
+      0.10232,
+      0.0
+    );
 
     loggingTable = NetworkTableInstance.getDefault().getTable("Commands/" + getName());
-    flyWheelPIDOutputPublisher = loggingTable.getDoubleTopic("FlyWheel PID Output").publish(); // fix later
+    flyWheelVoltageOutputPublisher = loggingTable.getDoubleTopic("FlyWheel PID + FF Output").publish(); // fix later
     flyWheelSetTargetVelocityPublisher = loggingTable.getDoubleTopic("Flywheel target velocity").publish();
     flyWheelVelocityPublisher = loggingTable.getDoubleTopic("FlyWheel current velocity").publish();
 
@@ -79,6 +83,8 @@ public class FlywheelCommand extends Command {
     m_flyWheelPidController.setI(kI_Entry.get());
     m_flyWheelPidController.setD(kD_Entry.get());
     m_flyWheelPidController.reset();
+
+    lastFlywheelVelocity = m_flywheelSubsystem.getFlywheelSpeed();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -86,16 +92,18 @@ public class FlywheelCommand extends Command {
   public void execute() {
     pidControllerOutput = m_flyWheelPidController.calculate(m_flywheelSubsystem.getFlywheelSpeed(), targetFlyWheelVelocity);
 
-    feedForwardControllerOutput = m_flyWheelFeedForward.calculate(
-            m_flywheelSubsystem.getFlywheelSpeed(), //One small thing, ask about whether further config factor is needed
-            0.0
+    feedForwardControllerOutput = m_flyWheelFeedForward.calculateWithVelocities(
+            lastFlywheelVelocity,
+            targetFlyWheelVelocity
     );
 
-    flyWheelPIDOutputPublisher.set(pidControllerOutput);
+    flyWheelVoltageOutputPublisher.set(pidControllerOutput + feedForwardControllerOutput);
     flyWheelSetTargetVelocityPublisher.set(targetFlyWheelVelocity);
     flyWheelVelocityPublisher.set(m_flywheelSubsystem.getFlywheelSpeed());
   
-    m_flywheelSubsystem.setFlywheelSpeed(pidControllerOutput + feedForwardControllerOutput);
+    m_flywheelSubsystem.setFlywheelVoltage(pidControllerOutput + feedForwardControllerOutput);
+
+    lastFlywheelVelocity = m_flywheelSubsystem.getFlywheelSpeed();
   }
   // Called once the command ends or is interrupted.
   @Override

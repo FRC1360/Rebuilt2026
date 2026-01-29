@@ -60,12 +60,7 @@ public class FlywheelSubsystem extends SubsystemBase {
     flywheelMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     flywheelFollower.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-
     flywheelEncoder = flywheelMotor.getEncoder();
-
-    
-    
-    
 
     routine = new SysIdRoutine(
       new SysIdRoutine.Config(
