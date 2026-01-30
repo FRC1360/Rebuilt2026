@@ -34,12 +34,16 @@ public class TurretSubsystem extends SubsystemBase {
    private final SparkMax motor;  
    private final EncoderConfig encoderConfig; 
    private final SparkMaxConfig motorConfig;
-   private static final int TurretMotorID = 0;
+   private static final int TurretMotorID = 60;
    private static final double gearRatio = (1.0 / 7.0) * 360.0;
    private final SysIdRoutine routine;   
       
    private final NetworkTable loggingTable;
    private final DoublePublisher turretPosDoublePublisher;
+   private final DoublePublisher turretVelDoublePublisher;
+   private final DoublePublisher turretVoltageDoublePublisher;
+
+   private final double initialAngle = 0;
 
    public TurretSubsystem() { 
       motor = new SparkMax(TurretMotorID, MotorType.kBrushless);
@@ -52,6 +56,7 @@ public class TurretSubsystem extends SubsystemBase {
       motorConfig.apply(encoderConfig);
             
       motor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+      motor.getEncoder().setPosition(initialAngle);
 
       routine = new SysIdRoutine(
       new SysIdRoutine.Config(
@@ -74,16 +79,28 @@ public class TurretSubsystem extends SubsystemBase {
         this));
         
         loggingTable = NetworkTableInstance.getDefault().getTable("Subsystems/" + getName());
-        turretPosDoublePublisher = loggingTable.getDoubleTopic("Current position").publish(); 
+        turretPosDoublePublisher = loggingTable.getDoubleTopic("Current Position").publish(); 
+        turretVelDoublePublisher = loggingTable.getDoubleTopic("Current Velocity").publish(); 
+        turretVoltageDoublePublisher = loggingTable.getDoubleTopic("Current Voltage").publish(); 
       }
       
    public void setVoltage(double volts) {
       motor.setVoltage(volts);
    }
 
+   public double getCurrentVelocity(){
+      return motor.getEncoder().getVelocity();
+   }
+
+   public double getCurrentAngle(){
+      return motor.getEncoder().getPosition();
+   }
+
    @Override
    public void periodic() {
       turretPosDoublePublisher.accept(motor.getEncoder().getPosition());
+      turretVelDoublePublisher.accept(motor.getEncoder().getVelocity());
+      turretVoltageDoublePublisher.accept(motor.getAppliedOutput() * RobotController.getBatteryVoltage());
    }
    
    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
