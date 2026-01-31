@@ -4,11 +4,16 @@
 
 package frc.robot;
 
-import frc.robot.commands.TurnTurretToAngle;
+import frc.robot.commands.TurnTurretToTurretRelative;
+import frc.robot.commands.TurnTurretToGyroRelative;
 import frc.robot.subsystems.TurretSubsystem;
+
+import com.ctre.phoenix6.hardware.Pigeon2;
+
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -20,12 +25,12 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
+  
+  // // The robot's subsystems and commands are defined here...
   private final TurretSubsystem m_turretSubsystem = new TurretSubsystem();
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_controller =
-      new CommandXboxController(0);
+  // // // Replace with CommandPS4Controller or CommandJoystick if needed
+  private final CommandXboxController m_controller = new CommandXboxController(0);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -34,21 +39,11 @@ public class RobotContainer {
   }
 
 private void configureBindings() {
-    // m_controller.b().whileTrue(m_turretSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    // m_controller.a().whileTrue(m_turretSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    // m_controller.x().whileTrue(m_turretSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    // m_controller.y().whileTrue(m_turretSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    m_turretSubsystem.
+    setDefaultCommand(
+      new TurnTurretToGyroRelative(m_turretSubsystem)
+    );
 
-    // m_controller.leftBumper().whileTrue(Commands.runOnce(() -> DataLogManager.start()));
-    // m_controller.rightBumper().whileTrue(Commands.runOnce(() -> DataLogManager.stop()));
-
-    // m_turretSubsystem.
-    // setDefaultCommand(
-    //   new RunCommand(() -> m_turretSubsystem.setVoltage(0.0), m_turretSubsystem)
-    // );
-
-    // m_controller.leftBumper().whileTrue(new TurnTurretToAngle(m_turretSubsystem, -160));
-    // m_controller.rightBumper().whileTrue(new TurnTurretToAngle(m_turretSubsystem, 160));
   }
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
