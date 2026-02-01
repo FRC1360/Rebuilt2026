@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -48,21 +49,32 @@ public class RobotContainer {
    */
   private void configureBindings() {
     m_hoodSubsystem.setDefaultCommand(
+      new SetHoodAngleCommand(m_hoodSubsystem, 74)
+    );
+    m_driverController.a().whileTrue(
       new SetHoodAngleCommand(m_hoodSubsystem, 70)
     );
-
-    m_flywheelSubsystem.setDefaultCommand(
-      new InstantCommand(() -> m_flywheelSubsystem.setFlywheelVoltage(0), m_flywheelSubsystem)
-    );
-
-    m_driverController.a().whileTrue(
-      new SetFlywheelVelocityCommand(m_flywheelSubsystem, 60)
-    );
     m_driverController.x().whileTrue(
-      new SetFlywheelVelocityCommand(m_flywheelSubsystem, 50)
+      new SetHoodAngleCommand(m_hoodSubsystem, 65)
     );
-    m_driverController.b().whileTrue(
-      new SetHoodAngleCommand(m_hoodSubsystem, 60)
+    m_driverController.y().whileTrue(
+      new SetHoodAngleCommand(m_hoodSubsystem, 50)
+    );
+
+    m_flywheelSubsystem.setDefaultCommand(  
+      new RunCommand(() -> m_flywheelSubsystem.setFlywheelVoltage(0.0), m_flywheelSubsystem)
+    );
+    m_driverController.leftBumper().whileTrue(
+      new SetFlywheelVelocityCommand(m_flywheelSubsystem, 80)
+    );
+    m_driverController.leftTrigger(0.8).whileTrue(
+      new SetFlywheelVelocityCommand(m_flywheelSubsystem, 90)
+    );
+    m_driverController.rightBumper().whileTrue(
+      new SetFlywheelVelocityCommand(m_flywheelSubsystem, 100)
+    );
+    m_driverController.rightTrigger(0.8).whileTrue(
+      new SetFlywheelVelocityCommand(m_flywheelSubsystem, 110)
     );
 
     // m_driverController.leftBumper().onTrue(Commands.runOnce(() -> DataLogManager.start()));
