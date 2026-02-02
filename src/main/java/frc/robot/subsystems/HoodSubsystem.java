@@ -72,6 +72,7 @@ public class HoodSubsystem extends SubsystemBase {
             Seconds.of(10),                         // Use default timeout (10 s)
             // Log state with SignalLogger class
             state -> SignalLogger.writeString("Hood_SysID_State", state.toString())
+            //tHood angle, aHood angle, tFlywheel speed, aFlywheel speed
         ),
         new SysIdRoutine.Mechanism(
          (volts) -> hoodMotor.setControl(hoodVoltageRequest.withOutput(volts.in(Volts))),
