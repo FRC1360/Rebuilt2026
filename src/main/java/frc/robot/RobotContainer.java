@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.commands.TurnTurretToTurretRelative;
+import frc.robot.commands.AimTurretAtHubCameraRelative;
 import frc.robot.commands.TurnTurretToGyroRelative;
 import frc.robot.subsystems.TurretSubsystem;
 
@@ -42,6 +43,10 @@ private void configureBindings() {
     m_turretSubsystem.
     setDefaultCommand(
       new TurnTurretToGyroRelative(m_turretSubsystem)
+    );
+
+    m_controller.a().whileTrue(
+      new AimTurretAtHubCameraRelative(m_turretSubsystem)
     );
 
   }

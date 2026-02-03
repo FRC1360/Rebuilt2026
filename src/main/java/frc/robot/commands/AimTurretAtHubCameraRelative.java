@@ -4,23 +4,29 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.TurretSubsystem;
 
-import static edu.wpi.first.units.Units.Degrees;
-import com.ctre.phoenix6.hardware.Pigeon2;
+import org.photonvision.PhotonUtils;
+
+import edu.wpi.first.math.MathUtil;
+import frc.robot.subsystems.OrbitCamera;
+import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.util.FieldConstants;
+
+
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class TurnTurretToGyroRelative extends Command {
+public class AimTurretAtHubCameraRelative extends Command {
 
     private final double default_kP = 0.055;
     private final double default_kI = 0.01;
@@ -30,7 +36,6 @@ public class TurnTurretToGyroRelative extends Command {
     private final double default_kS = 0.11;
     private final double default_kV = 0.0022;
     private final double default_kA = 0.0;
-    private final int pigeonDeviceID = 5;
 
     private final NetworkTable loggingTable;
     private final DoublePublisher controlLoopOutputPublisher;
@@ -38,7 +43,8 @@ public class TurnTurretToGyroRelative extends Command {
     private final DoublePublisher setpointVelocityPublisher;
     private final DoublePublisher currentAnglePublisher;
     private final DoublePublisher currentVelocityPublisher;
-    private final DoublePublisher pigeonYawPublisher;
+    private final DoublePublisher deltaYawPublisher;
+    
 
     private final DoubleEntry kP_Entry;
     private final DoubleEntry kI_Entry;
@@ -48,24 +54,22 @@ public class TurnTurretToGyroRelative extends Command {
     private final DoubleEntry kS_Entry;
     private final DoubleEntry kV_Entry;
     private final DoubleEntry kA_Entry;
-    private final DoubleEntry pigeonYawEntry;
+
 
     private final TurretSubsystem m_TurretSubsystem;
     private final ProfiledPIDController m_pidController;
     private final SimpleMotorFeedforward m_feedForward;
 
     private double lastVelocity;
+    private Pose2d currentTurretPose;
     private double pidControllerOutput;
     private double feedForwardControllerOutput;
-
-    private Pigeon2 pigeon;
-    private double pigeonYaw;
+    private double wrappedTarget;
 
     /** Creates a new SetHoodAngleCommand. */
-    public TurnTurretToGyroRelative(TurretSubsystem turretSubsystem) {
+    public AimTurretAtHubCameraRelative(TurretSubsystem turretSubsystem) {
         // Use addRequirements() here to declare subsystem dependencies.
         this.m_TurretSubsystem = turretSubsystem;
-        this.pigeon = new Pigeon2(pigeonDeviceID);
 
         this.m_pidController = new ProfiledPIDController(
             default_kP,
@@ -85,7 +89,7 @@ public class TurnTurretToGyroRelative extends Command {
         currentAnglePublisher = loggingTable.getDoubleTopic("Current Degrees").publish();
         currentVelocityPublisher = loggingTable.getDoubleTopic("Current Velocity Degrees per Sec").publish();
         setpointVelocityPublisher = loggingTable.getDoubleTopic("Setpoint Velocity Degrees per Sec").publish();
-        pigeonYawPublisher = loggingTable.getDoubleTopic("Pigeon Yaw in degress").publish();
+        deltaYawPublisher = loggingTable.getDoubleTopic("Photon Utils Yaw Delta Degrees").publish();
 
         kP_Entry = loggingTable.getDoubleTopic("kP").getEntry(default_kP);
         kI_Entry = loggingTable.getDoubleTopic("kI").getEntry(default_kI);
@@ -95,8 +99,7 @@ public class TurnTurretToGyroRelative extends Command {
         kS_Entry = loggingTable.getDoubleTopic("kS").getEntry(default_kS);
         kV_Entry = loggingTable.getDoubleTopic("kV").getEntry(default_kV);
         kA_Entry = loggingTable.getDoubleTopic("kA").getEntry(default_kA);
-        pigeonYawEntry = loggingTable.getDoubleTopic("Pigeon Yaw").getEntry(pigeonYaw);
-
+     
 
         kP_Entry.set(default_kP);
         kI_Entry.set(default_kI);
@@ -106,21 +109,18 @@ public class TurnTurretToGyroRelative extends Command {
         kS_Entry.set(default_kS);
         kV_Entry.set(default_kV);
         kA_Entry.set(default_kA);
-        pigeonYawEntry.set(pigeonYaw);
 
-        //this.targetAngleDegrees = targetAngleDegrees;
+
         this.pidControllerOutput = 0.0;
         this.feedForwardControllerOutput = 0.0;
 
-        //reset pigeon yaw on startup
-        this.pigeon.setYaw(0.0);
-    
         addRequirements(m_TurretSubsystem);
     }
 
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
+        
         m_pidController.setP(kP_Entry.get());
         m_pidController.setI(kI_Entry.get());
         m_pidController.setD(kD_Entry.get());
@@ -142,11 +142,14 @@ public class TurnTurretToGyroRelative extends Command {
         lastVelocity = m_TurretSubsystem.getCurrentVelocity();
     }
 
-    private double calculateWrapAround(double angle){
+    private double calculateWrapAround(){
+        currentTurretPose = m_TurretSubsystem.getEstimatedPose();
         
-        double currentAngle = m_TurretSubsystem.getCurrentAngle();
-        Rotation2d targetAngleRotation = Rotation2d.fromDegrees(angle);
+        double currentAngle = 0.0;
+        Rotation2d targetAngleRotation = PhotonUtils.getYawToPose(currentTurretPose, FieldConstants.redAllianceHubPose).times(-1);
+        deltaYawPublisher.accept(PhotonUtils.getYawToPose(currentTurretPose, FieldConstants.redAllianceHubPose).getDegrees());
         double wrappedTargetValue = MathUtil.inputModulus(targetAngleRotation.getDegrees(), -180, 180);
+        wrappedTarget = wrappedTargetValue;
 
         double negativePath;
         double positivePath;
@@ -158,11 +161,13 @@ public class TurnTurretToGyroRelative extends Command {
         else{
             positivePath =  wrappedTargetValue + 360; 
             negativePath = wrappedTargetValue;
+
         }
 
         if (currentAngle > 0 && negativePath > -160.0){
             return negativePath;
         }
+
         else if (currentAngle < 0 && positivePath < 160){
             return positivePath;
         }
@@ -172,14 +177,14 @@ public class TurnTurretToGyroRelative extends Command {
         }
         return positivePath;
 
+
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        pigeonYaw = pigeon.getYaw().getValue().in(Degrees);
-        double wrappedPigeonYaw = calculateWrapAround(pigeonYaw);
-        m_pidController.setGoal(wrappedPigeonYaw);
+        wrappedTarget = calculateWrapAround();
+        m_pidController.setGoal(wrappedTarget);
         
         pidControllerOutput = m_pidController.calculate(m_TurretSubsystem.getCurrentAngle());
         feedForwardControllerOutput = m_feedForward.calculateWithVelocities(
@@ -188,11 +193,10 @@ public class TurnTurretToGyroRelative extends Command {
         );
 
         controlLoopOutputPublisher.set(feedForwardControllerOutput);
-        setpointPublisher.set(m_pidController.getSetpoint().position);
+        setpointPublisher.set(wrappedTarget);
         setpointVelocityPublisher.set(m_pidController.getSetpoint().velocity);
         currentAnglePublisher.set(m_TurretSubsystem.getCurrentAngle());
         currentVelocityPublisher.set(m_TurretSubsystem.getCurrentVelocity());
-        pigeonYawPublisher.set(pigeonYaw);
 
         m_TurretSubsystem.setVoltage(pidControllerOutput + feedForwardControllerOutput);
 
