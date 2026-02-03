@@ -5,63 +5,41 @@
 package frc.robot.commands;
 
 import java.util.function.Consumer;
-
 import edu.wpi.first.networktables.DoubleEntry;
-import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class PIDLogger {
-    private final NetworkTable table;
-    private final Consumer<PIDLogger> resetController;
     
-    /// PID constants
-    private final DoubleEntry kP;
-    private final DoubleEntry kI;
-    private final DoubleEntry kD;
+    private final Consumer<double[]> onUpdate;
+    private final DoubleEntry[] entries;
     
-    /// Feedforward constants
-    private final DoubleEntry kS;
-    private final DoubleEntry kV;
-    private final DoubleEntry kA;
-    private final DoubleEntry kG;
+    public double[] values;
 
-    public PIDLogger(String commandName, double default_kP, double default_kI, double default_kD, 
-                     double default_kS, double default_kV, double default_kA, double default_kG,
-                     Consumer<PIDLogger> resetController) {
-        this.table = NetworkTableInstance.getDefault().getTable("Commands/" + commandName);
-        this.resetController = resetController;
+    public PIDLogger(String name, double[] defaults, Consumer<double[]> onUpdate) {
+        NetworkTable table = NetworkTableInstance.getDefault().getTable("Commands/" + name);
+        String[] keys = {"kP", "kI", "kD", "vel", "accel", "kS", "kV", "kA", "kG"};
         
-        /// Initialize PID entries
-        kP = createEntry("kP", default_kP);
-        kI = createEntry("kI", default_kI);
-        kD = createEntry("kD", default_kD);
+        this.entries = new DoubleEntry[keys.length];
+        this.values = new double[keys.length];
         
-        /// Initialize feedforward entries
-        kS = createEntry("kS", default_kS);
-        kV = createEntry("kV", default_kV);
-        kA = createEntry("kA", default_kA);
-        kG = createEntry("kG", default_kG);
+        for (int i = 0; i < keys.length; i++) {
+            entries[i] = createEntry(table, keys[i], defaults[i]);
+        }
+        
+        this.onUpdate = onUpdate;
+        update();
     }
 
-    /// Reset all controller gains from NetworkTables
-    public void reset() {
-        resetController.accept(this);
+    public void update() {
+        for (int i = 0; i < entries.length; i++) {
+            values[i] = entries[i].get();
+        }
+        
+        onUpdate.accept(values);
     }
 
-    public double getKP() { return kP.get(); }
-    public double getKI() { return kI.get(); }
-    public double getKD() { return kD.get(); }
-    public double getKS() { return kS.get(); }
-    public double getKV() { return kV.get(); }
-    public double getKA() { return kA.get(); }
-    public double getKG() { return kG.get(); }
-
-    public DoublePublisher createPublisher(String key) {
-        return table.getDoubleTopic(key).publish();
-    }
-
-    public DoubleEntry createEntry(String key, double defaultValue) {
+    private DoubleEntry createEntry(NetworkTable table, String key, double defaultValue) {
         DoubleEntry entry = table.getDoubleTopic(key).getEntry(defaultValue);
         entry.set(defaultValue);
         return entry;
