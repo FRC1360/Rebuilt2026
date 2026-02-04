@@ -50,32 +50,32 @@ public class TurnTurretToTurretRelative extends Command {
 
 
     private final TurretSubsystem m_TurretSubsystem;
-    private final ProfiledPIDController m_pidController;
-    private final SimpleMotorFeedforward m_feedForward;
+    // private final ProfiledPIDController m_pidController;
+    // private final SimpleMotorFeedforward m_feedForward;
 
     private double lastVelocity;
     private double targetAngleDegrees;
-    private double pidControllerOutput;
-    private double feedForwardControllerOutput;
-    private double wrappedTarget;
+    // private double pidControllerOutput;
+    // private double feedForwardControllerOutput;
+    // private double wrappedTarget;
 
     /** Creates a new SetHoodAngleCommand. */
     public TurnTurretToTurretRelative(TurretSubsystem turretSubsystem, double targetAngleDegrees) {
         // Use addRequirements() here to declare subsystem dependencies.
         this.m_TurretSubsystem = turretSubsystem;
-        this.targetAngleDegrees = targetAngleDegrees;
+        //this.targetAngleDegrees = targetAngleDegrees;
 
-        this.m_pidController = new ProfiledPIDController(
-            default_kP,
-            default_kI,
-            default_kD,
-            new TrapezoidProfile.Constraints(default_maxVelocity, default_maxAcceleration)
-        );
-        this.m_feedForward = new SimpleMotorFeedforward(
-            default_kS,
-            default_kV,
-            default_kA
-        );
+        // this.m_pidController = new ProfiledPIDController(
+        //     default_kP,
+        //     default_kI,
+        //     default_kD,
+        //     new TrapezoidProfile.Constraints(default_maxVelocity, default_maxAcceleration)
+        // );
+        // this.m_feedForward = new SimpleMotorFeedforward(
+        //     default_kS,
+        //     default_kV,
+        //     default_kA
+        // );
 
         loggingTable = NetworkTableInstance.getDefault().getTable("Commands/"+getName());
         controlLoopOutputPublisher = loggingTable.getDoubleTopic("PID Output").publish();
@@ -104,8 +104,8 @@ public class TurnTurretToTurretRelative extends Command {
         kA_Entry.set(default_kA);
 
 
-        this.pidControllerOutput = 0.0;
-        this.feedForwardControllerOutput = 0.0;
+        // this.pidControllerOutput = 0.0;
+        // this.feedForwardControllerOutput = 0.0;
 
         addRequirements(m_TurretSubsystem);
     }
@@ -114,85 +114,52 @@ public class TurnTurretToTurretRelative extends Command {
     @Override
     public void initialize() {
         
-        m_pidController.setP(kP_Entry.get());
-        m_pidController.setI(kI_Entry.get());
-        m_pidController.setD(kD_Entry.get());
-        m_pidController.setConstraints(
-            new TrapezoidProfile.Constraints(
-                maxVelocity_Entry.get(), 
-                maxAcceleration_Entry.get()
-            )
-        );
-        m_pidController.reset(
-            m_TurretSubsystem.getCurrentAngle(),
-            m_TurretSubsystem.getCurrentVelocity()
-        );
+        // m_pidController.setP(kP_Entry.get());
+        // m_pidController.setI(kI_Entry.get());
+        // m_pidController.setD(kD_Entry.get());
+        // m_pidController.setConstraints(
+        //     new TrapezoidProfile.Constraints(
+        //         maxVelocity_Entry.get(), 
+        //         maxAcceleration_Entry.get()
+        //     )
+        // );
+        // m_pidController.reset(
+        //     m_TurretSubsystem.getCurrentAngle(),
+        //     m_TurretSubsystem.getCurrentVelocity()
+        // );
         
         // new stuff
-        wrappedTarget = calculateWrapAround();
-        m_pidController.setGoal(wrappedTarget);
+        // wrappedTarget = calculateWrapAround();
+        // m_pidController.setGoal(wrappedTarget);
 
-        m_feedForward.setKs(kS_Entry.get());
-        m_feedForward.setKv(kV_Entry.get());
-        m_feedForward.setKa(kA_Entry.get());
+        // m_feedForward.setKs(kS_Entry.get());
+        // m_feedForward.setKv(kV_Entry.get());
+        // m_feedForward.setKa(kA_Entry.get());
 
         lastVelocity = m_TurretSubsystem.getCurrentVelocity();
     }
 
-    private double calculateWrapAround(){
-        
-        double currentAngle = m_TurretSubsystem.getCurrentAngle();
-        Rotation2d targetAngleRotation = Rotation2d.fromDegrees(targetAngleDegrees);
-        double wrappedTargetValue = MathUtil.inputModulus(targetAngleRotation.getDegrees(), -180, 180);
-        wrappedTarget = wrappedTargetValue;
-
-        double negativePath;
-        double positivePath;
-
-        if (wrappedTargetValue >= 0){
-            positivePath = wrappedTargetValue;
-            negativePath = wrappedTargetValue - 360;
-        }
-        else{
-            positivePath =  wrappedTargetValue + 360; 
-            negativePath = wrappedTargetValue;
-
-        }
-
-        if (currentAngle > 0 && negativePath > -160.0){
-            return negativePath;
-        }
-
-        else if (currentAngle < 0 && positivePath < 160){
-            return positivePath;
-        }
-
-        if(Math.abs(currentAngle - positivePath) > Math.abs(currentAngle - negativePath)){
-            return negativePath;
-        }
-        return positivePath;
-
-
-    }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        targetDegrees += 1;
-        pidControllerOutput = m_pidController.calculate(m_TurretSubsystem.getCurrentAngle());
-        feedForwardControllerOutput = m_feedForward.calculateWithVelocities(
-            lastVelocity,
-            m_pidController.getSetpoint().velocity
-        );
+        // pidControllerOutput = m_pidController.calculate(m_TurretSubsystem.getCurrentAngle());
+        // feedForwardControllerOutput = m_feedForward.calculateWithVelocities(
+        //     lastVelocity,
+        //     m_pidController.getSetpoint().velocity
+        // );
 
-        controlLoopOutputPublisher.set(feedForwardControllerOutput);
-        setpointPublisher.set(wrappedTarget);
-        setpointVelocityPublisher.set(m_pidController.getSetpoint().velocity);
+        controlLoopOutputPublisher.set(m_TurretSubsystem.getTurretFeedforwardOutput());
+        setpointPublisher.set(m_TurretSubsystem.getWrappedTarget());
+        setpointVelocityPublisher.set(m_TurretSubsystem.getTurretPIDController().getSetpoint().velocity);
         currentAnglePublisher.set(m_TurretSubsystem.getCurrentAngle());
         currentVelocityPublisher.set(m_TurretSubsystem.getCurrentVelocity());
 
-        m_TurretSubsystem.setVoltage(pidControllerOutput + feedForwardControllerOutput);
+        // m_TurretSubsystem.setVoltage(pidControllerOutput + feedForwardControllerOutput);
 
+        // lastVelocity = m_TurretSubsystem.getCurrentVelocity();
+        Rotation2d targetDegreesInRotation2d = Rotation2d.fromDegrees(targetAngleDegrees);
+        m_TurretSubsystem.setVoltage(m_TurretSubsystem.closedLoopCalculate(targetDegreesInRotation2d, lastVelocity));
         lastVelocity = m_TurretSubsystem.getCurrentVelocity();
     }
 

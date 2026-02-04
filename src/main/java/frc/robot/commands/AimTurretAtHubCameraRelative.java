@@ -14,6 +14,7 @@ import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import org.photonvision.PhotonUtils;
@@ -57,31 +58,31 @@ public class AimTurretAtHubCameraRelative extends Command {
 
 
     private final TurretSubsystem m_TurretSubsystem;
-    private final ProfiledPIDController m_pidController;
-    private final SimpleMotorFeedforward m_feedForward;
+    // private final ProfiledPIDController m_pidController;
+    // private final SimpleMotorFeedforward m_feedForward;
 
     private double lastVelocity;
     private Pose2d currentTurretPose;
-    private double pidControllerOutput;
-    private double feedForwardControllerOutput;
-    private double wrappedTarget;
+    // private double pidControllerOutput;
+    // private double feedForwardControllerOutput;
+
 
     /** Creates a new SetHoodAngleCommand. */
     public AimTurretAtHubCameraRelative(TurretSubsystem turretSubsystem) {
         // Use addRequirements() here to declare subsystem dependencies.
         this.m_TurretSubsystem = turretSubsystem;
 
-        this.m_pidController = new ProfiledPIDController(
-            default_kP,
-            default_kI,
-            default_kD,
-            new TrapezoidProfile.Constraints(default_maxVelocity, default_maxAcceleration)
-        );
-        this.m_feedForward = new SimpleMotorFeedforward(
-            default_kS,
-            default_kV,
-            default_kA
-        );
+        // this.m_pidController = new ProfiledPIDController(
+        //     default_kP,
+        //     default_kI,
+        //     default_kD,
+        //     new TrapezoidProfile.Constraints(default_maxVelocity, default_maxAcceleration)
+        // );
+        // this.m_feedForward = new SimpleMotorFeedforward(
+        //     default_kS,
+        //     default_kV,
+        //     default_kA
+        // );
 
         loggingTable = NetworkTableInstance.getDefault().getTable("Commands/"+getName());
         controlLoopOutputPublisher = loggingTable.getDoubleTopic("PID Output").publish();
@@ -111,8 +112,8 @@ public class AimTurretAtHubCameraRelative extends Command {
         kA_Entry.set(default_kA);
 
 
-        this.pidControllerOutput = 0.0;
-        this.feedForwardControllerOutput = 0.0;
+        // this.pidControllerOutput = 0.0;
+        // this.feedForwardControllerOutput = 0.0;
 
         addRequirements(m_TurretSubsystem);
     }
@@ -120,85 +121,70 @@ public class AimTurretAtHubCameraRelative extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        
-        m_pidController.setP(kP_Entry.get());
-        m_pidController.setI(kI_Entry.get());
-        m_pidController.setD(kD_Entry.get());
-        m_pidController.setConstraints(
-            new TrapezoidProfile.Constraints(
-                maxVelocity_Entry.get(), 
-                maxAcceleration_Entry.get()
-            )
-        );
-        m_pidController.reset(
-            m_TurretSubsystem.getCurrentAngle(),
-            m_TurretSubsystem.getCurrentVelocity()
-        );
-
-        m_feedForward.setKs(kS_Entry.get());
-        m_feedForward.setKv(kV_Entry.get());
-        m_feedForward.setKa(kA_Entry.get());
 
         lastVelocity = m_TurretSubsystem.getCurrentVelocity();
     }
 
-    private double calculateWrapAround(){
-        currentTurretPose = m_TurretSubsystem.getEstimatedPose();
+    // private double calculateWrapAround(){
+    //     currentTurretPose = m_TurretSubsystem.getEstimatedPose();
         
-        double currentAngle = 0.0;
-        Rotation2d targetAngleRotation = PhotonUtils.getYawToPose(currentTurretPose, FieldConstants.redAllianceHubPose).times(-1);
-        deltaYawPublisher.accept(PhotonUtils.getYawToPose(currentTurretPose, FieldConstants.redAllianceHubPose).getDegrees());
-        double wrappedTargetValue = MathUtil.inputModulus(targetAngleRotation.getDegrees(), -180, 180);
-        wrappedTarget = wrappedTargetValue;
+    //     double currentAngle = 0.0;
+    //     Rotation2d targetAngleRotation = PhotonUtils.getYawToPose(currentTurretPose, FieldConstants.redAllianceHubPose).times(-1);
+    //     deltaYawPublisher.accept(PhotonUtils.getYawToPose(currentTurretPose, FieldConstants.redAllianceHubPose).getDegrees());
+    //     double wrappedTargetValue = MathUtil.inputModulus(targetAngleRotation.getDegrees(), -180, 180);
+    //     wrappedTarget = wrappedTargetValue;
 
-        double negativePath;
-        double positivePath;
+    //     double negativePath;
+    //     double positivePath;
 
-        if (wrappedTargetValue >= 0){
-            positivePath = wrappedTargetValue;
-            negativePath = wrappedTargetValue - 360;
-        }
-        else{
-            positivePath =  wrappedTargetValue + 360; 
-            negativePath = wrappedTargetValue;
+    //     if (wrappedTargetValue >= 0){
+    //         positivePath = wrappedTargetValue;
+    //         negativePath = wrappedTargetValue - 360;
+    //     }
+    //     else{
+    //         positivePath =  wrappedTargetValue + 360; 
+    //         negativePath = wrappedTargetValue;
 
-        }
+    //     }
 
-        if (currentAngle > 0 && negativePath > -160.0){
-            return negativePath;
-        }
+    //     if (currentAngle > 0 && negativePath > -160.0){
+    //         return negativePath;
+    //     }
 
-        else if (currentAngle < 0 && positivePath < 160){
-            return positivePath;
-        }
+    //     else if (currentAngle < 0 && positivePath < 160){
+    //         return positivePath;
+    //     }
 
-        if(Math.abs(currentAngle - positivePath) > Math.abs(currentAngle - negativePath)){
-            return negativePath;
-        }
-        return positivePath;
+    //     if(Math.abs(currentAngle - positivePath) > Math.abs(currentAngle - negativePath)){
+    //         return negativePath;
+    //     }
+    //     return positivePath;
 
 
-    }
+    // }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        wrappedTarget = calculateWrapAround();
-        m_pidController.setGoal(wrappedTarget);
-        
-        pidControllerOutput = m_pidController.calculate(m_TurretSubsystem.getCurrentAngle());
-        feedForwardControllerOutput = m_feedForward.calculateWithVelocities(
-            lastVelocity,
-            m_pidController.getSetpoint().velocity
-        );
+        currentTurretPose = m_TurretSubsystem.getEstimatedPose();
 
-        controlLoopOutputPublisher.set(feedForwardControllerOutput);
-        setpointPublisher.set(wrappedTarget);
-        setpointVelocityPublisher.set(m_pidController.getSetpoint().velocity);
+        Rotation2d targetAngleRotation = Rotation2d.fromDegrees(m_TurretSubsystem.getCurrentAngle()).minus(PhotonUtils.getYawToPose(currentTurretPose, FieldConstants.redAllianceHubPose));
+            //.plus(Rotation2d.fromDegrees(m_TurretSubsystem.getCurrentAngle()));
+    
+
+        // controlLoopOutputPublisher.set(feedForwardControllerOutput);
+        // setpointPublisher.set(wrappedTarget);
+        // setpointVelocityPublisher.set(m_pidController.getSetpoint().velocity);
+        // currentAnglePublisher.set(m_TurretSubsystem.getCurrentAngle());
+        // currentVelocityPublisher.set(m_TurretSubsystem.getCurrentVelocity());
+
+        controlLoopOutputPublisher.set(m_TurretSubsystem.getTurretFeedforwardOutput());
+        setpointPublisher.set(targetAngleRotation.getDegrees());
+        setpointVelocityPublisher.set(m_TurretSubsystem.getTurretPIDController().getSetpoint().velocity);
         currentAnglePublisher.set(m_TurretSubsystem.getCurrentAngle());
         currentVelocityPublisher.set(m_TurretSubsystem.getCurrentVelocity());
 
-        m_TurretSubsystem.setVoltage(pidControllerOutput + feedForwardControllerOutput);
+       m_TurretSubsystem.setVoltage(m_TurretSubsystem.closedLoopCalculate(targetAngleRotation, lastVelocity));
 
         lastVelocity = m_TurretSubsystem.getCurrentVelocity();
     }
