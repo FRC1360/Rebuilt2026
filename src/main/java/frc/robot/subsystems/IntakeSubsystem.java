@@ -60,6 +60,10 @@ public class IntakeSubsystem extends SubsystemBase {
     pivot.set(speed);
   }
 
+  public double getPivotVelocity() { 
+    return pivot.getAbsoluteEncoder().getVelocity();
+  }
+
   public PIDController getPidController () {
     return this.pivotPID;
   }
@@ -98,6 +102,12 @@ public class IntakeSubsystem extends SubsystemBase {
   public void setIntakeWheelSpeed(double speed) {
     intakeSpeed = speed;
     wheel.set(speed);
+  }
+
+  public double closedLoopCalculate(double target, double nextVelocity) {
+    double pidOutput = pivotPID.calculate(target);
+    double ffOutput = pivotFeedForward.calculateWithVelocities(pidOutput, getPivotVelocity(), nextVelocity);
+    return ffOutput;
   }
 
   @Override
