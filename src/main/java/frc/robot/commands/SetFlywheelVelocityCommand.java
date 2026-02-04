@@ -12,42 +12,20 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class SetFlywheelVelocityCommand extends Command {
     private final FlywheelSubsystem m_flywheelSubsystem;
-    private final PIDController m_pidController;
-
-    
     private final double m_targetVelocity;
-    
-    private SimpleMotorFeedforward m_feedforward;
-    private double m_lastVelocity;
 
     public SetFlywheelVelocityCommand(FlywheelSubsystem subsystem, double targetVelocity) {
         m_flywheelSubsystem = subsystem;
         m_targetVelocity = targetVelocity;
-        
-        m_pidController = new PIDController(0, 0, 0);
-        m_feedforward = new SimpleMotorFeedforward(0, 0, 0);
-
-        
-
         addRequirements(m_flywheelSubsystem);
     }
 
     @Override
-    public void initialize() {
-        m_pidController.reset();
-        m_lastVelocity = m_flywheelSubsystem.getFlywheelSpeed();
-    }
+    public void initialize() {}
 
     @Override
     public void execute() {
-        double currentVelocity = m_flywheelSubsystem.getFlywheelSpeed();
-        
-        double pidOutput = m_pidController.calculate(currentVelocity, m_targetVelocity);
-        double ffOutput = m_feedforward.calculateWithVelocities(m_lastVelocity, m_targetVelocity);
-        
-        m_flywheelSubsystem.setFlywheelVoltage(pidOutput + ffOutput);
-        
-        m_lastVelocity = currentVelocity;
+        m_flywheelSubsystem.setFlywheelVoltage(m_flywheelSubsystem.closedLoopCalculate(m_targetVelocity));
     }
 
     @Override

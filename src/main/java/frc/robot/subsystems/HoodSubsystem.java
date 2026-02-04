@@ -30,16 +30,16 @@ public class HoodSubsystem extends SubsystemBase {
         0.0, 0.0, 0.0,
         new TrapezoidProfile.Constraints(0.0, 0.0)
     );
-    private SimpleMotorFeedforward hoodFFController = new SimpleMotorFeedforward(0.0, 0.0, 0.0, 0.0);
+    private SimpleMotorFeedforward hoodFFController = new SimpleMotorFeedforward(0.0, 0.0, 0.0);
 
     private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
+        0.5,  
+        1.0,  
         0.0,  
-        0.0,  
-        0.0,  
-        0.0,  
-        0.0,  
-        0.0,  
-        0.0,  
+        10.0,  
+        100.0,  
+        0.159,  
+        0.012661,  
         0.0,  
         0.0  
     );

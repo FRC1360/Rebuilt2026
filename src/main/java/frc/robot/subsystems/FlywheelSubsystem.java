@@ -33,19 +33,14 @@ import frc.robot.util.PIDLogger;
 
 public class FlywheelSubsystem extends SubsystemBase {
 
-  private PIDController flywheelPIDController = new PIDController(0.0, 0.0, 0.0);
-  private SimpleMotorFeedforward flywheelFFController = new SimpleMotorFeedforward(0.0, 0.0, 0.0, 0.0);
+  private ProfiledPIDController flywheelPIDController = new ProfiledPIDController(
+        0.0, 0.0, 0.0,
+        new TrapezoidProfile.Constraints(0.0, 0.0)
+    );
+  private SimpleMotorFeedforward flywheelFFController = new SimpleMotorFeedforward(0.0, 0.0, 0.0);
 
   private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
-    0.0,  
-    0.0,  
-    0.0,  
-    0.0,  
-    0.0,  
-    0.0,  
-    0.0,  
-    0.0,  
-    0.0  
+    0.05, 0.0, 0.003, 0.0, 0.0, 0.05901, 0.10232, 0.0, 0.0 
   );
 
   private final PIDLogger pidLogger = new PIDLogger(
@@ -53,6 +48,9 @@ public class FlywheelSubsystem extends SubsystemBase {
     defaultPIDConstants, 
     constants -> {
         this.flywheelPIDController.setPID(constants.kP, constants.kI, constants.kD);
+        this.flywheelPIDController.setConstraints(
+            new TrapezoidProfile.Constraints(constants.maxVelocity, constants.maxAcceleration)
+          );
         this.flywheelFFController.setKa(constants.kA);
         this.flywheelFFController.setKs(constants.kS);
         this.flywheelFFController.setKv(constants.kV);
