@@ -25,40 +25,58 @@ public class HoodSubsystem extends SubsystemBase {
   public Slot0Configs slot0Configs = talonFXConfigs.Slot0;
 
   
-  /** Creates a new HoodSubsystem. */
-  
-  public HoodSubsystem(TalonFX hoodmotor) {
-    var hoodMConfigs = new TalonFXConfiguration();
-    this.hoodmotor = hoodmotor;
-    slot0Configs.kP = 2.4; // An error of 1 rotation results in 2.4 V output
-    slot0Configs.kI = 0; // no output for integrated error
-    slot0Configs.kD = 0.1;     // A velocity of 1 rps results in 0.1 V output
-    slot0Configs.kS = 0.0;
-    slot0Configs.kV = 0.0;
-    slot0Configs.kG = 0.0;
-    slot0Configs.kA = 0.0;
-    MotionMagicConfigs hoodConfigs = hoodMConfigs.MotionMagic;
-    hoodConfigs.MotionMagicCruiseVelocity = 0.0;
-    hoodConfigs.MotionMagicExpo_kV = 0.0;
-    hoodConfigs.MotionMagicExpo_kA = 0.0;
-    hoodConfigs.MotionMagicJerk = 0.0;
-    
-  }
+    /** Creates a new HoodSubsystem. */
+    public HoodSubsystem() {
+        motorFeedbackConfigs = new FeedbackConfigs()
+            .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
+            .withSensorToMechanismRatio(kConversonFactor);
 
-  void MoveToAngle(double angle,double speed){
-    
-    MotionMagicVoltage m_request = new MotionMagicVoltage(0);
-    double rotation = angle/360; // turn degrees into rotation for built in PID
-    hoodmotor.setControl(m_request.withPosition(rotation));
-  }
+        motorOutputConfigs = new MotorOutputConfigs()
+            .withInverted(InvertedValue.Clockwise_Positive)
+            .withNeutralMode(NeutralModeValue.Brake);
 
+        hoodMotor.getConfigurator().apply(motorFeedbackConfigs);
+        hoodMotor.getConfigurator().apply(motorOutputConfigs);
+        hoodMotor.setPosition(kInitialAngle);
+    }
 
-  @Override
-  public void periodic() {
-    
-    // This method will be called once per scheduler run
-    
+    @Override
+    public void periodic() { 
+    }
 
-  }
+    public void setHoodMotorVoltage(double volts) {
+        hoodMotor.setVoltage(volts);
+    }
+
+    public double getCurrentAngle() {
+        return hoodMotor.getPosition().getValueAsDouble();
+    }
+    public double getCurrentVelocity() {
+        return hoodMotor.getVelocity().getValueAsDouble();
+    }
+
+    private SysIdRoutine sysIdRoutine = new SysIdRoutine(
+        new SysIdRoutine.Config(
+            Volts.of(0.1).per(Second),  // Ramp Rate of 0.1V/s
+            Volts.of(0.4),              // Dynamic Step Voltage of 0.4V
+            Seconds.of(10),                         // Use default timeout (10 s)
+            // Log state with SignalLogger class
+            state -> SignalLogger.writeString("Hood_SysID_State", state.toString())
+            //tHood angle, aHood angle, tFlywheel speed, aFlywheel speed
+        ),
+        new SysIdRoutine.Mechanism(
+         (volts) -> hoodMotor.setControl(hoodVoltageRequest.withOutput(volts.in(Volts))),
+         null,
+         this
+      )
+    );
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+       return sysIdRoutine.quasistatic(direction);
+    }
+    
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+       return sysIdRoutine.dynamic(direction);
+    }
 }
 
