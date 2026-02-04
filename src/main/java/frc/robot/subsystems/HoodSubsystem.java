@@ -3,10 +3,15 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.util.ClosedLoopConstants;
+import frc.robot.util.PIDLogger;
+
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -20,6 +25,38 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class HoodSubsystem extends SubsystemBase {
+
+    private ProfiledPIDController hoodPIDController = new ProfiledPIDController(
+        0.0, 0.0, 0.0,
+        new TrapezoidProfile.Constraints(0.0, 0.0)
+    );
+    private SimpleMotorFeedforward hoodFFController = new SimpleMotorFeedforward(0.0, 0.0, 0.0, 0.0);
+
+    private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
+        0.0,  
+        0.0,  
+        0.0,  
+        0.0,  
+        0.0,  
+        0.0,  
+        0.0,  
+        0.0,  
+        0.0  
+    );
+
+    private final PIDLogger pidLogger = new PIDLogger(
+        "Subsystems" + getName(), 
+        defaultPIDConstants, 
+        constants -> {
+            this.hoodPIDController.setPID(constants.kP, constants.kI, constants.kD);
+            this.hoodPIDController.setConstraints(
+                new TrapezoidProfile.Constraints(constants.maxVelocity, constants.maxAcceleration)
+            );
+            this.hoodFFController.setKa(constants.kA);
+            this.hoodFFController.setKs(constants.kS);
+            this.hoodFFController.setKv(constants.kV);
+        }
+    );
 
     private final TalonFX hoodMotor = new TalonFX(50);
     private final VoltageOut hoodVoltageRequest = new VoltageOut(0.0);
@@ -46,20 +83,35 @@ public class HoodSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() { 
+        pidLogger.updateConstants();
+        pidLogger.logControllerOutputs(
+            hoodPIDController.getSetpoint().position,
+            hoodPIDController.getSetpoint().velocity,
+            this.getCurrentAngle(),
+            this.getCurrentVelocity()
+        );
     }
 
     public void setHoodMotorVoltage(double volts) {
         hoodMotor.setVoltage(volts);
     }
 
-      public double getCurrentAngle() {
+    public double getCurrentAngle() {
         return hoodMotor.getPosition().getValueAsDouble();
     }
     
     public double getCurrentVelocity() {
         return hoodMotor.getVelocity().getValueAsDouble();
     }
-      private SysIdRoutine sysIdRoutine = new SysIdRoutine(
+
+    public double closedLoopCalculate(double target) {
+        hoodPIDController.setGoal(target);
+        return 
+            hoodPIDController.calculate(getCurrentAngle()) 
+            + hoodFFController.calculate(hoodPIDController.getSetpoint().velocity); // double check pid input
+    }
+
+    private SysIdRoutine sysIdRoutine = new SysIdRoutine(
         new SysIdRoutine.Config(
             Volts.of(0.1).per(Second),  // Ramp Rate of 0.1V/s
             Volts.of(0.4),              // Dynamic Step Voltage of 0.4V
@@ -75,11 +127,11 @@ public class HoodSubsystem extends SubsystemBase {
       )
     );
 
-      public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
        return sysIdRoutine.quasistatic(direction);
     }
 
-     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
        return sysIdRoutine.dynamic(direction);
     }
 }

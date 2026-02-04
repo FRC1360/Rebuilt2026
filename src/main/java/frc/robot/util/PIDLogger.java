@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands;
+package frc.robot.util;
 
 import java.util.function.Consumer;
 import edu.wpi.first.networktables.DoubleEntry;
@@ -11,30 +11,6 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class PIDLogger {
-
-    class ClosedLoopConstants {
-        public double kP;
-        public double kI;
-        public double kD;
-        public double maxVelocity;
-        public double maxAcceleration;
-        public double kS;
-        public double kV;
-        public double kA;
-        public double kG;
-
-        public ClosedLoopConstants(double kP, double kI, double kD, double maxVelocity, double maxAcceleration, double kS, double kV, double kA, double kG) {
-            this.kP = kP;
-            this.kI = kI;
-            this.kD = kD;
-            this.maxVelocity = maxVelocity;
-            this.maxAcceleration = maxAcceleration;
-            this.kS = kS;
-            this.kV = kV;
-            this.kA = kA;
-            this.kG = kG;
-        }
-    }
     
     private final NetworkTable loggingTable;
     private final DoublePublisher controlLoopOutputPublisher;
@@ -75,6 +51,8 @@ public class PIDLogger {
         kV_Entry = createEntry(loggingTable, "kV", this.defaultConstants.kV);
         kA_Entry = createEntry(loggingTable, "kA", this.defaultConstants.kA);
         kG_Entry = createEntry(loggingTable, "kG", this.defaultConstants.kG);
+
+        pullConstantsConsumer.accept(defaultConstants);
     }
 
     public void updateConstants() {
@@ -93,12 +71,15 @@ public class PIDLogger {
         );
     }
 
-    public void logOutputs(double controlLoopOutput, double setpointPosition, double setpointVelocity, double currentPosition, double currentVelocity) {
-        controlLoopOutputPublisher.set(controlLoopOutput);
+    public void logControllerOutputs(double setpointPosition, double setpointVelocity, double currentPosition, double currentVelocity) {
         setpointPositionPublisher.set(setpointPosition);
         setpointVelocityPublisher.set(setpointVelocity);
         currentPositionPublisher.set(currentPosition);
         currentVelocityPublisher.set(currentVelocity);
+    }
+
+    public void logVoltageOutputs(double outputVoltage) {
+        controlLoopOutputPublisher.set(outputVoltage);
     }
 
     private DoubleEntry createEntry(NetworkTable table, String key, double defaultValue) {

@@ -16,6 +16,11 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
+
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotController;
@@ -23,8 +28,37 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.util.ClosedLoopConstants;
+import frc.robot.util.PIDLogger;
 
 public class FlywheelSubsystem extends SubsystemBase {
+
+  private PIDController flywheelPIDController = new PIDController(0.0, 0.0, 0.0);
+  private SimpleMotorFeedforward flywheelFFController = new SimpleMotorFeedforward(0.0, 0.0, 0.0, 0.0);
+
+  private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
+    0.0,  
+    0.0,  
+    0.0,  
+    0.0,  
+    0.0,  
+    0.0,  
+    0.0,  
+    0.0,  
+    0.0  
+  );
+
+  private final PIDLogger pidLogger = new PIDLogger(
+    "Subsystems" + getName(), 
+    defaultPIDConstants, 
+    constants -> {
+        this.flywheelPIDController.setPID(constants.kP, constants.kI, constants.kD);
+        this.flywheelFFController.setKa(constants.kA);
+        this.flywheelFFController.setKs(constants.kS);
+        this.flywheelFFController.setKv(constants.kV);
+    }
+  );
+
   private final SparkFlex flywheelMotor;
   private final SparkFlex flywheelFollower;
   private final RelativeEncoder flywheelEncoder;
@@ -38,7 +72,7 @@ public class FlywheelSubsystem extends SubsystemBase {
   private SysIdRoutine routine;
 
   public FlywheelSubsystem() {
-    
+
     config = new SparkFlexConfig();
     followerConfig = new SparkFlexConfig();
 
@@ -83,6 +117,13 @@ public class FlywheelSubsystem extends SubsystemBase {
         this));
   }
 
+  public double closedLoopCalculate(double target) {
+    flywheelPIDController.setGoal(target);
+    return 
+        flywheelPIDController.calculate(getFlywheelSpeed()) 
+        + flywheelFFController.calculate(flywheelPIDController.getSetpoint().velocity); // double check pid input
+  }
+
   public void setFlywheelSpeed(double speed) {
     flywheelMotor.set(speed);
   }
@@ -101,7 +142,13 @@ public class FlywheelSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Subsystems/FlywheelSubsystem/FlywheelVelocity", getFlywheelSpeed());
+    pidLogger.updateConstants();
+    pidLogger.logControllerOutputs(
+        0.0,
+        flywheelPIDController.getSetpoint().velocity,
+        0.0,
+        this.getFlywheelSpeed()
+    );
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
