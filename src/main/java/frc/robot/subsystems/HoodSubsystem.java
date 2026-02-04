@@ -45,7 +45,7 @@ public class HoodSubsystem extends SubsystemBase {
     );
 
     private final PIDLogger pidLogger = new PIDLogger(
-        "Subsystems" + getName(), 
+        "Subsystems/" + getName(), 
         defaultPIDConstants, 
         constants -> {
             this.hoodPIDController.setPID(constants.kP, constants.kI, constants.kD);
@@ -85,6 +85,8 @@ public class HoodSubsystem extends SubsystemBase {
     public void periodic() { 
         pidLogger.updateConstants();
         pidLogger.logControllerOutputs(
+            hoodPIDController.getGoal().position,
+            hoodPIDController.getGoal().velocity,
             hoodPIDController.getSetpoint().position,
             hoodPIDController.getSetpoint().velocity,
             this.getCurrentAngle(),

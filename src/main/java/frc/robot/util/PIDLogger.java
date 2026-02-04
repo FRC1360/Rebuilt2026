@@ -14,6 +14,8 @@ public class PIDLogger {
     
     private final NetworkTable loggingTable;
     private final DoublePublisher controlLoopOutputPublisher;
+    private final DoublePublisher goalPositionPublisher;
+    private final DoublePublisher goalVelocityPublisher;
     private final DoublePublisher setpointPositionPublisher;
     private final DoublePublisher setpointVelocityPublisher;
     private final DoublePublisher currentPositionPublisher;
@@ -37,20 +39,22 @@ public class PIDLogger {
 
         loggingTable = NetworkTableInstance.getDefault().getTable(key);
         controlLoopOutputPublisher = loggingTable.getDoubleTopic("ControlLoopOutput").publish();
+        goalPositionPublisher = loggingTable.getDoubleTopic("GoalPosition").publish();
+        goalVelocityPublisher = loggingTable.getDoubleTopic("GoalVelocity").publish();
         setpointPositionPublisher = loggingTable.getDoubleTopic("SetpointPosition").publish();
         setpointVelocityPublisher = loggingTable.getDoubleTopic("SetpointVelocity").publish();
         currentPositionPublisher = loggingTable.getDoubleTopic("CurrentPosition").publish();
         currentVelocityPublisher = loggingTable.getDoubleTopic("CurrentVelocity").publish();
 
-        kP_Entry = createEntry(loggingTable, "kP", this.defaultConstants.kP);
-        kI_Entry = createEntry(loggingTable, "kI", this.defaultConstants.kI);
-        kD_Entry = createEntry(loggingTable, "kD", this.defaultConstants.kD);
-        maxVelocity_Entry = createEntry(loggingTable, "maxVelocity", this.defaultConstants.maxVelocity);
-        maxAcceleration_Entry = createEntry(loggingTable, "maxAcceleration", this.defaultConstants.maxAcceleration);
-        kS_Entry = createEntry(loggingTable, "kS", this.defaultConstants.kS);
-        kV_Entry = createEntry(loggingTable, "kV", this.defaultConstants.kV);
-        kA_Entry = createEntry(loggingTable, "kA", this.defaultConstants.kA);
-        kG_Entry = createEntry(loggingTable, "kG", this.defaultConstants.kG);
+        kP_Entry = createEntry(loggingTable, "PID/kP", this.defaultConstants.kP);
+        kI_Entry = createEntry(loggingTable, "PID/kI", this.defaultConstants.kI);
+        kD_Entry = createEntry(loggingTable, "PID/kD", this.defaultConstants.kD);
+        maxVelocity_Entry = createEntry(loggingTable, "Profile/maxVelocity", this.defaultConstants.maxVelocity);
+        maxAcceleration_Entry = createEntry(loggingTable, "Profile/maxAcceleration", this.defaultConstants.maxAcceleration);
+        kS_Entry = createEntry(loggingTable, "FeedForward/kS", this.defaultConstants.kS);
+        kV_Entry = createEntry(loggingTable, "FeedForward/kV", this.defaultConstants.kV);
+        kA_Entry = createEntry(loggingTable, "FeedForward/kA", this.defaultConstants.kA);
+        kG_Entry = createEntry(loggingTable, "FeedForward/kG", this.defaultConstants.kG);
 
         pullConstantsConsumer.accept(defaultConstants);
     }
@@ -71,7 +75,9 @@ public class PIDLogger {
         );
     }
 
-    public void logControllerOutputs(double setpointPosition, double setpointVelocity, double currentPosition, double currentVelocity) {
+    public void logControllerOutputs(double goalPosition, double goalVelocity, double setpointPosition, double setpointVelocity, double currentPosition, double currentVelocity) {
+        goalPositionPublisher.set(goalPosition);
+        goalVelocityPublisher.set(goalVelocity);
         setpointPositionPublisher.set(setpointPosition);
         setpointVelocityPublisher.set(setpointVelocity);
         currentPositionPublisher.set(currentPosition);

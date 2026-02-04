@@ -8,15 +8,10 @@ import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.commands.SetFlywheelVelocityCommand;
 import frc.robot.commands.SetHoodAngleCommand;
 import frc.robot.subsystems.HoodSubsystem;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -65,16 +60,16 @@ public class RobotContainer {
       new RunCommand(() -> m_flywheelSubsystem.setFlywheelVoltage(0.0), m_flywheelSubsystem)
     );
     m_driverController.leftBumper().whileTrue(
-      new SetFlywheelVelocityCommand(m_flywheelSubsystem, 80)
+      new SetFlywheelVelocityCommand(m_flywheelSubsystem, 50)
     );
     m_driverController.leftTrigger(0.8).whileTrue(
-      new SetFlywheelVelocityCommand(m_flywheelSubsystem, 90)
+      new SetFlywheelVelocityCommand(m_flywheelSubsystem, 60)
     );
     m_driverController.rightBumper().whileTrue(
-      new SetFlywheelVelocityCommand(m_flywheelSubsystem, 100)
+      new SetFlywheelVelocityCommand(m_flywheelSubsystem, 70)
     );
     m_driverController.rightTrigger(0.8).whileTrue(
-      new SetFlywheelVelocityCommand(m_flywheelSubsystem, 110)
+      new SetFlywheelVelocityCommand(m_flywheelSubsystem, 80)
     );
 
     // m_driverController.leftBumper().onTrue(Commands.runOnce(() -> DataLogManager.start()));

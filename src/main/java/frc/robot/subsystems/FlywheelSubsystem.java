@@ -8,23 +8,21 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -44,7 +42,7 @@ public class FlywheelSubsystem extends SubsystemBase {
   );
 
   private final PIDLogger pidLogger = new PIDLogger(
-    "Subsystems" + getName(), 
+    "Subsystems/" + getName(), 
     defaultPIDConstants, 
     constants -> {
         this.flywheelPIDController.setPID(constants.kP, constants.kI, constants.kD);
@@ -142,6 +140,8 @@ public class FlywheelSubsystem extends SubsystemBase {
   public void periodic() {
     pidLogger.updateConstants();
     pidLogger.logControllerOutputs(
+        0.0,
+        flywheelPIDController.getGoal().velocity,
         0.0,
         flywheelPIDController.getSetpoint().velocity,
         0.0,
