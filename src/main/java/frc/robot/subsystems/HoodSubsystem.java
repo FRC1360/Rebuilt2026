@@ -51,7 +51,6 @@ public class HoodSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() { 
-        SmartDashboard.putNumber("Subsystems/HoodSubsystem/Current Position Degrees", hoodMotor.getPosition().getValueAsDouble());
     }
 
     public void setHoodMotorVoltage(double volts) {
