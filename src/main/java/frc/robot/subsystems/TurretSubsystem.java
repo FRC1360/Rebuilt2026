@@ -105,6 +105,7 @@ public class TurretSubsystem extends SubsystemBase {
         encoderConfig.velocityConversionFactor(gearRatio / 60.0); // per minute to per second
         encoderConfig.positionConversionFactor(gearRatio);
         motorConfig.idleMode(IdleMode.kBrake);
+        motorConfig.inverted(true);
         motorConfig.apply(encoderConfig);
 
         motor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -138,7 +139,7 @@ public class TurretSubsystem extends SubsystemBase {
         orbitCamera = new OrbitCamera(
                 new Transform3d(
                         new Translation3d(0.05, 0, 0.045),
-                        new Rotation3d(0, -Math.toRadians(25), Math.toRadians(0))),
+                        new Rotation3d(0, -Math.toRadians(10), Math.toRadians(0))),
                 "photoncamera_turret");
     }
 

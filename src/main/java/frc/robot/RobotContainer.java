@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import frc.robot.commands.AimTurretAtHub;
+import frc.robot.commands.SetFieldRelativeTurretRotation;
 import frc.robot.commands.SetRobotRelativeTurretRotation;
 import frc.robot.subsystems.TurretSubsystem;
 
@@ -45,13 +47,29 @@ public class RobotContainer {
 
     private void configureBindings() {
         m_turretSubsystem.setDefaultCommand(
-            new RunCommand(
-                () -> m_turretSubsystem.setVoltage(0.0),
-                m_turretSubsystem
-            )
+            new AimTurretAtHub(m_turretSubsystem, () -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()))
         );
 
-        m_controller.leftBumper().onTrue(new SetRobotRelativeTurretRotation(m_turretSubsystem, new Rotation2d()));
+        m_controller.leftBumper().whileTrue(
+            new SetFieldRelativeTurretRotation(() -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()), m_turretSubsystem, Rotation2d.fromDegrees(-90))
+        );
+        m_controller.rightBumper().whileTrue(
+            new SetFieldRelativeTurretRotation(() -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()), m_turretSubsystem, Rotation2d.fromDegrees(90))
+        );
+        m_controller.leftTrigger(0.8).whileTrue(
+            new SetFieldRelativeTurretRotation(() -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()), m_turretSubsystem, Rotation2d.fromDegrees(-200))
+        );
+        m_controller.rightTrigger(0.8).whileTrue(
+            new SetFieldRelativeTurretRotation(() -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()), m_turretSubsystem, Rotation2d.fromDegrees(200))
+        );
+
+        m_controller.a().whileTrue(
+            new SetFieldRelativeTurretRotation(
+                () -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()),
+                m_turretSubsystem,
+                new Rotation2d()
+            )
+        );
     }
 
     /**
