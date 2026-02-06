@@ -15,6 +15,17 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.commands.AimTurretAtHub;
+import frc.robot.commands.SetFieldRelativeTurretRotation;
+import frc.robot.commands.SetRobotRelativeTurretRotation;
+import frc.robot.subsystems.TurretSubsystem;
+
+import com.ctre.phoenix6.hardware.Pigeon2;
+
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -36,7 +47,20 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
+    // // The robot's subsystems and commands are defined here...
+    private final TurretSubsystem m_turretSubsystem = new TurretSubsystem();
+
+    // // // Replace with CommandPS4Controller or CommandJoystick if needed
+    private final CommandXboxController m_controller = new CommandXboxController(0);
+
+    private final Pigeon2 m_pigeon2 = new Pigeon2(5);
+
+    /**
+     * The container for the robot. Contains subsystems, OI devices, and commands.
+     */
     public RobotContainer() {
+        m_pigeon2.setYaw(0.0);
+
         configureBindings();
     }
 
@@ -75,6 +99,32 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+    
+
+        m_turretSubsystem.setDefaultCommand(
+            new AimTurretAtHub(m_turretSubsystem, () -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()))
+        );
+
+        m_controller.leftBumper().whileTrue(
+            new SetFieldRelativeTurretRotation(() -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()), m_turretSubsystem, Rotation2d.fromDegrees(-90))
+        );
+        m_controller.rightBumper().whileTrue(
+            new SetFieldRelativeTurretRotation(() -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()), m_turretSubsystem, Rotation2d.fromDegrees(90))
+        );
+        m_controller.leftTrigger(0.8).whileTrue(
+            new SetFieldRelativeTurretRotation(() -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()), m_turretSubsystem, Rotation2d.fromDegrees(-200))
+        );
+        m_controller.rightTrigger(0.8).whileTrue(
+            new SetFieldRelativeTurretRotation(() -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()), m_turretSubsystem, Rotation2d.fromDegrees(200))
+        );
+
+        m_controller.a().whileTrue(
+            new SetFieldRelativeTurretRotation(
+                () -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()),
+                m_turretSubsystem,
+                new Rotation2d()
+            )
+        );
     }
 
     public Command getAutonomousCommand() {
