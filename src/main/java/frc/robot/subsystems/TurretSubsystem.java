@@ -14,6 +14,9 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotController;
@@ -54,16 +57,16 @@ public class TurretSubsystem extends SubsystemBase {
         0
     );
     private final double hardstopAngleDegrees = 0.0;
-    private final Pose2d robotToturret = new Pose2d(
+    private final Pose2d robotToTurret = new Pose2d(
         new Translation2d(),
         new Rotation2d()
     );
 
-    private final ProfiledPIDController m_pidController = new ProfiledPIDController(
+    public final ProfiledPIDController m_pidController = new ProfiledPIDController(
         defaultPIDConstants.kP, defaultPIDConstants.kI, defaultPIDConstants.kD,
         new TrapezoidProfile.Constraints(defaultPIDConstants.maxVelocity, defaultPIDConstants.maxAcceleration)
     );
-    private final SimpleMotorFeedforward m_feedForward = new SimpleMotorFeedforward(
+    public final SimpleMotorFeedforward m_feedForward = new SimpleMotorFeedforward(
         defaultPIDConstants.kS,
         defaultPIDConstants.kV,
         defaultPIDConstants.kA
@@ -86,7 +89,7 @@ public class TurretSubsystem extends SubsystemBase {
     private final SparkMax motor;
     private final EncoderConfig encoderConfig;
     private final SparkMaxConfig motorConfig;
-    private static final int TurretMotorID = 60;
+    private static final int TurretMotorID = 16;
     private static final double gearRatio = (1.0 / 7.0) * 360.0;
     private final SysIdRoutine routine;
 
@@ -96,6 +99,8 @@ public class TurretSubsystem extends SubsystemBase {
 
     private final OrbitCamera orbitCamera;
     private Pose2d estimatedPose;
+    // private final NetworkTable loggingTable = NetworkTableInstance.getDefault().getTable("Commands/"+getName());
+   // private final DoublePublisher aprilTagPublisher = loggingTable.getDoubleTopic("April tags").publish();
 
     public TurretSubsystem() {
         motor = new SparkMax(TurretMotorID, MotorType.kBrushless);
@@ -107,6 +112,9 @@ public class TurretSubsystem extends SubsystemBase {
         motorConfig.idleMode(IdleMode.kBrake);
         motorConfig.inverted(true);
         motorConfig.apply(encoderConfig);
+        motorConfig.idleMode(IdleMode.kBrake);
+        motorConfig.smartCurrentLimit(5, 5);
+        
 
         motor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         motor.getEncoder().setPosition(hardstopAngleDegrees);
@@ -160,10 +168,10 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
     public Rotation2d getCurrentRotation() {
-        return Rotation2d.fromDegrees(this.getCurrentAngle()).plus(this.robotToturret.getRotation());
+        return Rotation2d.fromDegrees(this.getCurrentAngle()).plus(this.robotToTurret.getRotation());
     }
 
-    private double calculateWrapAround(Rotation2d target) {
+    public double calculateWrapAround(Rotation2d target) {
 
         double currentAngle = this.getCurrentAngle();
         double wrappedTargetValue = MathUtil.inputModulus(target.getDegrees(), -180, 180);
@@ -191,10 +199,11 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
     public double closedLoopCalculate(Rotation2d target) {
-        wrappedTarget = this.calculateWrapAround(target.minus(this.robotToturret.getRotation()));
+        wrappedTarget = this.calculateWrapAround(target.minus(this.robotToTurret.getRotation()));
 
-        m_pidController.setGoal(wrappedTarget);
-        pidControllerOutput = m_pidController.calculate(this.getCurrentAngle());
+        // m_pidController.setGoal(wrappedTarget);
+        // pidControllerOutput = m_pidController.calculate(this.getCurrentAngle());
+        pidControllerOutput = m_pidController.calculate(getCurrentAngle(), wrappedTarget);
         feedForwardControllerOutput = m_feedForward.calculate(m_pidController.getSetpoint().velocity);
 
         return pidControllerOutput + feedForwardControllerOutput;
@@ -218,6 +227,8 @@ public class TurretSubsystem extends SubsystemBase {
         orbitCamera.updatePipelineResults();
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
         for (var result : orbitCamera.getPipelineResults()) {
+            //aprilTagPublisher.accept(result.getBestTarget().getFiducialId());
+
             visionEst = orbitCamera.getPhotonPoseEstimator().estimateCoprocMultiTagPose(result);
             if (visionEst.isEmpty()) {
                 visionEst = orbitCamera.getPhotonPoseEstimator().estimateLowestAmbiguityPose(result);

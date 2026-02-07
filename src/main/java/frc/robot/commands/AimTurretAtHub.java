@@ -11,6 +11,7 @@ import org.photonvision.PhotonUtils;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
@@ -26,9 +27,10 @@ public class AimTurretAtHub extends Command {
     private final StructPublisher<Pose2d> robotPosePublisher = loggingTable.getStructTopic("Robot Pose", Pose2d.struct).publish();;
     private final StructPublisher<Pose2d> hubPosePublisher = loggingTable.getStructTopic("Hub Pose", Pose2d.struct).publish();;
     private final StructPublisher<Rotation2d> fieldRelativeTargetYawPublisher = loggingTable.getStructTopic("Target Yaw", Rotation2d.struct).publish();
-    private final StructPublisher<Rotation2d> rotationSuppliedYaw = loggingTable.getStructTopic("Gyro Supplied Yaw", Rotation2d.struct).publish();
-
-
+    private final DoublePublisher rotationSuppliedYaw = loggingTable.getDoubleTopic("Gyro supplied Yaw").publish();
+     
+    private final StructPublisher<Rotation2d> turretYawSuppliedYaw = loggingTable.getStructTopic("Encoder Supplied Yaw", Rotation2d.struct).publish();
+   
     private final Supplier<Rotation2d> robotRotationSupplier;
     private final TurretSubsystem turretSubsystem;
 
@@ -85,9 +87,12 @@ public class AimTurretAtHub extends Command {
                 robotRotation
             )
         );
+
+        turretYawSuppliedYaw.accept(turretSubsystem.getCurrentRotation());
         hubPosePublisher.accept(FieldConstants.blueAllianceHubPose);
         fieldRelativeTargetYawPublisher.accept(targetFieldRelativeTurretRotation);
-        rotationSuppliedYaw.accept(targetRobotRelativeTurretRotation);
+        rotationSuppliedYaw.accept(targetRobotRelativeTurretRotation.getDegrees());
+        
     }
 
     // Called once the command ends or is interrupted.

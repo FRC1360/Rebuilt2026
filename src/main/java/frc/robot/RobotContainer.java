@@ -9,15 +9,18 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.commands.AimAtHubFieldRelative;
 import frc.robot.commands.AimTurretAtHub;
 import frc.robot.commands.SetFieldRelativeTurretRotation;
 import frc.robot.commands.SetRobotRelativeTurretRotation;
+import frc.robot.commands.TurnTurretToGyroRelative;
 import frc.robot.subsystems.TurretSubsystem;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -53,13 +56,16 @@ public class RobotContainer {
     // // // Replace with CommandPS4Controller or CommandJoystick if needed
     private final CommandXboxController m_controller = new CommandXboxController(0);
 
-    private final Pigeon2 m_pigeon2 = new Pigeon2(5);
+    private final Pigeon2 m_pigeon2 = new Pigeon2(6);
+    private final Pigeon2 m_pigeon2Swerve = new Pigeon2(5);
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
+        m_pigeon2Swerve.setYaw(0.0);
         m_pigeon2.setYaw(0.0);
+        drivetrain.resetPose(new Pose2d());
 
         configureBindings();
     }
@@ -83,7 +89,7 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
         joystick.b().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
@@ -99,14 +105,18 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        // m_turretSubsystem.setDefaultCommand(new TurnTurretToGyroRelative(m_turretSubsystem));
     
 
-        m_turretSubsystem.setDefaultCommand(
-            new AimTurretAtHub(m_turretSubsystem, () -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()))
+        m_controller.a().whileTrue(
+            new AimAtHubFieldRelative(drivetrain, m_turretSubsystem)
+            //new AimTurretAtHub(m_turretSubsystem, () -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()))
         );
 
         m_controller.leftBumper().whileTrue(
             new SetFieldRelativeTurretRotation(() -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()), m_turretSubsystem, Rotation2d.fromDegrees(-90))
+            //new AimTurretAtHub(m_turretSubsystem, () -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()))
         );
         m_controller.rightBumper().whileTrue(
             new SetFieldRelativeTurretRotation(() -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()), m_turretSubsystem, Rotation2d.fromDegrees(90))
