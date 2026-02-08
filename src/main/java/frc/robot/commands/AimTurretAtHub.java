@@ -29,7 +29,7 @@ public class AimTurretAtHub extends Command {
     private final StructPublisher<Rotation2d> rotationSuppliedYaw = loggingTable.getStructTopic("Gyro Supplied Yaw", Rotation2d.struct).publish();
 
 
-    private final Supplier<Rotation2d> robotRotationSupplier;
+    private final Supplier<Pose2d> robotPoseSupplier;
     private final TurretSubsystem turretSubsystem;
 
     private Rotation2d targetFieldRelativeTurretRotation;
@@ -39,9 +39,9 @@ public class AimTurretAtHub extends Command {
     private Pose2d estimatedTurretPose;
 
     /** Creates a new AimTurretAtHub. */
-    public AimTurretAtHub(TurretSubsystem turretSubsystem, Supplier<Rotation2d> robotRotationSupplier) {
+    public AimTurretAtHub(TurretSubsystem turretSubsystem, Supplier<Pose2d> robotPoseSupplier) {
         this.turretSubsystem = turretSubsystem;
-        this.robotRotationSupplier = robotRotationSupplier;
+        this.robotPoseSupplier = robotPoseSupplier;
 
         this.hubTranslation = FieldConstants.blueAllianceHubPose.getTranslation();
 
@@ -63,7 +63,7 @@ public class AimTurretAtHub extends Command {
             return;
         }
         // Rotation2d robotRotation = estimatedTurretPose.getRotation().minus(turretSubsystem.getCurrentRotation());
-        Rotation2d robotRotation = robotRotationSupplier.get();
+        Rotation2d robotRotation = robotPoseSupplier.get().getRotation();
         turretTranslation = estimatedTurretPose.getTranslation();
         
         targetFieldRelativeTurretRotation =

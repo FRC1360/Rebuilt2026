@@ -55,7 +55,7 @@ public class TurretSubsystem extends SubsystemBase {
     );
     private final double hardstopAngleDegrees = 0.0;
     private final Pose2d robotToturret = new Pose2d(
-        new Translation2d(),
+        new Translation2d(0.225, 0.0),
         new Rotation2d()
     );
 
