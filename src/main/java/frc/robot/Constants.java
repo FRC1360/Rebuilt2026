@@ -4,9 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import frc.robot.util.FieldConstants;
-
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -24,10 +21,7 @@ public final class Constants {
     public static final int TurretMotorID = 10;
     public static final double velocityConversionFactor = 0; 
     public static final double positionConversionFactor = 0;
-    public static final Pose2d FIELD_RELATIVE_BLUE_HUB_POS = new Pose2d(FieldConstants.blueAllianceHubPose.getX(), FieldConstants.blueAllianceHubPose.getY(), FieldConstants.blueAllianceHubPose.getRotation());
-    public static final Pose2d FIELD_RELATIVE_RED_HUB_POS = new Pose2d(FieldConstants.redAllianceHubPose.getX(), FieldConstants.redAllianceHubPose.getY(), FieldConstants.redAllianceHubPose.getRotation());
-
-
+    
     public static final double Max_v = 0.0;
     public static final double Max_a = 0.0;
     public static final double kP = 0.0;
