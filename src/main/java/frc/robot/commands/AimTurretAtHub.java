@@ -59,8 +59,15 @@ public class AimTurretAtHub extends Command {
     public void execute() {
         estimatedTurretPose = turretSubsystem.getEstimatedPose();
         if (estimatedTurretPose == null) {
-            turretSubsystem.setVoltage(0.0);
-            return;
+            Pose2d turretOnField = new Pose2d(
+                robotPoseSupplier.get().getTranslation()
+                    .plus(turretSubsystem.getRobotToTurret().getTranslation()),
+                new Rotation2d()
+            );
+            estimatedTurretPose = turretOnField.rotateAround(
+                turretOnField.getTranslation(),
+                robotPoseSupplier.get().getRotation()
+            );
         }
         // Rotation2d robotRotation = estimatedTurretPose.getRotation().minus(turretSubsystem.getCurrentRotation());
         Rotation2d robotRotation = robotPoseSupplier.get().getRotation();
@@ -79,12 +86,7 @@ public class AimTurretAtHub extends Command {
         );
 
         turretPosePublisher.accept(estimatedTurretPose);
-        robotPosePublisher.accept(
-            new Pose2d(
-                turretTranslation,
-                robotRotation
-            )
-        );
+        robotPosePublisher.accept(robotPoseSupplier.get());
         hubPosePublisher.accept(FieldConstants.blueAllianceHubPose);
         fieldRelativeTargetYawPublisher.accept(targetFieldRelativeTurretRotation);
         rotationSuppliedYaw.accept(targetRobotRelativeTurretRotation);

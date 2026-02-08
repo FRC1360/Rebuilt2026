@@ -5,6 +5,8 @@ import static edu.wpi.first.units.Units.*;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.photonvision.EstimatedRobotPose;
+
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
@@ -14,6 +16,9 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -49,6 +54,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
+
+    private final OrbitCamera frontLeftSwerveCamera =
+        new OrbitCamera(
+            new Transform3d(
+                new Translation3d(0.2809, 0.2809, 0.192),
+                new Rotation3d(0, -Math.toRadians(10), Math.toRadians(45))),
+            "photoncamera_fl"
+        );
+    private final OrbitCamera[] swerveCameras = new OrbitCamera[1];
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -130,6 +144,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        swerveCameras[0] = frontLeftSwerveCamera;
     }
 
     /**
@@ -154,6 +169,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        swerveCameras[0] = frontLeftSwerveCamera;
     }
 
     /**
@@ -186,6 +202,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        swerveCameras[0] = frontLeftSwerveCamera;
     }
 
     /**
@@ -239,6 +256,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+
+        this.updatePose();
     }
 
     private void startSimThread() {
@@ -254,6 +273,30 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             updateSimState(deltaTime, RobotController.getBatteryVoltage());
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
+    }
+
+    private void updatePose() {
+        for (OrbitCamera orbitCamera : swerveCameras) {
+            orbitCamera.updatePipelineResults();
+            Optional<EstimatedRobotPose> visionEst = Optional.empty();
+            for (var result : orbitCamera.getPipelineResults()) {
+                visionEst = orbitCamera.getPhotonPoseEstimator().estimateCoprocMultiTagPose(result);
+                if (visionEst.isEmpty()) {
+                    visionEst = orbitCamera.getPhotonPoseEstimator().estimateLowestAmbiguityPose(result);
+                }
+                orbitCamera.updateEstimationStdDevs(visionEst, result.getTargets());
+
+                visionEst.ifPresent(
+                        est -> {
+                            this.addVisionMeasurement(
+                                est.estimatedPose.toPose2d(),
+                                est.timestampSeconds,
+                                orbitCamera.getEstimationStdDevs()
+                            );
+                            orbitCamera.updateStructPublisher(est.estimatedPose.toPose2d());
+                        });
+            }
+        }
     }
 
     /**

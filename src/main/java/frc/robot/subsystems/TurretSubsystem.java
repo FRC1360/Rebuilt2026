@@ -163,6 +163,10 @@ public class TurretSubsystem extends SubsystemBase {
         return Rotation2d.fromDegrees(this.getCurrentAngle()).plus(this.robotToturret.getRotation());
     }
 
+    public Pose2d getRobotToTurret() {
+        return this.robotToturret;
+    }
+
     private double calculateWrapAround(Rotation2d target) {
 
         double currentAngle = this.getCurrentAngle();
