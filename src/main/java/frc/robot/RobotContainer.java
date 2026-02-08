@@ -122,7 +122,7 @@ public class RobotContainer {
             new SetFieldRelativeTurretRotation(
                 () -> Rotation2d.fromDegrees(m_pigeon2.getYaw().getValueAsDouble()),
                 m_turretSubsystem,
-                new Rotation2d()
+                new Rotation2d() 
             )
         );
     }
