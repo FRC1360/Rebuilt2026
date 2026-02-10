@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands;
+package frc.robot.commands.turret;
 
 import java.util.function.Supplier;
 
@@ -19,7 +19,7 @@ import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.util.FieldConstants;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class AimTurretAtHub extends Command {
+public class AimTurretAtHubCommand extends Command {
 
     private final NetworkTable loggingTable = NetworkTableInstance.getDefault().getTable("Commands/"+getName());
     private final StructPublisher<Pose2d> turretPosePublisher = loggingTable.getStructTopic("Turret Pose", Pose2d.struct).publish();
@@ -39,7 +39,7 @@ public class AimTurretAtHub extends Command {
     private Pose2d estimatedTurretPose;
 
     /** Creates a new AimTurretAtHub. */
-    public AimTurretAtHub(TurretSubsystem turretSubsystem, Supplier<Pose2d> robotPoseSupplier) {
+    public AimTurretAtHubCommand(TurretSubsystem turretSubsystem, Supplier<Pose2d> robotPoseSupplier) {
         this.turretSubsystem = turretSubsystem;
         this.robotPoseSupplier = robotPoseSupplier;
 
