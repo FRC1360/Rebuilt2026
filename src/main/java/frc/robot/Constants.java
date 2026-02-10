@@ -25,23 +25,24 @@ public final class Constants {
   }
 
     public static class TurretConstants {
-        public static final int TurretMotorID = 10;
-        public static final double velocityConversionFactor = 0;
-        public static final double positionConversionFactor = 0;
+        public static final int TURRET_MOTOR_ID = 10;
+        public static final double VELOCITY_CONVERSION_FACTOR = 0;
+        public static final double POSITION_CONVERSION_FACTOR = 0;
 
-        public static final double Max_v = 0.0;
-        public static final double Max_a = 0.0;
-        public static final double kP = 0.0;
-        public static final double kI = 0.0;
-        public static final double kD = 0.0;
-        public static final double kA = 0.0;
-        public static final double kV = 0.0;
-        public static final double kG = 0.0;
+        public static final double MAX_V = 3000.0;
+        public static final double MAX_A = 3500.0;
+        public static final double KP = 0.055;
+        public static final double KI = 0.01;
+        public static final double KD = 0.0;
+        public static final double KS = 0.11;
+        public static final double KV = 0.0022;
+        public static final double KA = 0.0;
+        public static final double KG = 0.0;
     }
 
     public static class IndexConstants {
-        public static final int hopperConveyorID = 0;
-        public static final int magazineConveyorID = 0;
-        public static final int magazineSensorID = 1;
+        public static final int HOPPER_CONVEYOR_ID = 0;
+        public static final int MAGAZINE_CONVEYOR_ID = 0;
+        public static final int MAGAZINE_SENSOR_ID = 1;
     }
 }

@@ -27,19 +27,19 @@ public class IndexSubsystem extends SubsystemBase {
   /** Creates a new IndexSubsystem. */
 
   public IndexSubsystem() {
-    hopperMotor = new SparkFlex(Constants.IndexConstants.hopperConveyorID, MotorType.kBrushless);
+    hopperMotor = new SparkFlex(Constants.IndexConstants.HOPPER_CONVEYOR_ID, MotorType.kBrushless);
     hopperMotorConfig = new SparkFlexConfig();
 
     hopperMotorConfig.idleMode(IdleMode.kBrake);
     hopperMotor.configure(hopperMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    magazineMotor = new SparkFlex(Constants.IndexConstants.magazineConveyorID, MotorType.kBrushless);
+    magazineMotor = new SparkFlex(Constants.IndexConstants.MAGAZINE_CONVEYOR_ID, MotorType.kBrushless);
     magazineMotorConfig = new SparkFlexConfig();
 
     magazineMotorConfig.idleMode(IdleMode.kBrake);
     magazineMotor.configure(magazineMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    this.magazineSensor = new DigitalInput(Constants.IndexConstants.magazineSensorID);
+    this.magazineSensor = new DigitalInput(Constants.IndexConstants.MAGAZINE_SENSOR_ID);
     this.magazineSensorTriggered = new Trigger(() -> (magazineSensor.get()));
   }
 

@@ -86,7 +86,7 @@ public class TurretSubsystem extends SubsystemBase {
     private final SparkMax motor;
     private final EncoderConfig encoderConfig;
     private final SparkMaxConfig motorConfig;
-    private static final int TurretMotorID = 60;
+    private static final int TURRET_MOTOR_ID = 60;
     private static final double gearRatio = (1.0 / 7.0) * 360.0;
     private final SysIdRoutine routine;
 
@@ -98,7 +98,7 @@ public class TurretSubsystem extends SubsystemBase {
     private Pose2d estimatedPose;
 
     public TurretSubsystem() {
-        motor = new SparkMax(TurretMotorID, MotorType.kBrushless);
+        motor = new SparkMax(TURRET_MOTOR_ID, MotorType.kBrushless);
         motorConfig = new SparkMaxConfig();
         encoderConfig = new EncoderConfig();
 
