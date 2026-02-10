@@ -32,48 +32,57 @@ public class IntakeSubsystem extends SubsystemBase {
   private double kA = 0.0;
   private double kV = 0.0;
 
-  private SparkFlex wheel = new SparkFlex(Constants.IntakeConstants.WHEEL_ID, MotorType.kBrushless);
-  private SparkFlex pivot = new SparkFlex(Constants.IntakeConstants.PIVOT_ID, MotorType.kBrushless);
+  private SparkFlex wheelMotor = new SparkFlex(Constants.IntakeConstants.WHEEL_ID, MotorType.kBrushless);
+  private SparkFlex pivotMotor = new SparkFlex(Constants.IntakeConstants.PIVOT_ID, MotorType.kBrushless);
 
   private ArmFeedforward pivotFeedForward = new ArmFeedforward(kG, kS, kV, kA);
 
   SparkFlexConfig wheelConfig = new SparkFlexConfig();
+  SparkFlexConfig pivotConfig = new SparkFlexConfig();
 
   public IntakeSubsystem() {
-       wheel.clearFaults();
-  pivot.clearFaults();
+    wheelMotor.clearFaults();
+    pivotMotor.clearFaults();
 
-  wheelConfig.inverted(false);
-  wheelConfig.idleMode(IdleMode.kCoast);
-  wheelConfig.smartCurrentLimit(30);
+    wheelConfig.inverted(false);
+    wheelConfig.idleMode(IdleMode.kCoast);
+    wheelConfig.smartCurrentLimit(30, 30);
 
-  wheel.configure(
-      wheelConfig,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
-  );
+    wheelMotor.configure(
+        wheelConfig,
+        ResetMode.kResetSafeParameters,
+        PersistMode.kPersistParameters
+    );
+
+    pivotConfig.inverted(false);
+    pivotConfig.idleMode(IdleMode.kBrake);
+    pivotConfig.smartCurrentLimit(30, 30);
+
+    pivotMotor.configure(
+        pivotConfig,
+        ResetMode.kResetSafeParameters,
+        PersistMode.kPersistParameters
+    );
   }
   
-
   //Probably not needed
   public void setPivotSpeed(double speed) { 
-    pivot.set(speed);
+    pivotMotor.set(speed);
   }
 
   public double getPivotVelocity() { 
-    return pivot.getAbsoluteEncoder().getVelocity();
+    return pivotMotor.getAbsoluteEncoder().getVelocity();
   }
 
   public PIDController getPidController () {
     return this.pivotPID;
   }
 
-
   public double getPivotPosition() {
-    return pivot.getEncoder().getPosition();
+    return pivotMotor.getEncoder().getPosition();
   }
 
-  public ArmFeedforward  getfeedForward () {
+  public ArmFeedforward getfeedForward () {
     return this.pivotFeedForward;
   }
 
@@ -91,17 +100,16 @@ public class IntakeSubsystem extends SubsystemBase {
   } 
 
   public double getPivotPositionInDegrees() {
-      return pivot.getEncoder().getPosition() * 360.0;
+      return pivotMotor.getEncoder().getPosition() * 360.0;
   }
 
-
-  public double getWheelSpeedInRPM() {
-      return pivot.getEncoder().getVelocity();
+  public double getWheelSpeed() {
+      return pivotMotor.getEncoder().getVelocity();
   }
 
   public void setIntakeWheelSpeed(double speed) {
     intakeSpeed = speed;
-    wheel.set(speed);
+    wheelMotor.set(speed);
   }
 
   public double closedLoopCalculate(double target, double nextVelocity) {
@@ -112,10 +120,6 @@ public class IntakeSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-      
-      SmartDashboard.putNumber("SubsystemIntakePivotPosition", getPivotPositionInDegrees());
-
-      SmartDashboard.putNumber("SubsystemIntakeWheelSpeed", getWheelSpeedInRPM());
   }
 }
 
