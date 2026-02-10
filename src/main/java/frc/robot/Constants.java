@@ -14,8 +14,11 @@ package frc.robot;
  */
 public final class Constants {
 
-  public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
+    public static final class IntakeConstants {
+    public static final int WHEEL_ID = 60;
+    public static final int PIVOT_ID = 0;
+    public static final double PIVOT_GEAR_RATIO = 0.0;
+    
   }
 
   public static class TurretConstants {
