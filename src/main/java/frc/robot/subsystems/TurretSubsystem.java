@@ -147,6 +147,13 @@ public class TurretSubsystem extends SubsystemBase {
         this.pidLogger.updateConstants();
     }
 
+    public void resetPIDController() {
+        m_pidController.reset(
+            this.getCurrentAngle(),
+            this.getCurrentVelocity()
+        );
+    }
+
     public void setVoltage(double volts) {
         motor.setVoltage(volts);
     }

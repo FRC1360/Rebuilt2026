@@ -52,23 +52,22 @@ public class AimTurretAtHubCommand extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
+        turretSubsystem.grabConstantsFromNetworkTables();
+        turretSubsystem.resetPIDController();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        estimatedTurretPose = turretSubsystem.getEstimatedPose();
-        if (estimatedTurretPose == null) {
-            Pose2d turretOnField = new Pose2d(
-                robotPoseSupplier.get().getTranslation()
-                    .plus(turretSubsystem.getRobotToTurret().getTranslation()),
-                new Rotation2d()
-            );
-            estimatedTurretPose = turretOnField.rotateAround(
-                turretOnField.getTranslation(),
-                robotPoseSupplier.get().getRotation()
-            );
-        }
+        Pose2d turretOnField = new Pose2d(
+            robotPoseSupplier.get().getTranslation()
+                .plus(turretSubsystem.getRobotToTurret().getTranslation()),
+            new Rotation2d()
+        );
+        estimatedTurretPose = turretOnField.rotateAround(
+            robotPoseSupplier.get().getTranslation(),
+            robotPoseSupplier.get().getRotation()
+        );
         // Rotation2d robotRotation = estimatedTurretPose.getRotation().minus(turretSubsystem.getCurrentRotation());
         Rotation2d robotRotation = robotPoseSupplier.get().getRotation();
         turretTranslation = estimatedTurretPose.getTranslation();

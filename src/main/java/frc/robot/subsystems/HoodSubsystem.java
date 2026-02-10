@@ -27,22 +27,26 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class HoodSubsystem extends SubsystemBase {
 
-    private ProfiledPIDController hoodPIDController = new ProfiledPIDController(
-        0.0, 0.0, 0.0,
-        new TrapezoidProfile.Constraints(0.0, 0.0)
-    );
-    private SimpleMotorFeedforward hoodFFController = new SimpleMotorFeedforward(0.0, 0.0, 0.0);
-
     private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
-        0.5,  
-        1.0,  
-        0.0,  
-        10.0,  
-        100.0,  
-        0.159,  
-        0.012661,  
-        0.0,  
-        0.0  
+        0.0,
+        0.0,
+        0.0,
+        90.0,
+        360.0,
+        0.13988,
+        0.0092414,
+        0.0023902,
+        0.0
+    );
+
+    private ProfiledPIDController hoodPIDController = new ProfiledPIDController(
+        defaultPIDConstants.kP, defaultPIDConstants.kI, defaultPIDConstants.kD,
+        new TrapezoidProfile.Constraints(defaultPIDConstants.maxVelocity, defaultPIDConstants.maxAcceleration)
+    );
+    private SimpleMotorFeedforward hoodFFController = new SimpleMotorFeedforward(
+        defaultPIDConstants.kS, 
+        defaultPIDConstants.kV, 
+        defaultPIDConstants.kA
     );
 
     private final PIDLogger pidLogger = new PIDLogger(
@@ -84,7 +88,6 @@ public class HoodSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() { 
-        pidLogger.updateConstants();
         pidLogger.logControllerOutputs(
             hoodPIDController.getGoal().position,
             hoodPIDController.getGoal().velocity,
@@ -112,6 +115,17 @@ public class HoodSubsystem extends SubsystemBase {
         return 
             hoodPIDController.calculate(getCurrentAngle()) 
             + hoodFFController.calculate(hoodPIDController.getSetpoint().velocity); // double check pid input
+    }
+
+    public void resetPIDController() {
+        hoodPIDController.reset(
+            this.getCurrentAngle(),
+            this.getCurrentVelocity()
+        );
+    }
+
+    public void grabConstantsFromNetworkTables() {
+        this.pidLogger.updateConstants();
     }
 
     private SysIdRoutine sysIdRoutine = new SysIdRoutine(

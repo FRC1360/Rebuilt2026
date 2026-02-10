@@ -45,6 +45,7 @@ public class SetFieldRelativeTurretRotationCommand extends Command {
     @Override
     public void initialize() {
         turretSubsystem.grabConstantsFromNetworkTables();
+        turretSubsystem.resetPIDController();
     }
 
     // Called every time the scheduler runs while the command is scheduled.

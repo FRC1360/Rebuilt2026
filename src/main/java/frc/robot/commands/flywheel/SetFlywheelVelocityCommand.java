@@ -18,7 +18,10 @@ public class SetFlywheelVelocityCommand extends Command {
     }
 
     @Override
-    public void initialize() {}
+    public void initialize() {
+        m_flywheelSubsystem.grabConstantsFromNetworkTables();
+        m_flywheelSubsystem.resetPIDController();
+    }
 
     @Override
     public void execute() {
@@ -26,7 +29,8 @@ public class SetFlywheelVelocityCommand extends Command {
     }
 
     @Override
-    public void end(boolean interrupted) {}
+    public void end(boolean interrupted) {
+    }
 
     @Override
     public boolean isFinished() {

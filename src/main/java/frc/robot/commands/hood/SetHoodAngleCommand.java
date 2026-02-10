@@ -11,7 +11,6 @@ public class SetHoodAngleCommand extends Command {
     /// Subsystem and controllers
     private final HoodSubsystem m_hoodSubsystem;
 
-
     private double targetAngleDegrees;
 
     public SetHoodAngleCommand(HoodSubsystem hoodSubsystem, double targetAngleDegrees) {
@@ -21,7 +20,10 @@ public class SetHoodAngleCommand extends Command {
     }
 
     @Override
-    public void initialize() {}
+    public void initialize() {
+        m_hoodSubsystem.grabConstantsFromNetworkTables();
+        m_hoodSubsystem.resetPIDController();
+    }
 
     @Override
     public void execute() {
@@ -29,7 +31,8 @@ public class SetHoodAngleCommand extends Command {
     }
 
     @Override
-    public void end(boolean interrupted) {}
+    public void end(boolean interrupted) {
+    }
 
     @Override
     public boolean isFinished() {
