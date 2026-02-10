@@ -20,6 +20,6 @@ public final class Constants {
   public static class IndexConstants {
     public static final int hopperConveyorID = 0;
     public static final int magazineConveyorID = 0;
-    public static final int magazineRollerID = 0;
+    public static final int magazineSensorID = 1;
   }
 }
