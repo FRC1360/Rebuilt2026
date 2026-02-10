@@ -4,14 +4,63 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class IndexSubsystem extends SubsystemBase {
+
+  private SparkFlex hopperMotor;
+  private SparkFlexConfig hopperMotorConfig;
+  private SparkFlex magazineMotor;
+  private SparkFlexConfig magazineMotorConfig;
+  private DigitalInput magazineSensor;
+  public Trigger magazineSensorTriggered;
+
   /** Creates a new IndexSubsystem. */
-  public IndexSubsystem() {}
+
+  public IndexSubsystem() {
+    hopperMotor = new SparkFlex(Constants.IndexConstants.hopperConveyorID, MotorType.kBrushless);
+    hopperMotorConfig = new SparkFlexConfig();
+
+    hopperMotorConfig.idleMode(IdleMode.kBrake);
+    hopperMotor.configure(hopperMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    magazineMotor = new SparkFlex(Constants.IndexConstants.magazineConveyorID, MotorType.kBrushless);
+    magazineMotorConfig = new SparkFlexConfig();
+
+    magazineMotorConfig.idleMode(IdleMode.kBrake);
+    magazineMotor.configure(magazineMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    this.magazineSensor = new DigitalInput(Constants.IndexConstants.magazineSensorID);
+    this.magazineSensorTriggered = new Trigger(() -> (magazineSensor.get()));
+  }
+
+  public void setHopperVoltage(double volts) {
+    hopperMotor.setVoltage(volts);
+  }
+
+  public void setHopperSpeed(double speed) {
+    hopperMotor.set(speed);
+  }
+
+    public void setMagazineVoltage(double volts) {
+    magazineMotor.setVoltage(volts);
+  }
+
+  public void setMagazineSpeed(double speed) {
+    magazineMotor.set(speed);
+  }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
   }
 }
