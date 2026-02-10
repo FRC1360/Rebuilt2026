@@ -14,20 +14,14 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.subsystems.FlywheelSubsystem;
-import frc.robot.commands.SetFlywheelVelocityCommand;
-import frc.robot.commands.SetHoodAngleCommand;
-import frc.robot.subsystems.HoodSubsystem;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.AimTurretAtHub;
-import frc.robot.commands.SetFieldRelativeTurretRotation;
-import frc.robot.commands.SetRobotRelativeTurretRotation;
 import frc.robot.subsystems.TurretSubsystem;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 
+import frc.robot.commands.turret.AimTurretAtHubCommand;
+import frc.robot.commands.turret.SetFieldRelativeTurretRotationCommand;
+import frc.robot.commands.turret.SetRobotRelativeTurretRotationCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
@@ -80,7 +74,7 @@ public class RobotContainer {
             )
         );
         m_turretSubsystem.setDefaultCommand(
-            new SetRobotRelativeTurretRotation(m_turretSubsystem, Rotation2d.fromDegrees(0.0))
+            new SetRobotRelativeTurretRotationCommand(m_turretSubsystem, Rotation2d.fromDegrees(0.0))
         );
         
         m_controller.b().whileTrue(
@@ -88,7 +82,7 @@ public class RobotContainer {
         );
 
         m_controller.leftBumper().whileTrue(
-            new SetFieldRelativeTurretRotation(
+            new SetFieldRelativeTurretRotationCommand(
                 () -> drivetrain.samplePoseAt(Timer.getFPGATimestamp()).get().getRotation(),
                 m_turretSubsystem,
                 new Rotation2d()
@@ -96,7 +90,7 @@ public class RobotContainer {
         );
 
         m_controller.a().whileTrue(
-            new AimTurretAtHub(
+            new AimTurretAtHubCommand(
                 m_turretSubsystem, 
                 () -> drivetrain.samplePoseAt(Timer.getFPGATimestamp()).get()
             )

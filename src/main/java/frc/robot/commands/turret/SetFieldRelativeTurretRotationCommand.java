@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands;
+package frc.robot.commands.turret;
 
 import java.util.function.Supplier;
 
@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.TurretSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class SetFieldRelativeTurretRotation extends Command {
+public class SetFieldRelativeTurretRotationCommand extends Command {
 
     private final NetworkTable loggingTable = NetworkTableInstance.getDefault().getTable("Subsystems/Gyro Testing");
     private final StructPublisher<Rotation2d> robotRotationPublisher = loggingTable.getStructTopic("Robot Yaw", Rotation2d.struct).publish();
@@ -28,7 +28,7 @@ public class SetFieldRelativeTurretRotation extends Command {
     private Rotation2d targetTurretRotation;
 
     /** Creates a new SetFieldRelativeTurretRotation. */
-    public SetFieldRelativeTurretRotation(
+    public SetFieldRelativeTurretRotationCommand(
         Supplier<Rotation2d> robotRotationSupplier, 
         TurretSubsystem turretSubsystem,
         Rotation2d targetFieldRotation
