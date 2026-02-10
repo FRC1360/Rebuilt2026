@@ -122,4 +122,3 @@ public class IntakeSubsystem extends SubsystemBase {
   public void periodic() {
   }
 }
-
