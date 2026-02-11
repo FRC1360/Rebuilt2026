@@ -7,6 +7,10 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkBase.PersistMode;
+
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -18,7 +22,11 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.controller.PIDController;
 
+
 public class IntakeSubsystem extends SubsystemBase {
+    
+    private BooleanSupplier intakeWheelsEnabled;
+    public BooleanSupplier intakeWheelsDisabled;
 
   private double intakeSpeed = 0.5;
 
@@ -26,11 +34,12 @@ public class IntakeSubsystem extends SubsystemBase {
   private double kI = 0.0;
   private double kD = 0.0;
   private PIDController pivotPID = new PIDController(kP, kI, kD);
-
   private double kG = 0.0;
   private double kS = 0.0;
   private double kA = 0.0;
   private double kV = 0.0;
+  private double currentAngle;
+  private double targetAngle;
 
   private SparkFlex wheelMotor = new SparkFlex(Constants.IntakeConstants.WHEEL_ID, MotorType.kBrushless);
   private SparkFlex pivotMotor = new SparkFlex(Constants.IntakeConstants.PIVOT_ID, MotorType.kBrushless);
@@ -44,6 +53,7 @@ public class IntakeSubsystem extends SubsystemBase {
     wheelMotor.clearFaults();
     pivotMotor.clearFaults();
 
+    
     wheelConfig.inverted(false);
     wheelConfig.idleMode(IdleMode.kCoast);
     wheelConfig.smartCurrentLimit(30, 30);
@@ -63,11 +73,33 @@ public class IntakeSubsystem extends SubsystemBase {
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters
     );
-  }
+
+
+    this.currentAngle = Constants.IntakeConstants.DEPLOYED_ANGLE;
+
+    this.intakeWheelsDisabled = () -> {
+        return pivotPID.atSetpoint() && 
+        Math.abs(currentAngle - Constants.IntakeConstants.DEPLOYED_ANGLE) <= Constants.IntakeConstants.ANGLE_TOLERANCE;
+    };
+    
+    // if (false) {intakeWheelsEnabled = true;} 
+    // else {intakeWheelsEnabled = false;}
+    
+    this.intakeWheelsEnabled = () -> {
+    return (pivotPID.atSetpoint() && 
+    Math.abs(currentAngle - Constants.IntakeConstants.DEPLOYED_ANGLE)<= Constants.IntakeConstants.ANGLE_TOLERANCE);
+};
+
+
+}
   
   //Probably not needed
   public void setPivotSpeed(double speed) { 
     pivotMotor.set(speed);
+  }
+
+  public void setPivotVoltage(double voltage) {
+    pivotMotor.set(voltage);
   }
 
   public double getPivotVelocity() { 
@@ -113,12 +145,18 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public double closedLoopCalculate(double target, double nextVelocity) {
+    this.targetAngle = target;
     double pidOutput = pivotPID.calculate(target);
     double ffOutput = pivotFeedForward.calculateWithVelocities(pidOutput, getPivotVelocity(), nextVelocity);
     return ffOutput;
   }
+   
+  public void setCurrentAngle(double angle) {
+    this.currentAngle = angle;
+  }   
 
   @Override
   public void periodic() {
+    currentAngle = getPivotPositionInDegrees();
   }
 }

@@ -1,50 +1,41 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.commands.intake;
-
-import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.IntakeSubsystem;
 
-/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class DeployIntakeCommand extends Command {
 
-	// Initializing supplier and variable
-	private final DoubleSupplier intakeWheelsEnabledSupplier;
-	private double intakeWheelsEnabled;
+    private static final double DEPLOY_ANGLE = 45.0;
+    private static final double WHEEL_SPEED = 0.5;
+    private static final double NEXT_VELOCITY = 0.0;
 
-	private final IntakeSubsystem intakeSubsystem;
+    private final IntakeSubsystem intakeSubsystem;
 
-	/** Creates a new DeployIntakeCommand. */
-	public DeployIntakeCommand(IntakeSubsystem intakeSubsystem, DoubleSupplier intakeWheelsEnabledSupplier) {
-		this.intakeSubsystem = intakeSubsystem;
-		this.intakeWheelsEnabledSupplier = intakeWheelsEnabledSupplier;
-			
-		// Use addRequirements() here to declare subsystem dependencies.
-		addRequirements(this.intakeSubsystem);
-	}
+    public DeployIntakeCommand(IntakeSubsystem intakeSubsystem) {
+        this.intakeSubsystem = intakeSubsystem;
+        addRequirements(intakeSubsystem);
+    }
 
-	// Called when the command is initially scheduled.
-	@Override
-	public void initialize() {
-	}
+    @Override
+    public void initialize() {
+        intakeSubsystem.setCurrentAngle(DEPLOY_ANGLE);
+    }
 
-	// Called every time the scheduler runs while the command is scheduled.
-	@Override
-	public void execute() {
-	}
+    @Override
+    public void execute() {
+        double output = intakeSubsystem.closedLoopCalculate(DEPLOY_ANGLE, NEXT_VELOCITY);
+        intakeSubsystem.setPivotVoltage(output);
 
-	// Called once the command ends or is interrupted.
-	@Override
-	public void end(boolean interrupted) {
-	}
+        intakeSubsystem.setIntakeWheelSpeed(WHEEL_SPEED);
+    }
 
-	// Returns true when the command should end.
-	@Override
-	public boolean isFinished() {
-		return false;
-	}
+    @Override
+    public void end(boolean interrupted) {
+        intakeSubsystem.setIntakeWheelSpeed(0.0);
+    }
+
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
 }
