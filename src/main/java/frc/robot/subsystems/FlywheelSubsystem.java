@@ -18,9 +18,8 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
-import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotController;
@@ -33,20 +32,22 @@ import frc.robot.util.PIDLogger;
 public class FlywheelSubsystem extends SubsystemBase {
 
     private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
+        0.03,
+        0.0,
+        0.0014,
         0.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        0.05901,
+        0.10232,
         0.0,
         0.0
     );
+//     private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
+//     0.05, 0.0, 0.003, 0.0, 0.0, 0.05901, 0.10232, 0.0, 0.0 
+//   );
 
-    private ProfiledPIDController flywheelPIDController = new ProfiledPIDController(
-        defaultPIDConstants.kP, defaultPIDConstants.kI, defaultPIDConstants.kD,
-        new TrapezoidProfile.Constraints(defaultPIDConstants.maxVelocity, defaultPIDConstants.maxAcceleration)
+    private PIDController flywheelPIDController = new PIDController(
+        defaultPIDConstants.kP, defaultPIDConstants.kI, defaultPIDConstants.kD
     );
     private SimpleMotorFeedforward flywheelFFController = new SimpleMotorFeedforward(
         defaultPIDConstants.kS,
@@ -59,8 +60,6 @@ public class FlywheelSubsystem extends SubsystemBase {
             defaultPIDConstants,
             constants -> {
                 this.flywheelPIDController.setPID(constants.kP, constants.kI, constants.kD);
-                this.flywheelPIDController.setConstraints(
-                        new TrapezoidProfile.Constraints(constants.maxVelocity, constants.maxAcceleration));
                 this.flywheelFFController.setKa(constants.kA);
                 this.flywheelFFController.setKs(constants.kS);
                 this.flywheelFFController.setKv(constants.kV);
@@ -127,14 +126,12 @@ public class FlywheelSubsystem extends SubsystemBase {
     }
 
     public void resetPIDController() {
-        // TODO implement reset method
+        flywheelPIDController.reset();
     }
 
     public double closedLoopCalculate(double target) {
-        flywheelPIDController.setGoal(target);
-        return flywheelPIDController.calculate(getFlywheelSpeed())
-                + flywheelFFController.calculate(flywheelPIDController.getSetpoint().velocity); // double check pid
-                                                                                                // input
+        return flywheelPIDController.calculate(getFlywheelSpeed(), target)
+                + flywheelFFController.calculate(target);
     }
 
     public void grabConstantsFromNetworkTables() {
@@ -161,9 +158,9 @@ public class FlywheelSubsystem extends SubsystemBase {
     public void periodic() {
         pidLogger.logControllerOutputs(
                 0.0,
-                flywheelPIDController.getGoal().velocity,
+                flywheelPIDController.getSetpoint(),
                 0.0,
-                flywheelPIDController.getSetpoint().velocity,
+                flywheelPIDController.getSetpoint(),
                 0.0,
                 this.getFlywheelSpeed(),
                 flywheelPIDController.getVelocityError());
