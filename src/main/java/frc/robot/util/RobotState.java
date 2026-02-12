@@ -21,62 +21,41 @@ public class RobotState {
     }
 
     private Supplier<Pose2d> robotOdomPoseSupplier;
-    private Supplier<Pose2d> turretOdomPoseSupplier;
     private Supplier<Pose2d> turretCameraPoseSupplier;
     private DoubleSupplier turretCameraEstimationTimestampSupplier;
-    private Supplier<Pose2d> robotToTurretOffsetSupplier;
-
+    
+    // For Aditya:
+    private static final Pose2d ROBOT_TO_TURRET_OFFSET = new Pose2d();
+    
     private Pose2d calculatedTurretOdomPose;
+
+    public void setAllPublishers(Supplier<Pose2d> robotOdomPoseSupplier, Supplier<Pose2d> turretCameraPoseSupplier, DoubleSupplier turretCameraEstimationTimestampSupplier) {
+        this.robotOdomPoseSupplier = robotOdomPoseSupplier;
+        this.turretCameraPoseSupplier = turretCameraPoseSupplier;
+        this.turretCameraEstimationTimestampSupplier = turretCameraEstimationTimestampSupplier;
+    }
 
     public Pose2d getRobotOdomPose() {
         return robotOdomPoseSupplier.get();
     }
 
-    public void setRobotOdomPoseSupplier(Supplier<Pose2d> robotOdomPoseSupplier) {
-        this.robotOdomPoseSupplier = robotOdomPoseSupplier;
-    }
-
     public Pose2d getTurretOdomPose() {
-        return turretOdomPoseSupplier.get();
-    }
-
-    public void setTurretOdomPoseSupplier(Supplier<Pose2d> turretOdomPoseSupplier) {
-        this.turretOdomPoseSupplier = turretOdomPoseSupplier;
+        return calculatedTurretOdomPose;
     }
 
     public Pose2d getTurretCameraPose() {
         return turretCameraPoseSupplier.get();
     }
 
-    public void setTurretCameraPoseSupplier(Supplier<Pose2d> turretCameraPoseSupplier) {
-        this.turretCameraPoseSupplier = turretCameraPoseSupplier;
-    }
-
     public double getTurretCameraEstimationTimestamp() {
         return turretCameraEstimationTimestampSupplier.getAsDouble();
     }
 
-    public void setTurretCameraEstimationTimestampSupplier(DoubleSupplier turretCameraEstimationTimestampSupplier) {
-        this.turretCameraEstimationTimestampSupplier = turretCameraEstimationTimestampSupplier;
-    }
-
-    public void setRobotToTurretOffsetSupplier(Supplier<Pose2d> robotToTurretOffsetSupplier) {
-        this.robotToTurretOffsetSupplier = robotToTurretOffsetSupplier;
-    }
-
-
-    // Not sure if this is needed, but otherwise the variable never gets used
-    public Pose2d getCalculatedTurretOdomPose() {
-        return calculatedTurretOdomPose;
-    }
-
-
     public void updateTurretPose(Pose2d robotPose, Rotation2d turretRotation) {
-        Pose2d robotToTurretOffset = robotToTurretOffsetSupplier.get();
         // Step Uno: Create initial turret position by adding offset to robot position
         Pose2d turretOnField = new Pose2d(
             robotPose.getTranslation()
-                .plus(robotToTurretOffset.getTranslation()),
+                .plus(ROBOT_TO_TURRET_OFFSET.getTranslation()),
             new Rotation2d()
         );
         
