@@ -5,7 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.flywheel.SetFlywheelVelocityCommand;
 import frc.robot.commands.hood.SetHoodAngleCommand;
@@ -16,6 +16,7 @@ public class RobotContainer {
 
     //Replace with CommandPS4Controller or CommandJoystick if needed
     private final CommandXboxController m_controller = new CommandXboxController(0);
+    private static final RobotState robotState = RobotState.getInstance();
 
     private final HoodSubsystem m_HoodSubsystem = new HoodSubsystem();
     private final FlywheelSubsystem m_FlywheelSubsystem = new FlywheelSubsystem();
