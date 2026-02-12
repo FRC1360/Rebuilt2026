@@ -4,8 +4,6 @@
 
 package frc.robot.commands.turret;
 
-import java.util.function.Supplier;
-
 import org.photonvision.PhotonUtils;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -16,34 +14,32 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.TurretSubsystem;
-import frc.robot.util.FieldConstants;
+import frc.robot.util.RobotState;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class AimTurretAtHubCommand extends Command {
+public class AimTurretAtPoseCommand extends Command {
 
     private final NetworkTable loggingTable = NetworkTableInstance.getDefault().getTable("Commands/"+getName());
     private final StructPublisher<Pose2d> turretPosePublisher = loggingTable.getStructTopic("Turret Pose", Pose2d.struct).publish();
-    private final StructPublisher<Pose2d> robotPosePublisher = loggingTable.getStructTopic("Robot Pose", Pose2d.struct).publish();;
-    private final StructPublisher<Pose2d> hubPosePublisher = loggingTable.getStructTopic("Hub Pose", Pose2d.struct).publish();;
-    private final StructPublisher<Rotation2d> fieldRelativeTargetYawPublisher = loggingTable.getStructTopic("Target Yaw", Rotation2d.struct).publish();
-    private final StructPublisher<Rotation2d> rotationSuppliedYaw = loggingTable.getStructTopic("Gyro Supplied Yaw", Rotation2d.struct).publish();
+    private final StructPublisher<Pose2d> robotPosePublisher = loggingTable.getStructTopic("Robot Pose", Pose2d.struct).publish();
+    private final StructPublisher<Pose2d> goalPosePublisher = loggingTable.getStructTopic("Goal Pose", Pose2d.struct).publish();
+    private final StructPublisher<Rotation2d> fieldRelativeGoalYaw = loggingTable.getStructTopic("Field Relative Goal Yaw", Rotation2d.struct).publish();
 
+    private final RobotState robotState = RobotState.getInstance();
 
-    private final Supplier<Pose2d> robotPoseSupplier;
     private final TurretSubsystem turretSubsystem;
 
     private Rotation2d targetFieldRelativeTurretRotation;
     private Rotation2d targetRobotRelativeTurretRotation;
+    private Rotation2d robotRotation;
     private Translation2d turretTranslation;
-    private Translation2d hubTranslation;
     private Pose2d estimatedTurretPose;
+    private Pose2d goalPose;
 
     /** Creates a new AimTurretAtHub. */
-    public AimTurretAtHubCommand(TurretSubsystem turretSubsystem, Supplier<Pose2d> robotPoseSupplier) {
+    public AimTurretAtPoseCommand(TurretSubsystem turretSubsystem, Pose2d goalPose) {
         this.turretSubsystem = turretSubsystem;
-        this.robotPoseSupplier = robotPoseSupplier;
-
-        this.hubTranslation = FieldConstants.blueAllianceHubPose.getTranslation();
+        this.goalPose = goalPose;
 
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(this.turretSubsystem);
@@ -59,38 +55,26 @@ public class AimTurretAtHubCommand extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        Pose2d turretOnField = new Pose2d(
-            robotPoseSupplier.get().getTranslation()
-                .plus(turretSubsystem.getRobotToTurret().getTranslation()),
-            new Rotation2d()
-        );
-        estimatedTurretPose = turretOnField.rotateAround(
-            robotPoseSupplier.get().getTranslation(),
-            robotPoseSupplier.get().getRotation()
-        );
-        estimatedTurretPose = estimatedTurretPose.rotateAround(
-            estimatedTurretPose.getTranslation(), turretSubsystem.getCurrentRotation());
-        // Rotation2d robotRotation = estimatedTurretPose.getRotation().minus(turretSubsystem.getCurrentRotation());
-        Rotation2d robotRotation = robotPoseSupplier.get().getRotation();
+        estimatedTurretPose = robotState.getTurretOdomPose();
+        robotRotation = robotState.getRobotOdomPose().getRotation();
         turretTranslation = estimatedTurretPose.getTranslation();
         
         targetFieldRelativeTurretRotation =
             PhotonUtils.getYawToPose(
                 new Pose2d(turretTranslation, new Rotation2d()),
-                new Pose2d(hubTranslation, new Rotation2d())
+                new Pose2d(goalPose.getTranslation(), new Rotation2d())
             );
         targetRobotRelativeTurretRotation = 
             targetFieldRelativeTurretRotation.minus(robotRotation);
-        // targetRobotRelativeTurretRotation = targetFieldRelativeTurretRotation;
+
         turretSubsystem.setVoltage(
             turretSubsystem.closedLoopCalculate(targetRobotRelativeTurretRotation)
         );
-
+        
         turretPosePublisher.accept(estimatedTurretPose);
-        robotPosePublisher.accept(robotPoseSupplier.get());
-        hubPosePublisher.accept(FieldConstants.blueAllianceHubPose);
-        fieldRelativeTargetYawPublisher.accept(targetFieldRelativeTurretRotation);
-        rotationSuppliedYaw.accept(targetRobotRelativeTurretRotation);
+        robotPosePublisher.accept(robotState.getRobotOdomPose());
+        goalPosePublisher.accept(goalPose);
+        fieldRelativeGoalYaw.accept(targetFieldRelativeTurretRotation);
     }
 
     // Called once the command ends or is interrupted.

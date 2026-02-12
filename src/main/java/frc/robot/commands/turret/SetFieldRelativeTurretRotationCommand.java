@@ -4,8 +4,6 @@
 
 package frc.robot.commands.turret;
 
-import java.util.function.Supplier;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
@@ -13,6 +11,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.util.RobotState;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class SetFieldRelativeTurretRotationCommand extends Command {
@@ -21,19 +20,18 @@ public class SetFieldRelativeTurretRotationCommand extends Command {
     private final StructPublisher<Rotation2d> robotRotationPublisher = loggingTable.getStructTopic("Robot Yaw", Rotation2d.struct).publish();
     private final StructPublisher<Pose2d> turretPosePublisher = loggingTable.getStructTopic("Turret Pose", Pose2d.struct).publish();
 
-    private final Supplier<Rotation2d> robotRotationSupplier;
+    private final RobotState robotState = RobotState.getInstance();
     private final TurretSubsystem turretSubsystem;
     private final Rotation2d targetFieldRotation;
 
+    private Rotation2d robotRotation;
     private Rotation2d targetTurretRotation;
 
     /** Creates a new SetFieldRelativeTurretRotation. */
     public SetFieldRelativeTurretRotationCommand(
-        Supplier<Rotation2d> robotRotationSupplier, 
         TurretSubsystem turretSubsystem,
         Rotation2d targetFieldRotation
     ) {
-        this.robotRotationSupplier = robotRotationSupplier;
         this.turretSubsystem = turretSubsystem;
         this.targetFieldRotation = targetFieldRotation;
 
@@ -51,10 +49,12 @@ public class SetFieldRelativeTurretRotationCommand extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        robotRotationPublisher.accept(robotRotationSupplier.get());
+        robotRotation = robotState.getRobotOdomPose().getRotation();
+
+        robotRotationPublisher.accept(robotRotation);
         turretPosePublisher.accept(turretSubsystem.getEstimatedPose());
 
-        targetTurretRotation = targetFieldRotation.minus(robotRotationSupplier.get());
+        targetTurretRotation = targetFieldRotation.minus(robotRotation);
         turretSubsystem.setVoltage(
             turretSubsystem.closedLoopCalculate(targetTurretRotation)
         );

@@ -4,13 +4,22 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
+import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.flywheel.SetFlywheelVelocityCommand;
-import frc.robot.commands.hood.SetHoodAngleCommand;
-import frc.robot.subsystems.FlywheelSubsystem;
-import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.commands.turret.AimTurretAtPoseCommand;
+import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.util.FieldConstants;
+import frc.robot.util.RobotState;
 
 public class RobotContainer {
 
@@ -18,49 +27,45 @@ public class RobotContainer {
     private final CommandXboxController m_controller = new CommandXboxController(0);
     private static final RobotState robotState = RobotState.getInstance();
 
-    private final HoodSubsystem m_HoodSubsystem = new HoodSubsystem();
-    private final FlywheelSubsystem m_FlywheelSubsystem = new FlywheelSubsystem();
+    private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+
+    /* Setting up bindings for necessary control of the swerve drive platform */
+    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+            .withDeadband(MaxSpeed * 0.15).withRotationalDeadband(MaxAngularRate * 0.15) // Add a 15% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+
+    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    private final TurretSubsystem m_turretSubsystem = new TurretSubsystem();
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
+        robotState.setAllSuppliers(
+            () -> drivetrain.samplePoseAt(Timer.getFPGATimestamp()).get(),
+            () -> m_turretSubsystem.getCurrentRotation(),
+            () -> m_turretSubsystem.getEstimatedPose(),
+            () -> m_turretSubsystem.getEstimatedPoseTimestamp()
+        );
+
         configureBindings();
     }
 
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
-        m_HoodSubsystem.setDefaultCommand(
-            new SetHoodAngleCommand(m_HoodSubsystem, 74)
-        );
-        m_FlywheelSubsystem.setDefaultCommand(
-            new RunCommand(() -> m_FlywheelSubsystem.setFlywheelVoltage(0.0), m_FlywheelSubsystem)
-        );
-
-        m_controller.a().whileTrue(
-            new SetHoodAngleCommand(m_HoodSubsystem, 70)
-        );
-
-        m_controller.b().whileTrue(
-            new SetHoodAngleCommand(m_HoodSubsystem, 60)
-        );
-
-        m_controller.x().whileTrue(
-            new SetHoodAngleCommand(m_HoodSubsystem, 50)
+        drivetrain.setDefaultCommand(
+            // Drivetrain will execute this command periodically
+            drivetrain.applyRequest(() ->
+                drive.withVelocityX(-m_controller.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-m_controller.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate(-m_controller.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            )
         );
 
         m_controller.leftBumper().whileTrue(
-            new SetFlywheelVelocityCommand(m_FlywheelSubsystem, 40)
-        );
-        m_controller.leftTrigger(0.8).whileTrue(
-            new SetFlywheelVelocityCommand(m_FlywheelSubsystem, 60)
-        );
-        m_controller.rightBumper().whileTrue(
-            new SetFlywheelVelocityCommand(m_FlywheelSubsystem, 80)
-        );
-        m_controller.rightTrigger(0.8).whileTrue(
-            new SetFlywheelVelocityCommand(m_FlywheelSubsystem, 100)
+            new AimTurretAtPoseCommand(m_turretSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE)
         );
     }
 

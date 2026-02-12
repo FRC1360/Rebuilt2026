@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
  * numerical or boolean
@@ -38,6 +42,12 @@ public final class Constants {
         public static final double KV = 0.0022;
         public static final double KA = 0.0;
         public static final double KG = 0.0;
+
+        public static final Pose2d ROBOT_TO_TURRET = 
+            new Pose2d(
+                new Translation2d(0.225, 0.0),
+                new Rotation2d()
+            );
     }
 
     public static class IndexConstants {

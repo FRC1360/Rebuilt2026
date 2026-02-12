@@ -21,6 +21,7 @@ public class RobotState {
     }
 
     private Supplier<Pose2d> robotOdomPoseSupplier;
+    private Supplier<Rotation2d> turretRotationSupplier;
     private Supplier<Pose2d> turretCameraPoseSupplier;
     private DoubleSupplier turretCameraEstimationTimestampSupplier;
     
@@ -29,8 +30,9 @@ public class RobotState {
     
     private Pose2d calculatedTurretOdomPose;
 
-    public void setAllPublishers(Supplier<Pose2d> robotOdomPoseSupplier, Supplier<Pose2d> turretCameraPoseSupplier, DoubleSupplier turretCameraEstimationTimestampSupplier) {
+    public void setAllSuppliers(Supplier<Pose2d> robotOdomPoseSupplier, Supplier<Rotation2d> turretRotationSupplier, Supplier<Pose2d> turretCameraPoseSupplier, DoubleSupplier turretCameraEstimationTimestampSupplier) {
         this.robotOdomPoseSupplier = robotOdomPoseSupplier;
+        this.turretRotationSupplier = turretRotationSupplier;
         this.turretCameraPoseSupplier = turretCameraPoseSupplier;
         this.turretCameraEstimationTimestampSupplier = turretCameraEstimationTimestampSupplier;
     }
@@ -39,7 +41,15 @@ public class RobotState {
         return robotOdomPoseSupplier.get();
     }
 
+    public Rotation2d getTurretRotation() {
+        return turretRotationSupplier.get();
+    }
+
     public Pose2d getTurretOdomPose() {
+        updateTurretPose(
+            this.getRobotOdomPose(), 
+            this.getTurretRotation()
+        );
         return calculatedTurretOdomPose;
     }
 
@@ -53,14 +63,14 @@ public class RobotState {
 
     public void updateTurretPose(Pose2d robotPose, Rotation2d turretRotation) {
         // Step Uno: Create initial turret position by adding offset to robot position
-        Pose2d turretOnField = new Pose2d(
+        Pose2d estimatedTurretPose = new Pose2d(
             robotPose.getTranslation()
                 .plus(ROBOT_TO_TURRET_OFFSET.getTranslation()),
             new Rotation2d()
         );
         
         // Step Dos: Rotate turret position around robot center to account for robot rotation
-        Pose2d estimatedTurretPose = turretOnField.rotateAround(
+        estimatedTurretPose = estimatedTurretPose.rotateAround(
             robotPose.getTranslation(),
             robotPose.getRotation()
         );

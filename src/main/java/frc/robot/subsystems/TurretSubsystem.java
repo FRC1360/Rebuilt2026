@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.util.ClosedLoopConstants;
 import frc.robot.util.PIDLogger;
 
@@ -54,10 +55,7 @@ public class TurretSubsystem extends SubsystemBase {
         0
     );
     private final double hardstopAngleDegrees = 0.0;
-    private final Pose2d robotToturret = new Pose2d(
-        new Translation2d(0.225, 0.0),
-        new Rotation2d()
-    );
+    private final Pose2d robotToturret = TurretConstants.ROBOT_TO_TURRET;
 
     private final ProfiledPIDController m_pidController = new ProfiledPIDController(
         defaultPIDConstants.kP, defaultPIDConstants.kI, defaultPIDConstants.kD,
@@ -96,6 +94,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     private final OrbitCamera orbitCamera;
     private Pose2d estimatedPose;
+    private double estimatedPoseTimestamp;
 
     public TurretSubsystem() {
         motor = new SparkMax(TURRET_MOTOR_ID, MotorType.kBrushless);
@@ -243,12 +242,16 @@ public class TurretSubsystem extends SubsystemBase {
 
                         orbitCamera.updateStructPublisher(est.estimatedPose.toPose2d());
                         this.estimatedPose = est.estimatedPose.toPose2d();
+                        this.estimatedPoseTimestamp = est.timestampSeconds;
                     });
         }
     }
 
     public Pose2d getEstimatedPose() {
         return this.estimatedPose;
+    }
+    public double getEstimatedPoseTimestamp() {
+        return this.estimatedPoseTimestamp;
     }
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
