@@ -14,6 +14,7 @@ public class PIDLogger {
     
     private final NetworkTable loggingTable;
     private final DoublePublisher controlLoopOutputPublisher;
+    private final DoublePublisher pidControllerErrorPublisher;
     private final DoublePublisher goalPositionPublisher;
     private final DoublePublisher goalVelocityPublisher;
     private final DoublePublisher setpointPositionPublisher;
@@ -38,6 +39,7 @@ public class PIDLogger {
         this.defaultConstants = defaultConstants;
 
         loggingTable = NetworkTableInstance.getDefault().getTable(key);
+        pidControllerErrorPublisher = loggingTable.getDoubleTopic("PIDError").publish();
         controlLoopOutputPublisher = loggingTable.getDoubleTopic("ControlLoopOutput").publish();
         goalPositionPublisher = loggingTable.getDoubleTopic("GoalPosition").publish();
         goalVelocityPublisher = loggingTable.getDoubleTopic("GoalVelocity").publish();
@@ -75,13 +77,14 @@ public class PIDLogger {
         );
     }
 
-    public void logControllerOutputs(double goalPosition, double goalVelocity, double setpointPosition, double setpointVelocity, double currentPosition, double currentVelocity) {
+    public void logControllerOutputs(double goalPosition, double goalVelocity, double setpointPosition, double setpointVelocity, double currentPosition, double currentVelocity, double pidControllerError) {
         goalPositionPublisher.set(goalPosition);
         goalVelocityPublisher.set(goalVelocity);
         setpointPositionPublisher.set(setpointPosition);
         setpointVelocityPublisher.set(setpointVelocity);
         currentPositionPublisher.set(currentPosition);
         currentVelocityPublisher.set(currentVelocity);
+        pidControllerErrorPublisher.set(pidControllerError);
     }
 
     public void logVoltageOutputs(double outputVoltage) {

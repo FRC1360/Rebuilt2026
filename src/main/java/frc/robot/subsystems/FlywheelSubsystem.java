@@ -165,7 +165,8 @@ public class FlywheelSubsystem extends SubsystemBase {
                 0.0,
                 flywheelPIDController.getSetpoint().velocity,
                 0.0,
-                this.getFlywheelSpeed());
+                this.getFlywheelSpeed(),
+                flywheelPIDController.getVelocityError());
     }
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {

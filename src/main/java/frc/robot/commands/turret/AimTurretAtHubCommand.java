@@ -68,6 +68,8 @@ public class AimTurretAtHubCommand extends Command {
             robotPoseSupplier.get().getTranslation(),
             robotPoseSupplier.get().getRotation()
         );
+        estimatedTurretPose = estimatedTurretPose.rotateAround(
+            estimatedTurretPose.getTranslation(), turretSubsystem.getCurrentRotation());
         // Rotation2d robotRotation = estimatedTurretPose.getRotation().minus(turretSubsystem.getCurrentRotation());
         Rotation2d robotRotation = robotPoseSupplier.get().getRotation();
         turretTranslation = estimatedTurretPose.getTranslation();

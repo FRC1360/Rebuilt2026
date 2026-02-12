@@ -28,8 +28,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 public class HoodSubsystem extends SubsystemBase {
 
     private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
-        0.0,
-        0.0,
+        0.06,
+        0.07,
         0.0,
         90.0,
         360.0,
@@ -94,7 +94,8 @@ public class HoodSubsystem extends SubsystemBase {
             hoodPIDController.getSetpoint().position,
             hoodPIDController.getSetpoint().velocity,
             this.getCurrentAngle(),
-            this.getCurrentVelocity()
+            this.getCurrentVelocity(),
+            hoodPIDController.getPositionError()
         );
     }
 
@@ -111,9 +112,8 @@ public class HoodSubsystem extends SubsystemBase {
     }
 
     public double closedLoopCalculate(double target) {
-        hoodPIDController.setGoal(target);
         return 
-            hoodPIDController.calculate(getCurrentAngle()) 
+            hoodPIDController.calculate(getCurrentAngle(), target) 
             + hoodFFController.calculate(hoodPIDController.getSetpoint().velocity); // double check pid input
     }
 

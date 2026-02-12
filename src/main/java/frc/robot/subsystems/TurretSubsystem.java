@@ -219,7 +219,8 @@ public class TurretSubsystem extends SubsystemBase {
             m_pidController.getSetpoint().position,
             m_pidController.getSetpoint().velocity,
             this.getCurrentAngle(),
-            this.getCurrentVelocity()
+            this.getCurrentVelocity(),
+            m_pidController.getPositionError()
         );
 
         this.updatePose();
