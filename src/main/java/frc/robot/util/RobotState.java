@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.Constants.TurretConstants;
 
 public class RobotState {
     
@@ -25,8 +26,7 @@ public class RobotState {
     private Supplier<Pose2d> turretCameraPoseSupplier;
     private DoubleSupplier turretCameraEstimationTimestampSupplier;
     
-    // For Aditya:
-    private static final Pose2d ROBOT_TO_TURRET_OFFSET = new Pose2d();
+    private static final Pose2d ROBOT_TO_TURRET_OFFSET = TurretConstants.ROBOT_TO_TURRET;
     
     private Pose2d calculatedTurretOdomPose;
 

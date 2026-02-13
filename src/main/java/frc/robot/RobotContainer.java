@@ -11,10 +11,12 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.turret.AimTurretAtPoseCommand;
+import frc.robot.commands.turret.SetRobotRelativeTurretRotationCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.TurretSubsystem;
@@ -34,6 +36,7 @@ public class RobotContainer {
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.15).withRotationalDeadband(MaxAngularRate * 0.15) // Add a 15% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+    private final Telemetry logger = new Telemetry(MaxSpeed);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final TurretSubsystem m_turretSubsystem = new TurretSubsystem();
@@ -62,6 +65,9 @@ public class RobotContainer {
                     .withVelocityY(-m_controller.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-m_controller.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
+        );
+        m_turretSubsystem.setDefaultCommand(
+            new SetRobotRelativeTurretRotationCommand(m_turretSubsystem, new Rotation2d())
         );
 
         m_controller.leftBumper().whileTrue(
