@@ -19,6 +19,9 @@ package frc.robot;
 public final class Constants {
 
     public static final class IntakeConstants {
+    public static final double RETRACT_ANGLE = 2.0;
+    public static final double WHEEL_SPEED = 0.0;
+    public static final double NEXT_VELOCITY = 0.0;
     public static final int WHEEL_ID = 60;
     public static final int PIVOT_ID = 0;
     public static final double PIVOT_GEAR_RATIO = 0.0;

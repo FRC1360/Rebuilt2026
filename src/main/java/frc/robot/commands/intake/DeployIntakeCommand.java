@@ -2,12 +2,9 @@ package frc.robot.commands.intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.Constants;
 
 public class DeployIntakeCommand extends Command {
-
-    private static final double DEPLOY_ANGLE = 45.0;
-    private static final double WHEEL_SPEED = 0.5;
-    private static final double NEXT_VELOCITY = 0.0;
 
     private final IntakeSubsystem intakeSubsystem;
 
@@ -18,17 +15,17 @@ public class DeployIntakeCommand extends Command {
 
     @Override
     public void initialize() {
-        intakeSubsystem.setIntakeWheelSpeed(WHEEL_SPEED);
+        intakeSubsystem.setIntakeWheelSpeed(Constants.IntakeConstants.WHEEL_SPEED);
         intakeSubsystem.grabConstantsFromNetworkTables();
         intakeSubsystem.resetPIDController();
     }
 
     @Override
     public void execute() {
-        double output = intakeSubsystem.closedLoopCalculate(DEPLOY_ANGLE, NEXT_VELOCITY);
+        double output = intakeSubsystem.closedLoopCalculate(Constants.IntakeConstants.DEPLOYED_ANGLE, Constants.IntakeConstants.NEXT_VELOCITY);
         intakeSubsystem.setPivotVoltage(output);
 
-        intakeSubsystem.setIntakeWheelSpeed(WHEEL_SPEED);
+        intakeSubsystem.setIntakeWheelSpeed(Constants.IntakeConstants.WHEEL_SPEED);
     }
 
     @Override

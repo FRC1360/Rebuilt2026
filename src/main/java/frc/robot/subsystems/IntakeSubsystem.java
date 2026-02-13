@@ -16,17 +16,18 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.PIDLogger;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.controller.PIDController;
 
-
 public class IntakeSubsystem extends SubsystemBase {
     
     public BooleanSupplier intakeWheelsEnabled;
     public BooleanSupplier intakeWheelsDisabled;
+    private PIDLogger pidLogger;
 
     private double kP = 0.0;
     private double kI = 0.0;
@@ -147,9 +148,17 @@ public class IntakeSubsystem extends SubsystemBase {
     return ffOutput;
   }
    
-  public double getCurrentAngle(double angle) {
+  public double getCurrentAngle() {
     return this.currentAngle;
   }   
+
+      public void grabConstantsFromNetworkTables() {
+        this.pidLogger.updateConstants();
+    }
+
+    public void resetPIDController() {
+        pivotPID.reset();
+    }
 
   @Override
   public void periodic() {

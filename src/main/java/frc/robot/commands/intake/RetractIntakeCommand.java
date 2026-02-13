@@ -2,12 +2,9 @@ package frc.robot.commands.intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.Constants;
 
 public class RetractIntakeCommand extends Command {
-
-    private static final double RETRACT_ANGLE = 0.0;
-    private static final double WHEEL_SPEED = 0.0;
-    private static final double NEXT_VELOCITY = 0.0;
 
     private final IntakeSubsystem intakeSubsystem;
 
@@ -24,10 +21,10 @@ public class RetractIntakeCommand extends Command {
 
     @Override
     public void execute() {
-        double output = intakeSubsystem.closedLoopCalculate(RETRACT_ANGLE, NEXT_VELOCITY);
+        double output = intakeSubsystem.closedLoopCalculate(Constants.IntakeConstants.RETRACT_ANGLE, Constants.IntakeConstants.NEXT_VELOCITY);
         intakeSubsystem.setPivotVoltage(output);
 
-        intakeSubsystem.setIntakeWheelSpeed(WHEEL_SPEED);
+        intakeSubsystem.setIntakeWheelSpeed(Constants.IntakeConstants.WHEEL_SPEED);
     }
 
     @Override
