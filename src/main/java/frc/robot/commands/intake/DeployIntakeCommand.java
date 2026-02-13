@@ -18,7 +18,7 @@ public class DeployIntakeCommand extends Command {
 
     @Override
     public void initialize() {
-        intakeSubsystem.setCurrentAngle(DEPLOY_ANGLE);
+        intakeSubsystem.setIntakeWheelSpeed(WHEEL_SPEED);
     }
 
     @Override
@@ -31,7 +31,6 @@ public class DeployIntakeCommand extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        intakeSubsystem.setIntakeWheelSpeed(0.0);
     }
 
     @Override

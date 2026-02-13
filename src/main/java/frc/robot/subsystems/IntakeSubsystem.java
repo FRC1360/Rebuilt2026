@@ -25,73 +25,69 @@ import edu.wpi.first.math.controller.PIDController;
 
 public class IntakeSubsystem extends SubsystemBase {
     
-    private BooleanSupplier intakeWheelsEnabled;
+    public BooleanSupplier intakeWheelsEnabled;
     public BooleanSupplier intakeWheelsDisabled;
 
-  private double intakeSpeed = 0.5;
+    private double kP = 0.0;
+    private double kI = 0.0;
+    private double kD = 0.0;
+    private PIDController pivotPID = new PIDController(kP, kI, kD);
+    private double kG = 0.0;
+    private double kS = 0.0;
+    private double kA = 0.0;
+    private double kV = 0.0;
+    private double currentAngle;
+    private double targetAngle;
 
-  private double kP = 0.0;
-  private double kI = 0.0;
-  private double kD = 0.0;
-  private PIDController pivotPID = new PIDController(kP, kI, kD);
-  private double kG = 0.0;
-  private double kS = 0.0;
-  private double kA = 0.0;
-  private double kV = 0.0;
-  private double currentAngle;
-  private double targetAngle;
+    private SparkFlex wheelMotor = new SparkFlex(Constants.IntakeConstants.WHEEL_ID, MotorType.kBrushless);
+    private SparkFlex pivotMotor = new SparkFlex(Constants.IntakeConstants.PIVOT_ID, MotorType.kBrushless);
 
-  private SparkFlex wheelMotor = new SparkFlex(Constants.IntakeConstants.WHEEL_ID, MotorType.kBrushless);
-  private SparkFlex pivotMotor = new SparkFlex(Constants.IntakeConstants.PIVOT_ID, MotorType.kBrushless);
+    private ArmFeedforward pivotFeedForward = new ArmFeedforward(kG, kS, kV, kA);
 
-  private ArmFeedforward pivotFeedForward = new ArmFeedforward(kG, kS, kV, kA);
+    SparkFlexConfig wheelConfig = new SparkFlexConfig();
+    SparkFlexConfig pivotConfig = new SparkFlexConfig();
 
-  SparkFlexConfig wheelConfig = new SparkFlexConfig();
-  SparkFlexConfig pivotConfig = new SparkFlexConfig();
+    public IntakeSubsystem() {
+        wheelMotor.clearFaults();
+        pivotMotor.clearFaults();
 
-  public IntakeSubsystem() {
-    wheelMotor.clearFaults();
-    pivotMotor.clearFaults();
+        
+        wheelConfig.inverted(false);
+        wheelConfig.idleMode(IdleMode.kCoast);
+        wheelConfig.smartCurrentLimit(30, 30);
 
-    
-    wheelConfig.inverted(false);
-    wheelConfig.idleMode(IdleMode.kCoast);
-    wheelConfig.smartCurrentLimit(30, 30);
+        wheelMotor.configure(
+            wheelConfig,
+            ResetMode.kResetSafeParameters,
+            PersistMode.kPersistParameters
+        );
 
-    wheelMotor.configure(
-        wheelConfig,
-        ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters
-    );
+        pivotConfig.inverted(false);
+        pivotConfig.idleMode(IdleMode.kBrake);
+        pivotConfig.smartCurrentLimit(30, 30);
 
-    pivotConfig.inverted(false);
-    pivotConfig.idleMode(IdleMode.kBrake);
-    pivotConfig.smartCurrentLimit(30, 30);
-
-    pivotMotor.configure(
-        pivotConfig,
-        ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters
-    );
+        pivotMotor.configure(
+            pivotConfig,
+            ResetMode.kResetSafeParameters,
+            PersistMode.kPersistParameters
+        );
 
 
-    this.currentAngle = Constants.IntakeConstants.DEPLOYED_ANGLE;
+        this.currentAngle = Constants.IntakeConstants.HOME_ANGLE;
 
-    this.intakeWheelsDisabled = () -> {
-        return pivotPID.atSetpoint() && 
-        Math.abs(currentAngle - Constants.IntakeConstants.DEPLOYED_ANGLE) <= Constants.IntakeConstants.ANGLE_TOLERANCE;
-    };
-    
-    // if (false) {intakeWheelsEnabled = true;} 
-    // else {intakeWheelsEnabled = false;}
-    
-    this.intakeWheelsEnabled = () -> {
-    return (pivotPID.atSetpoint() && 
-    Math.abs(currentAngle - Constants.IntakeConstants.DEPLOYED_ANGLE)<= Constants.IntakeConstants.ANGLE_TOLERANCE);
-};
-
-
-}
+        this.intakeWheelsDisabled = () -> {
+            return (pivotPID.atSetpoint() && 
+            Math.abs(currentAngle - Constants.IntakeConstants.HOME_ANGLE) <= Constants.IntakeConstants.ANGLE_TOLERANCE);
+        };
+        
+        // if (false) {intakeWheelsEnabled = true;} 
+        // else {intakeWheelsEnabled = false;}
+        
+        this.intakeWheelsEnabled = () -> {
+            return (pivotPID.atSetpoint() && 
+            Math.abs(currentAngle - Constants.IntakeConstants.DEPLOYED_ANGLE)<= Constants.IntakeConstants.ANGLE_TOLERANCE);
+        };
+    }
   
   //Probably not needed
   public void setPivotSpeed(double speed) { 
@@ -99,11 +95,11 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void setPivotVoltage(double voltage) {
-    pivotMotor.set(voltage);
+    pivotMotor.setVoltage(voltage);
   }
 
   public double getPivotVelocity() { 
-    return pivotMotor.getAbsoluteEncoder().getVelocity();
+    return pivotMotor.getEncoder().getVelocity();
   }
 
   public PIDController getPidController () {
@@ -136,23 +132,23 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public double getWheelSpeed() {
-      return pivotMotor.getEncoder().getVelocity();
+      return wheelMotor.getEncoder().getVelocity();
   }
 
   public void setIntakeWheelSpeed(double speed) {
-    intakeSpeed = speed;
     wheelMotor.set(speed);
   }
 
   public double closedLoopCalculate(double target, double nextVelocity) {
     this.targetAngle = target;
-    double pidOutput = pivotPID.calculate(target);
+    this.pivotPID.setSetpoint(targetAngle);
+    double pidOutput = pivotPID.calculate(targetAngle);
     double ffOutput = pivotFeedForward.calculateWithVelocities(pidOutput, getPivotVelocity(), nextVelocity);
     return ffOutput;
   }
    
-  public void setCurrentAngle(double angle) {
-    this.currentAngle = angle;
+  public double getCurrentAngle(double angle) {
+    return this.currentAngle;
   }   
 
   @Override

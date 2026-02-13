@@ -18,7 +18,7 @@ public class RetractIntakeCommand extends Command {
 
     @Override
     public void initialize() {
-        intakeSubsystem.setCurrentAngle(RETRACT_ANGLE);
+        intakeSubsystem.setIntakeWheelSpeed(0.0);
     }
 
     @Override
@@ -31,7 +31,6 @@ public class RetractIntakeCommand extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        intakeSubsystem.setIntakeWheelSpeed(0.0);
     }
 
     @Override
