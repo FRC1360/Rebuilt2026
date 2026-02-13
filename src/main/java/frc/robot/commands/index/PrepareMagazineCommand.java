@@ -18,8 +18,6 @@ public class PrepareMagazineCommand extends Command {
     /** Creates a new ActivateMagazineCommand. */
     public PrepareMagazineCommand(IndexSubsystem indexSubsystem) {
         this.indexSubsystem = indexSubsystem;
-
-        // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(this.indexSubsystem);
     }
 
@@ -31,13 +29,13 @@ public class PrepareMagazineCommand extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        indexSubsystem.setMagazineSpeed(Constants.IndexConstants.magazineTargetSpeed);
+        indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_TARGET_SPEED);
     }
 
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
-        indexSubsystem.setMagazineSpeed(0);
+        indexSubsystem.setMagazineSpeed(0.1);
     }
 
     // Returns true when the command should end.

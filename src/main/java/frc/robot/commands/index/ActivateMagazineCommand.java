@@ -27,7 +27,7 @@ public class ActivateMagazineCommand extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        indexSubsystem.setMagazineSpeed(Constants.IndexConstants.magazineTargetSpeed);
+        indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_TARGET_SPEED);
     }
 
     // Called once the command ends or is interrupted.
