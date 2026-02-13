@@ -18,7 +18,8 @@ public class RetractIntakeCommand extends Command {
 
     @Override
     public void initialize() {
-        intakeSubsystem.setIntakeWheelSpeed(0.0);
+        intakeSubsystem.grabConstantsFromNetworkTables();
+        intakeSubsystem.resetPIDController();
     }
 
     @Override

@@ -19,6 +19,8 @@ public class DeployIntakeCommand extends Command {
     @Override
     public void initialize() {
         intakeSubsystem.setIntakeWheelSpeed(WHEEL_SPEED);
+        intakeSubsystem.grabConstantsFromNetworkTables();
+        intakeSubsystem.resetPIDController();
     }
 
     @Override
