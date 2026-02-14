@@ -5,19 +5,18 @@
 package frc.robot.commands.index;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.IndexSubsystem;
+import frc.robot.Constants;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class ActivateMagazineCommand extends Command {
 
-    private final IntakeSubsystem intakeSubsystem;
+    private final IndexSubsystem indexSubsystem;
 
     /** Creates a new ActivateMagazineCommand. */
-    public ActivateMagazineCommand(IntakeSubsystem intakeSubsystem) {
-        this.intakeSubsystem = intakeSubsystem;
-
-        // Use addRequirements() here to declare subsystem dependencies.
-        addRequirements(this.intakeSubsystem);
+    public ActivateMagazineCommand(IndexSubsystem indexSubsystem) {
+        this.indexSubsystem = indexSubsystem;
+        addRequirements(this.indexSubsystem);
     }
 
     // Called when the command is initially scheduled.
@@ -28,6 +27,7 @@ public class ActivateMagazineCommand extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
+        indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_TARGET_SPEED);
     }
 
     // Called once the command ends or is interrupted.

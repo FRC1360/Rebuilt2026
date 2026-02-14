@@ -69,13 +69,13 @@ public class HoodSubsystem extends SubsystemBase {
     private final FeedbackConfigs motorFeedbackConfigs;
     private final MotorOutputConfigs motorOutputConfigs;
 
-    private final double kConversonFactor = ((164.0 / 12.0) * (60.0 / 18.0)) / 360.0;
+    private final double kConversionFactor = ((164.0 / 12.0) * (60.0 / 18.0)) / 360.0;
     private final double kInitialAngle = 75.0;
      /** Creates a new HoodSubsystem. */
     public HoodSubsystem() {
         motorFeedbackConfigs = new FeedbackConfigs()
             .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
-            .withSensorToMechanismRatio(kConversonFactor);
+            .withSensorToMechanismRatio(kConversionFactor);
 
         motorOutputConfigs = new MotorOutputConfigs()
             .withInverted(InvertedValue.Clockwise_Positive)
