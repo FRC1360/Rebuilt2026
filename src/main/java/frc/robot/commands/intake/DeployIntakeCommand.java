@@ -2,30 +2,36 @@ package frc.robot.commands.intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.util.RobotState;
 import frc.robot.Constants;
 
 public class DeployIntakeCommand extends Command {
 
-    private final IntakeSubsystem intakeSubsystem;
+    private final RobotState robotState;
 
-    public DeployIntakeCommand(IntakeSubsystem intakeSubsystem) {
-        this.intakeSubsystem = intakeSubsystem;
-        addRequirements(intakeSubsystem);
-    }
-
-    @Override
+    public DeployIntakeCommand(RobotState robotState) {
+        this.robotState = robotState;
+        addRequirements(robotState);
+            }
+        
+            private void addRequirements(RobotState robotState2) {
+                // TODO Auto-generated method stub
+                throw new UnsupportedOperationException("Unimplemented method 'addRequirements'");
+            }
+        
+            @Override
     public void initialize() {
-        intakeSubsystem.setIntakeWheelSpeed(Constants.IntakeConstants.WHEEL_SPEED);
-        intakeSubsystem.grabConstantsFromNetworkTables();
-        intakeSubsystem.resetPIDController();
+        robotState.setIntakeWheelSpeed(Constants.IntakeConstants.WHEEL_SPEED);
+        robotState.grabConstantsFromNetworkTables();
+        robotState.resetPIDController();
     }
 
     @Override
     public void execute() {
-        double output = intakeSubsystem.closedLoopCalculate(Constants.IntakeConstants.DEPLOYED_ANGLE, Constants.IntakeConstants.NEXT_VELOCITY);
-        intakeSubsystem.setPivotVoltage(output);
+        double output = robotState.closedLoopCalculate(Constants.IntakeConstants.DEPLOYED_ANGLE, Constants.IntakeConstants.NEXT_VELOCITY);
+        robotState.setPivotVoltage(output);
 
-        intakeSubsystem.setIntakeWheelSpeed(Constants.IntakeConstants.WHEEL_SPEED);
+        robotState.setIntakeWheelSpeed(Constants.IntakeConstants.WHEEL_SPEED);
     }
 
     @Override
