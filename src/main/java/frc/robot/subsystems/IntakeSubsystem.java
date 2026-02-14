@@ -13,29 +13,65 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import frc.robot.util.ClosedLoopConstants;
+import frc.robot.util.PIDLogger;
 
 public class IntakeSubsystem extends SubsystemBase {
 
   private double intakeSpeed = 0.5;
 
-  private double kP = 0.0;
-  private double kI = 0.0;
-  private double kD = 0.0;
-  private PIDController pivotPID = new PIDController(kP, kI, kD);
+private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+);
 
-  private double kG = 0.0;
-  private double kS = 0.0;
-  private double kA = 0.0;
-  private double kV = 0.0;
+  private ProfiledPIDController pivotPID = new ProfiledPIDController(
+    defaultPIDConstants.kP, 
+    defaultPIDConstants.kI, 
+    defaultPIDConstants.kD,
+    new TrapezoidProfile.Constraints(
+        defaultPIDConstants.maxVelocity, 
+        defaultPIDConstants.maxAcceleration
+    )
+  );
 
+  private ArmFeedforward pivotFeedForward = new ArmFeedforward(
+    defaultPIDConstants.kG,
+    defaultPIDConstants.kS,
+    defaultPIDConstants.kV,
+    defaultPIDConstants.kA
+  );
+
+private final PIDLogger pidLogger = new PIDLogger(
+        "Subsystems/" + getName(),
+        defaultPIDConstants,
+        constants -> {
+            this.pivotPID.setPID(constants.kP, constants.kI, constants.kD);
+            this.pivotPID.setConstraints(
+               new TrapezoidProfile.Constraints(constants.maxVelocity, constants.maxAcceleration)
+            );
+            this.pivotFeedForward.setKa(constants.kA);
+            this.pivotFeedForward.setKs(constants.kS);
+            this.pivotFeedForward.setKv(constants.kV);
+       }
+    );
+  
   private SparkFlex wheelMotor = new SparkFlex(Constants.IntakeConstants.WHEEL_ID, MotorType.kBrushless);
   private SparkFlex pivotMotor = new SparkFlex(Constants.IntakeConstants.PIVOT_ID, MotorType.kBrushless);
 
-  private ArmFeedforward pivotFeedForward = new ArmFeedforward(kG, kS, kV, kA);
 
   SparkFlexConfig wheelConfig = new SparkFlexConfig();
   SparkFlexConfig pivotConfig = new SparkFlexConfig();
@@ -74,7 +110,7 @@ public class IntakeSubsystem extends SubsystemBase {
     return pivotMotor.getAbsoluteEncoder().getVelocity();
   }
 
-  public PIDController getPidController () {
+  public ProfiledPIDController getPidController () {
     return this.pivotPID;
   }
 
