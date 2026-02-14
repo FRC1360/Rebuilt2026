@@ -7,74 +7,109 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkBase.PersistMode;
+
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.PIDLogger;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 
 public class IntakeSubsystem extends SubsystemBase {
+    
+    public BooleanSupplier intakeWheelsEnabled;
+    public BooleanSupplier intakeWheelsDisabled;
+    private PIDLogger pidLogger;
 
-  private double intakeSpeed = 0.5;
+    private double maxAccel = 0.0;
+    private double maxVel = 0.0;
+    private TrapezoidProfile.Constraints pivotConstraints = new Constraints(maxVel, maxAccel);
+    private double kP = 0.0;
+    private double kI = 0.0;
+    private double kD = 0.0;
+    private ProfiledPIDController pivotPID = new ProfiledPIDController(kP, kI, kD, pivotConstraints);
+    private double kG = 0.0;
+    private double kS = 0.0;
+    private double kA = 0.0;
+    private double kV = 0.0;
+    private double currentAngle;
+    private double targetAngle;
 
-  private double kP = 0.0;
-  private double kI = 0.0;
-  private double kD = 0.0;
-  private PIDController pivotPID = new PIDController(kP, kI, kD);
+    private SparkFlex wheelMotor = new SparkFlex(Constants.IntakeConstants.WHEEL_ID, MotorType.kBrushless);
+    private SparkFlex pivotMotor = new SparkFlex(Constants.IntakeConstants.PIVOT_ID, MotorType.kBrushless);
 
-  private double kG = 0.0;
-  private double kS = 0.0;
-  private double kA = 0.0;
-  private double kV = 0.0;
+    private ArmFeedforward pivotFeedForward = new ArmFeedforward(kG, kS, kV, kA);
 
-  private SparkFlex wheelMotor = new SparkFlex(Constants.IntakeConstants.WHEEL_ID, MotorType.kBrushless);
-  private SparkFlex pivotMotor = new SparkFlex(Constants.IntakeConstants.PIVOT_ID, MotorType.kBrushless);
+    SparkFlexConfig wheelConfig = new SparkFlexConfig();
+    SparkFlexConfig pivotConfig = new SparkFlexConfig();
 
-  private ArmFeedforward pivotFeedForward = new ArmFeedforward(kG, kS, kV, kA);
+    public IntakeSubsystem() {
+        wheelMotor.clearFaults();
+        pivotMotor.clearFaults();
 
-  SparkFlexConfig wheelConfig = new SparkFlexConfig();
-  SparkFlexConfig pivotConfig = new SparkFlexConfig();
+        
+        wheelConfig.inverted(false);
+        wheelConfig.idleMode(IdleMode.kCoast);
+        wheelConfig.smartCurrentLimit(30, 30);
 
-  public IntakeSubsystem() {
-    wheelMotor.clearFaults();
-    pivotMotor.clearFaults();
+        wheelMotor.configure(
+            wheelConfig,
+            ResetMode.kResetSafeParameters,
+            PersistMode.kPersistParameters
+        );
 
-    wheelConfig.inverted(false);
-    wheelConfig.idleMode(IdleMode.kCoast);
-    wheelConfig.smartCurrentLimit(30, 30);
+        pivotConfig.inverted(false);
+        pivotConfig.idleMode(IdleMode.kBrake);
+        pivotConfig.smartCurrentLimit(30, 30);
 
-    wheelMotor.configure(
-        wheelConfig,
-        ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters
-    );
+        pivotMotor.configure(
+            pivotConfig,
+            ResetMode.kResetSafeParameters,
+            PersistMode.kPersistParameters
+        );
 
-    pivotConfig.inverted(false);
-    pivotConfig.idleMode(IdleMode.kBrake);
-    pivotConfig.smartCurrentLimit(30, 30);
 
-    pivotMotor.configure(
-        pivotConfig,
-        ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters
-    );
-  }
+        this.currentAngle = Constants.IntakeConstants.HOME_ANGLE;
+
+        this.intakeWheelsDisabled = () -> {
+            return (pivotPID.atSetpoint() && 
+            Math.abs(currentAngle - Constants.IntakeConstants.HOME_ANGLE) <= Constants.IntakeConstants.ANGLE_TOLERANCE);
+        };
+        
+        // if (false) {intakeWheelsEnabled = true;} 
+        // else {intakeWheelsEnabled = false;}
+        
+        this.intakeWheelsEnabled = () -> {
+            return (pivotPID.atSetpoint() && 
+            Math.abs(currentAngle - Constants.IntakeConstants.DEPLOYED_ANGLE)<= Constants.IntakeConstants.ANGLE_TOLERANCE);
+        };
+    }
   
   //Probably not needed
   public void setPivotSpeed(double speed) { 
     pivotMotor.set(speed);
   }
 
-  public double getPivotVelocity() { 
-    return pivotMotor.getAbsoluteEncoder().getVelocity();
+  public void setPivotVoltage(double voltage) {
+    pivotMotor.setVoltage(voltage);
   }
 
-  public PIDController getPidController () {
+  public double getPivotVelocity() { 
+    return pivotMotor.getEncoder().getVelocity();
+  }
+
+  public ProfiledPIDController getPidController () {
     return this.pivotPID;
   }
 
@@ -104,21 +139,38 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public double getWheelSpeed() {
-      return pivotMotor.getEncoder().getVelocity();
+      return wheelMotor.getEncoder().getVelocity();
   }
 
   public void setIntakeWheelSpeed(double speed) {
-    intakeSpeed = speed;
     wheelMotor.set(speed);
   }
 
   public double closedLoopCalculate(double target, double nextVelocity) {
-    double pidOutput = pivotPID.calculate(target);
-    double ffOutput = pivotFeedForward.calculateWithVelocities(this.getPivotPositionInDegrees(), this.getPivotVelocity(), nextVelocity);
+    this.targetAngle = target;
+    this.pivotPID.setGoal(targetAngle);
+    double pidOutput = pivotPID.calculate(targetAngle);
+    double ffOutput = pivotFeedForward.calculateWithVelocities(pidOutput, getPivotVelocity(), nextVelocity);
     return pidOutput + ffOutput;
   }
+   
+  public double getCurrentAngle() {
+    return this.currentAngle;
+  }   
+
+      public void grabConstantsFromNetworkTables() {
+        this.pidLogger.updateConstants();
+    }
+
+    public void resetPIDController() {
+        pivotPID.reset(
+            this.getCurrentAngle(),
+            this.getPivotVelocity()
+        );
+    }
 
   @Override
   public void periodic() {
+    currentAngle = getPivotPositionInDegrees();
   }
 }
