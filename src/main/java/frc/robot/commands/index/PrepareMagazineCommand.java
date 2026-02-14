@@ -29,18 +29,23 @@ public class PrepareMagazineCommand extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_TARGET_SPEED);
+        if (indexSubsystem.magazineSensorTriggered.getAsBoolean()) {
+            indexSubsystem.setMagazineSpeed(0.0);
+            indexSubsystem.setHopperSpeed(0.0);
+        } else {
+            indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_TARGET_SPEED);
+            indexSubsystem.setHopperSpeed(Constants.IndexConstants.HOPPER_SPEED);
+        }
     }
 
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
-        indexSubsystem.setMagazineSpeed(0.1);
     }
 
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return indexSubsystem.magazineSensorTriggered.getAsBoolean();
+        return false;
     }
 }

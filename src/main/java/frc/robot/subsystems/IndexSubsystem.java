@@ -40,7 +40,7 @@ public class IndexSubsystem extends SubsystemBase {
     magazineMotor.configure(magazineMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     this.magazineSensor = new DigitalInput(Constants.IndexConstants.MAGAZINE_SENSOR_ID);
-    this.magazineSensorTriggered = new Trigger(() -> (magazineSensor.get()));
+    this.magazineSensorTriggered = new Trigger((() -> (!magazineSensor.get())));
   }
 
   public void setHopperVoltage(double volts) {

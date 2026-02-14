@@ -28,6 +28,7 @@ public class ActivateMagazineCommand extends Command {
     @Override
     public void execute() {
         indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_TARGET_SPEED);
+        indexSubsystem.setHopperSpeed(Constants.IndexConstants.HOPPER_SPEED);
     }
 
     // Called once the command ends or is interrupted.
