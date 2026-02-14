@@ -56,7 +56,7 @@ public final class Constants {
         public static final int MAGAZINE_SENSOR_ID = 1;
         
         public static final double HOPPER_SPEED = 0.5;
-        public static final double MAGAZINE_TARGET_SPEED = 0.0;
+        public static final double MAGAZINE_SPEED = 0.0;
     }
 
     public static class FlywheelConstants {

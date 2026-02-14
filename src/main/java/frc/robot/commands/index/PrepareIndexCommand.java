@@ -18,7 +18,7 @@ public class PrepareIndexCommand extends Command {
     /** Creates a new ActivateMagazineCommand. */
     public PrepareIndexCommand(IndexSubsystem indexSubsystem) {
         this.indexSubsystem = indexSubsystem;
-        addRequirements(this.indexSubsystem);
+        addRequirements(indexSubsystem);
     }
 
     // Called when the command is initially scheduled.
@@ -33,7 +33,7 @@ public class PrepareIndexCommand extends Command {
             indexSubsystem.setMagazineSpeed(0.0);
             indexSubsystem.setHopperSpeed(0.0);
         } else {
-            indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_TARGET_SPEED);
+            indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_SPEED);
             indexSubsystem.setHopperSpeed(Constants.IndexConstants.HOPPER_SPEED);
         }
     }

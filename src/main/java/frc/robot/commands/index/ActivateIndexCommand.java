@@ -16,7 +16,7 @@ public class ActivateIndexCommand extends Command {
     /** Creates a new ActivateMagazineCommand. */
     public ActivateIndexCommand(IndexSubsystem indexSubsystem) {
         this.indexSubsystem = indexSubsystem;
-        addRequirements(this.indexSubsystem);
+        addRequirements(indexSubsystem);
     }
 
     // Called when the command is initially scheduled.
@@ -27,7 +27,7 @@ public class ActivateIndexCommand extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_TARGET_SPEED);
+        indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_SPEED);
         indexSubsystem.setHopperSpeed(Constants.IndexConstants.HOPPER_SPEED);
     }
 
