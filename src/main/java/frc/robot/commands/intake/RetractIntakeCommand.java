@@ -21,7 +21,7 @@ public class RetractIntakeCommand extends Command {
 
     @Override
     public void execute() {
-        double output = intakeSubsystem.closedLoopCalculate(Constants.IntakeConstants.RETRACT_ANGLE, Constants.IntakeConstants.NEXT_VELOCITY);
+        double output = intakeSubsystem.closedLoopCalculate(Constants.IntakeConstants.RETRACT_ANGLE, intakeSubsystem.getPidController().getSetpoint().velocity);
         intakeSubsystem.setPivotVoltage(output);
 
         intakeSubsystem.setIntakeWheelSpeed(Constants.IntakeConstants.WHEEL_SPEED);
