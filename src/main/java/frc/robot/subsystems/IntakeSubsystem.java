@@ -19,9 +19,12 @@ import frc.robot.Constants;
 import frc.robot.util.PIDLogger;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 
 public class IntakeSubsystem extends SubsystemBase {
     
@@ -29,10 +32,13 @@ public class IntakeSubsystem extends SubsystemBase {
     public BooleanSupplier intakeWheelsDisabled;
     private PIDLogger pidLogger;
 
+    private double maxAccel = 0.0;
+    private double maxVel = 0.0;
+    private TrapezoidProfile.Constraints pivotConstraints = new Constraints(maxVel, maxAccel);
     private double kP = 0.0;
     private double kI = 0.0;
     private double kD = 0.0;
-    private PIDController pivotPID = new PIDController(kP, kI, kD);
+    private ProfiledPIDController pivotPID = new ProfiledPIDController(kP, kI, kD, pivotConstraints);
     private double kG = 0.0;
     private double kS = 0.0;
     private double kA = 0.0;
@@ -103,7 +109,7 @@ public class IntakeSubsystem extends SubsystemBase {
     return pivotMotor.getEncoder().getVelocity();
   }
 
-  public PIDController getPidController () {
+  public ProfiledPIDController getPidController () {
     return this.pivotPID;
   }
 
@@ -142,7 +148,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public double closedLoopCalculate(double target, double nextVelocity) {
     this.targetAngle = target;
-    this.pivotPID.setSetpoint(targetAngle);
+    this.pivotPID.setGoal(targetAngle);
     double pidOutput = pivotPID.calculate(targetAngle);
     double ffOutput = pivotFeedForward.calculateWithVelocities(pidOutput, getPivotVelocity(), nextVelocity);
     return ffOutput;
@@ -157,7 +163,10 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void resetPIDController() {
-        pivotPID.reset();
+        pivotPID.reset(
+            this.getCurrentAngle(),
+            this.getPivotVelocity()
+        );
     }
 
   @Override
