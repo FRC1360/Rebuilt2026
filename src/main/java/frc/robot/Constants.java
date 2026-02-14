@@ -55,4 +55,10 @@ public final class Constants {
         public static final int MAGAZINE_CONVEYOR_ID = 0;
         public static final int MAGAZINE_SENSOR_ID = 1;
     }
+
+    public static class FlywheelConstants {
+        public static final double HIGH_SPEED = 0;
+        public static final double LOW_SPEED = 0;
+        public static final double DISTANCE_THRESHOLD = 0;
+    }
 }
