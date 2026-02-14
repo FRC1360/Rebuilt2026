@@ -114,8 +114,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public double closedLoopCalculate(double target, double nextVelocity) {
     double pidOutput = pivotPID.calculate(target);
-    double ffOutput = pivotFeedForward.calculateWithVelocities(pidOutput, getPivotVelocity(), nextVelocity);
-    return ffOutput;
+    double ffOutput = pivotFeedForward.calculateWithVelocities(this.getPivotPositionInDegrees(), this.getPivotVelocity(), nextVelocity);
+    return pidOutput + ffOutput;
   }
 
   @Override
