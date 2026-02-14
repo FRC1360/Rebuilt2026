@@ -12,6 +12,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.util.FieldConstants;
+import frc.robot.util.RobotState;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AimHoodAtPoseCommand extends Command {
@@ -20,13 +22,15 @@ public class AimHoodAtPoseCommand extends Command {
     private Pose2d turretPose;
     private Pose2d PoseToAimAt; 
     private  InterpolatingDoubleTreeMap angletable = CreateMapCommand.turretPowerAngleDistancetable;
+     private final RobotState robotState = RobotState.getInstance();
+
     
 
-    /** Creates a new RetractHoodCommand. */
-    public AimHoodAtPoseCommand(HoodSubsystem hoodSubsystem, Supplier<Pose2d> turretPose, Pose2d PoseToAimAt) {
+    /** Creates a new RetractHoodCommand.  */
+    public AimHoodAtPoseCommand(HoodSubsystem hoodSubsystem) {
         this.hoodSubsystem = hoodSubsystem;
-        this.turretPose = turretPose.get();
-        this.PoseToAimAt = PoseToAimAt;
+        this.turretPose = robotState.getTurretOdomPose();
+        this.PoseToAimAt = FieldConstants.BLUE_ALLIANCE_HUB_POSE;
         
 
         // Use addRequirements() here to declare subsystem dependencies.
@@ -36,6 +40,8 @@ public class AimHoodAtPoseCommand extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
+        hoodSubsystem.grabConstantsFromNetworkTables();
+        hoodSubsystem.resetPIDController();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
