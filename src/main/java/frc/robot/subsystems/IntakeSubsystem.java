@@ -157,4 +157,19 @@ private final PIDLogger pidLogger = new PIDLogger(
   @Override
   public void periodic() {
   }
+
+public void setPivotVoltage(double output) {
+    pivotMotor.setVoltage(output);
+}
+
+public void grabConstantsFromNetworkTables() {
+    this.pidLogger.updateConstants();
+}
+
+public void resetPIDController() {
+    pivotPID.reset (
+        this.getPivotPositionInDegrees(),
+        this.getPivotVelocity()
+    );
+}
 }
