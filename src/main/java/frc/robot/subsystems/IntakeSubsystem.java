@@ -18,13 +18,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.PIDLogger;
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import frc.robot.util.ClosedLoopConstants;
+import frc.robot.util.PIDLogger;
+
 
 public class IntakeSubsystem extends SubsystemBase {
     
@@ -46,19 +50,59 @@ public class IntakeSubsystem extends SubsystemBase {
     private double currentAngle;
     private double targetAngle;
 
-    private SparkFlex wheelMotor = new SparkFlex(Constants.IntakeConstants.WHEEL_ID, MotorType.kBrushless);
-    private SparkFlex pivotMotor = new SparkFlex(Constants.IntakeConstants.PIVOT_ID, MotorType.kBrushless);
+private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+);
 
-    private ArmFeedforward pivotFeedForward = new ArmFeedforward(kG, kS, kV, kA);
+  private ProfiledPIDController pivotPID = new ProfiledPIDController(
+    defaultPIDConstants.kP, 
+    defaultPIDConstants.kI, 
+    defaultPIDConstants.kD,
+    new TrapezoidProfile.Constraints(
+        defaultPIDConstants.maxVelocity, 
+        defaultPIDConstants.maxAcceleration
+    )
+  );
 
-    SparkFlexConfig wheelConfig = new SparkFlexConfig();
-    SparkFlexConfig pivotConfig = new SparkFlexConfig();
+  private ArmFeedforward pivotFeedForward = new ArmFeedforward(
+    defaultPIDConstants.kG,
+    defaultPIDConstants.kS,
+    defaultPIDConstants.kV,
+    defaultPIDConstants.kA
+  );
+
+private final PIDLogger pidLogger = new PIDLogger(
+        "Subsystems/" + getName(),
+        defaultPIDConstants,
+        constants -> {
+            this.pivotPID.setPID(constants.kP, constants.kI, constants.kD);
+            this.pivotPID.setConstraints(
+               new TrapezoidProfile.Constraints(constants.maxVelocity, constants.maxAcceleration)
+            );
+            this.pivotFeedForward.setKa(constants.kA);
+            this.pivotFeedForward.setKs(constants.kS);
+            this.pivotFeedForward.setKv(constants.kV);
+       }
+    );
+  
+  private SparkFlex wheelMotor = new SparkFlex(Constants.IntakeConstants.WHEEL_ID, MotorType.kBrushless);
+  private SparkFlex pivotMotor = new SparkFlex(Constants.IntakeConstants.PIVOT_ID, MotorType.kBrushless);
+
+  SparkFlexConfig wheelConfig = new SparkFlexConfig();
+  SparkFlexConfig pivotConfig = new SparkFlexConfig();
+
 
     public IntakeSubsystem() {
         wheelMotor.clearFaults();
         pivotMotor.clearFaults();
-
-        
         wheelConfig.inverted(false);
         wheelConfig.idleMode(IdleMode.kCoast);
         wheelConfig.smartCurrentLimit(30, 30);
@@ -173,4 +217,19 @@ public class IntakeSubsystem extends SubsystemBase {
   public void periodic() {
     currentAngle = getPivotPositionInDegrees();
   }
+
+public void setPivotVoltage(double output) {
+    pivotMotor.setVoltage(output);
+}
+
+public void grabConstantsFromNetworkTables() {
+    this.pidLogger.updateConstants();
+}
+
+public void resetPIDController() {
+    pivotPID.reset (
+        this.getPivotPositionInDegrees(),
+        this.getPivotVelocity()
+    );
+}
 }
