@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.turret.AimTurretAtPoseCommand;
-import frc.robot.commands.turret.GetCurrentRobotRelativeRotationCommand;
+import frc.robot.commands.turret.SetTurretToRobotRelativeAngleCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.TurretSubsystem;
@@ -36,7 +36,6 @@ public class RobotContainer {
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.15).withRotationalDeadband(MaxAngularRate * 0.15) // Add a 15% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
-    private final Telemetry logger = new Telemetry(MaxSpeed);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final TurretSubsystem m_turretSubsystem = new TurretSubsystem();
@@ -47,7 +46,7 @@ public class RobotContainer {
     public RobotContainer() {
         robotState.setAllSuppliers(
             () -> drivetrain.samplePoseAt(Timer.getFPGATimestamp()).get(),
-            () -> m_turretSubsystem.getCurrentRotation(),
+            () -> m_turretSubsystem.getCurrentRobotRelativeRotation(),
             () -> m_turretSubsystem.getPhotonCameraEstimatedPose(),
             () -> m_turretSubsystem.getPhotonCameraEstimatedPoseTimestamp()
         );
@@ -67,7 +66,7 @@ public class RobotContainer {
             )
         );
         m_turretSubsystem.setDefaultCommand(
-            new GetCurrentRobotRelativeRotationCommand(m_turretSubsystem, new Rotation2d())
+            new SetTurretToRobotRelativeAngleCommand(m_turretSubsystem, new Rotation2d())
         );
 
         m_controller.leftBumper().whileTrue(

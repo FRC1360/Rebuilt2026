@@ -14,7 +14,7 @@ import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.util.RobotState;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class GetCurrentLocalAngleCommand extends Command {
+public class SetTurretToFieldRelativeAngleCommand extends Command {
 
     private final NetworkTable loggingTable = NetworkTableInstance.getDefault().getTable("Subsystems/Gyro Testing");
     private final StructPublisher<Rotation2d> robotRotationPublisher = loggingTable.getStructTopic("Robot Yaw", Rotation2d.struct).publish();
@@ -28,7 +28,7 @@ public class GetCurrentLocalAngleCommand extends Command {
     private Rotation2d targetTurretRotation;
 
     /** Creates a new SetFieldRelativeTurretRotation. */
-    public GetCurrentLocalAngleCommand(
+    public SetTurretToFieldRelativeAngleCommand(
         TurretSubsystem turretSubsystem,
         Rotation2d targetFieldRotation
     ) {

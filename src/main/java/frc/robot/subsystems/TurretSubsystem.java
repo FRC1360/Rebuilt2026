@@ -113,8 +113,8 @@ public class TurretSubsystem extends SubsystemBase {
 
     public void resetPIDController() {
         m_pidController.reset(
-            this.getCurrentAngle(),
-            this.getCurrentVelocity()
+            this.getCurrentEncoderAngle(),
+            this.getCurrentEncoderVelocity()
         );
     }
 
@@ -122,21 +122,21 @@ public class TurretSubsystem extends SubsystemBase {
         motor.setVoltage(volts);
     }
 
-    public double getCurrentVelocity() {
+    public double getCurrentEncoderVelocity() {
         return motor.getVelocity().getValueAsDouble();
     }
 
-    public double getCurrentAngle() {
+    public double getCurrentEncoderAngle() {
         return motor.getPosition().getValueAsDouble();
     }
 
-    public Rotation2d getCurrentRotation() {
-        return Rotation2d.fromDegrees(this.getCurrentAngle()).plus(TurretConstants.ROBOT_TO_TURRET_CENTER.getRotation());
+    public Rotation2d getCurrentRobotRelativeRotation() {
+        return Rotation2d.fromDegrees(this.getCurrentEncoderAngle()).plus(TurretConstants.ROBOT_TO_TURRET_CENTER.getRotation());
     }
 
     private double calculateWrapAround(Rotation2d target) {
         //Converts the angle between the range of 0 to 360 to -180 to 180
-        double currentAngle = this.getCurrentAngle();
+        double currentAngle = this.getCurrentEncoderAngle();
         double wrappedTargetValue = MathUtil.inputModulus(target.getDegrees(), -180, 180);
         double negativePath, positivePath;
 
@@ -169,7 +169,7 @@ public class TurretSubsystem extends SubsystemBase {
         wrappedTarget = this.calculateWrapAround(target.minus(TurretConstants.ROBOT_TO_TURRET_CENTER.getRotation()));
 
         m_pidController.setGoal(wrappedTarget);
-        pidControllerOutput = m_pidController.calculate(this.getCurrentAngle());
+        pidControllerOutput = m_pidController.calculate(this.getCurrentEncoderAngle());
         feedForwardControllerOutput = m_feedForward.calculate(m_pidController.getSetpoint().velocity);
 
         return pidControllerOutput + feedForwardControllerOutput;
@@ -182,8 +182,8 @@ public class TurretSubsystem extends SubsystemBase {
             m_pidController.getGoal().velocity,
             m_pidController.getSetpoint().position,
             m_pidController.getSetpoint().velocity,
-            this.getCurrentAngle(),
-            this.getCurrentVelocity(),
+            this.getCurrentEncoderAngle(),
+            this.getCurrentEncoderVelocity(),
             m_pidController.getPositionError()
         );
 
