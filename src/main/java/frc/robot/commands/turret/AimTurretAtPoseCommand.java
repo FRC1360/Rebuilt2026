@@ -55,15 +55,19 @@ public class AimTurretAtPoseCommand extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
+        //Gets the turretPosition, robot's rotation, and the turret translation from the origin of the robot
         estimatedTurretPose = robotState.getTurretOdomPose();
         robotRotation = robotState.getRobotOdomPose().getRotation();
         turretTranslation = estimatedTurretPose.getTranslation();
         
+        //Determines the angle between the turret's position and the Hub's position (Field Relative Rotation).
         targetFieldRelativeTurretRotation =
             PhotonUtils.getYawToPose(
                 new Pose2d(turretTranslation, new Rotation2d()),
                 new Pose2d(goalPose.getTranslation(), new Rotation2d())
             );
+
+        // Determines the robot felative rotation by subtracting the robot's current position.
         targetRobotRelativeTurretRotation = 
             targetFieldRelativeTurretRotation.minus(robotRotation);
 

@@ -47,8 +47,14 @@ public final class Constants {
 
     public static class TurretConstants {
         public static final int TURRET_MOTOR_ID = 10;
+        public static final double ENCODER_STARTUP_ANGLE_DEGREES = 0.0;
         public static final double VELOCITY_CONVERSION_FACTOR = 0;
         public static final double POSITION_CONVERSION_FACTOR = 0;
+        public static final double TOTAL_WRAP_AROUND_ANGLE_RANGE = 400;
+        public static final double POSITIVE_THRESHOLD = 180 - (TOTAL_WRAP_AROUND_ANGLE_RANGE - 360) / 2;
+        public static final double NEGATIVE_THRESHOLD = -180 + (TOTAL_WRAP_AROUND_ANGLE_RANGE - 360) / 2;
+
+        public static final double GEAR_RATIO = (1.0 / 7.0) * 360.0;
 
         public static final double MAX_V = 3000.0;
         public static final double MAX_A = 3500.0;

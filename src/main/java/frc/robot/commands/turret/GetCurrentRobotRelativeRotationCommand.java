@@ -9,13 +9,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.TurretSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class SetRobotRelativeTurretRotationCommand extends Command {
+public class GetCurrentRobotRelativeRotationCommand extends Command {
 
     private final TurretSubsystem turretSubsystem;
     private final Rotation2d targetRotation;
 
     /** Creates a new SetRobotRelativeTurretRotation. */
-    public SetRobotRelativeTurretRotationCommand(TurretSubsystem turretSubsystem, Rotation2d targetRotation) {
+    public GetCurrentRobotRelativeRotationCommand(TurretSubsystem turretSubsystem, Rotation2d targetRotation) {
         this.turretSubsystem = turretSubsystem;
         this.targetRotation = targetRotation;
 
