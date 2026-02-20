@@ -1,10 +1,8 @@
 package frc.robot.commands.intake;
 
-import java.util.function.Supplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.Constants;
+import frc.robot.Constants.IntakeConstants;
 
 public class RetractIntakeCommand extends Command {
 
@@ -17,16 +15,15 @@ public class RetractIntakeCommand extends Command {
 
     @Override
     public void initialize() {
+        intakeSubsystem.setWheelSpeed(0.0);
+
         intakeSubsystem.grabConstantsFromNetworkTables();
         intakeSubsystem.resetPIDController();
     }
 
     @Override
     public void execute() {
-        double output = intakeSubsystem.closedLoopCalculate(Constants.IntakeConstants.RETRACT_ANGLE, intakeSubsystem.getPidController().getSetpoint().velocity);
-        intakeSubsystem.setPivotVoltage(output);
-
-        intakeSubsystem.setIntakeWheelSpeed(Constants.IntakeConstants.WHEEL_SPEED);
+        intakeSubsystem.setPivotVoltage(intakeSubsystem.closedLoopCalculate(IntakeConstants.RETRACT_ANGLE));
     }
 
     @Override

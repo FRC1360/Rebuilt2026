@@ -3,233 +3,151 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
+
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.PersistMode;
 
-import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
-
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.PIDLogger;
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.wpilibj.motorcontrol.MotorController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import frc.robot.util.ClosedLoopConstants;
-import frc.robot.util.PIDLogger;
-
 
 public class IntakeSubsystem extends SubsystemBase {
-    
-    public BooleanSupplier intakeWheelsEnabled;
-    public BooleanSupplier intakeWheelsDisabled;
-    private PIDLogger pidLogger;
 
-    private double maxAccel = 0.0;
-    private double maxVel = 0.0;
-    private TrapezoidProfile.Constraints pivotConstraints = new Constraints(maxVel, maxAccel);
-    private double kP = 0.0;
-    private double kI = 0.0;
-    private double kD = 0.0;
-    private ProfiledPIDController pivotPID = new ProfiledPIDController(kP, kI, kD, pivotConstraints);
-    private double kG = 0.0;
-    private double kS = 0.0;
-    private double kA = 0.0;
-    private double kV = 0.0;
-    private double currentAngle;
-    private double targetAngle;
+    private final ClosedLoopConstants defaultPivotPIDConstants = new ClosedLoopConstants(
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0);
 
-private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
-    0.0,
-    0.0,
-    0.0,
-    0.0,
-    0.0,
-    0.0,
-    0.0,
-    0.0,
-    0.0
-);
+    private ProfiledPIDController pivotPID = new ProfiledPIDController(
+            defaultPivotPIDConstants.kP,
+            defaultPivotPIDConstants.kI,
+            defaultPivotPIDConstants.kD,
+            new TrapezoidProfile.Constraints(
+                    defaultPivotPIDConstants.maxVelocity,
+                    defaultPivotPIDConstants.maxAcceleration));
 
-  private ProfiledPIDController pivotPID = new ProfiledPIDController(
-    defaultPIDConstants.kP, 
-    defaultPIDConstants.kI, 
-    defaultPIDConstants.kD,
-    new TrapezoidProfile.Constraints(
-        defaultPIDConstants.maxVelocity, 
-        defaultPIDConstants.maxAcceleration
-    )
-  );
+    private ArmFeedforward pivotFeedForward = new ArmFeedforward(
+            defaultPivotPIDConstants.kG,
+            defaultPivotPIDConstants.kS,
+            defaultPivotPIDConstants.kV,
+            defaultPivotPIDConstants.kA);
 
-  private ArmFeedforward pivotFeedForward = new ArmFeedforward(
-    defaultPIDConstants.kG,
-    defaultPIDConstants.kS,
-    defaultPIDConstants.kV,
-    defaultPIDConstants.kA
-  );
+    private final PIDLogger pidLogger = new PIDLogger(
+            "Subsystems/" + getName(),
+            defaultPivotPIDConstants,
+            constants -> {
+                this.pivotPID.setPID(constants.kP, constants.kI, constants.kD);
+                this.pivotPID.setConstraints(
+                        new TrapezoidProfile.Constraints(constants.maxVelocity, constants.maxAcceleration));
+                this.pivotFeedForward.setKa(constants.kA);
+                this.pivotFeedForward.setKs(constants.kS);
+                this.pivotFeedForward.setKv(constants.kV);
+            });
 
-private final PIDLogger pidLogger = new PIDLogger(
-        "Subsystems/" + getName(),
-        defaultPIDConstants,
-        constants -> {
-            this.pivotPID.setPID(constants.kP, constants.kI, constants.kD);
-            this.pivotPID.setConstraints(
-               new TrapezoidProfile.Constraints(constants.maxVelocity, constants.maxAcceleration)
-            );
-            this.pivotFeedForward.setKa(constants.kA);
-            this.pivotFeedForward.setKs(constants.kS);
-            this.pivotFeedForward.setKv(constants.kV);
-       }
-    );
-  
-  private SparkFlex wheelMotor = new SparkFlex(Constants.IntakeConstants.WHEEL_ID, MotorType.kBrushless);
-  private SparkFlex pivotMotor = new SparkFlex(Constants.IntakeConstants.PIVOT_ID, MotorType.kBrushless);
+    private final SparkFlex wheelMotor = new SparkFlex(Constants.IntakeConstants.WHEEL_ID, MotorType.kBrushless);
+    private final SparkFlex pivotMotor = new SparkFlex(Constants.IntakeConstants.PIVOT_ID, MotorType.kBrushless);
 
-  SparkFlexConfig wheelConfig = new SparkFlexConfig();
-  SparkFlexConfig pivotConfig = new SparkFlexConfig();
+    private SparkFlexConfig wheelConfig = new SparkFlexConfig();
+    private SparkFlexConfig pivotConfig = new SparkFlexConfig();
 
+    private double lastPivotVelocity = 0.0;
 
     public IntakeSubsystem() {
         wheelMotor.clearFaults();
-        pivotMotor.clearFaults();
         wheelConfig.inverted(false);
         wheelConfig.idleMode(IdleMode.kCoast);
         wheelConfig.smartCurrentLimit(30, 30);
-
         wheelMotor.configure(
-            wheelConfig,
-            ResetMode.kResetSafeParameters,
-            PersistMode.kPersistParameters
-        );
+                wheelConfig,
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
 
+        pivotMotor.clearFaults();
         pivotConfig.inverted(false);
         pivotConfig.idleMode(IdleMode.kBrake);
         pivotConfig.smartCurrentLimit(30, 30);
-
         pivotMotor.configure(
-            pivotConfig,
-            ResetMode.kResetSafeParameters,
-            PersistMode.kPersistParameters
-        );
-
-
-        this.currentAngle = Constants.IntakeConstants.HOME_ANGLE;
-
-        this.intakeWheelsDisabled = () -> {
-            return (pivotPID.atSetpoint() && 
-            Math.abs(currentAngle - Constants.IntakeConstants.HOME_ANGLE) <= Constants.IntakeConstants.ANGLE_TOLERANCE);
-        };
-        
-        // if (false) {intakeWheelsEnabled = true;} 
-        // else {intakeWheelsEnabled = false;}
-        
-        this.intakeWheelsEnabled = () -> {
-            return (pivotPID.atSetpoint() && 
-            Math.abs(currentAngle - Constants.IntakeConstants.DEPLOYED_ANGLE)<= Constants.IntakeConstants.ANGLE_TOLERANCE);
-        };
+                pivotConfig,
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
     }
-  
-  //Probably not needed
-  public void setPivotSpeed(double speed) { 
-    pivotMotor.set(speed);
-  }
 
-  public void setPivotVoltage(double voltage) {
-    pivotMotor.setVoltage(voltage);
-  }
+    // Probably not needed
+    public void setPivotSpeed(double speed) {
+        pivotMotor.set(speed);
+    }
 
-  public double getPivotVelocity() { 
-    return pivotMotor.getEncoder().getVelocity();
-  }
+    public void setPivotVoltage(double voltage) {
+        pivotMotor.setVoltage(voltage);
+    }
 
-  public ProfiledPIDController getPidController () {
-    return this.pivotPID;
-  }
+    public double getPivotVelocity() {
+        return pivotMotor.getEncoder().getVelocity();
+    }
 
-  public double getPivotPosition() {
-    return pivotMotor.getEncoder().getPosition();
-  }
+    public double getPivotPosition() {
+        return pivotMotor.getEncoder().getPosition();
+    }
 
-  public ArmFeedforward getfeedForward () {
-    return this.pivotFeedForward;
-  }
+    public double getWheelSpeed() {
+        return wheelMotor.getEncoder().getVelocity();
+    }
 
-  public void setFeedForwardParameters(double passed_kG, double passed_kS, double passed_kA, double passed_kV) {
-    this.pivotFeedForward.setKg(passed_kG);
-    this.pivotFeedForward.setKs(passed_kS);
-    this.pivotFeedForward.setKa(passed_kA);
-    this.pivotFeedForward.setKv(passed_kV);
-  }
+    public void setWheelSpeed(double speed) {
+        wheelMotor.set(speed);
+    }
+    
+    public void setWheelVoltage(double volts) {
+        wheelMotor.setVoltage(volts);
+    }
 
-  public void setPIDControllerParameters(double passed_kP, double passed_kI, double passed_kD) {
-    this.pivotPID.setP(passed_kP);
-    this.pivotPID.setI(passed_kI);
-    this.pivotPID.setD(passed_kD);
-  } 
-
-  public double getPivotPositionInDegrees() {
-      return pivotMotor.getEncoder().getPosition() * 360.0;
-  }
-
-  public double getWheelSpeed() {
-      return wheelMotor.getEncoder().getVelocity();
-  }
-
-  public void setIntakeWheelSpeed(double speed) {
-    wheelMotor.set(speed);
-  }
-
-  public double closedLoopCalculate(double target, double nextVelocity) {
-    this.targetAngle = target;
-    this.pivotPID.setGoal(targetAngle);
-    double pidOutput = pivotPID.calculate(targetAngle);
-    double ffOutput = pivotFeedForward.calculateWithVelocities(pidOutput, getPivotVelocity(), nextVelocity);
-    return pidOutput + ffOutput;
-  }
-   
-  public double getCurrentAngle() {
-    return this.currentAngle;
-  }   
-
-      public void grabConstantsFromNetworkTables() {
-        this.pidLogger.updateConstants();
+    public double closedLoopCalculate(double target) {
+        double pidOutput = pivotPID.calculate(this.getPivotPosition(), target);
+        double calculatedOutput = pidOutput + pivotFeedForward.calculateWithVelocities(
+                Units.degreesToRadians(this.getPivotPosition()),
+                lastPivotVelocity, pivotPID.getSetpoint().velocity
+            );
+        lastPivotVelocity = pivotPID.getSetpoint().velocity;
+        return calculatedOutput;
     }
 
     public void resetPIDController() {
         pivotPID.reset(
-            this.getCurrentAngle(),
-            this.getPivotVelocity()
-        );
+                this.getPivotPosition(),
+                this.getPivotVelocity());
+
+        lastPivotVelocity = pivotPID.getSetpoint().velocity;
     }
 
-  @Override
-  public void periodic() {
-    currentAngle = getPivotPositionInDegrees();
-  }
+    public void grabConstantsFromNetworkTables() {
+        this.pidLogger.updateConstants();
+    }
 
-public void setPivotVoltage(double output) {
-    pivotMotor.setVoltage(output);
-}
-
-public void grabConstantsFromNetworkTables() {
-    this.pidLogger.updateConstants();
-}
-
-public void resetPIDController() {
-    pivotPID.reset (
-        this.getPivotPositionInDegrees(),
-        this.getPivotVelocity()
-    );
-}
+    @Override
+    public void periodic() {
+        pidLogger.logControllerOutputs(
+            pivotPID.getGoal().position,
+            pivotPID.getGoal().velocity,
+            pivotPID.getSetpoint().position,
+            pivotPID.getSetpoint().velocity,
+            this.getPivotPosition(),
+            this.getPivotPosition(),
+            pivotPID.getPositionError()
+        );
+    }
 }
