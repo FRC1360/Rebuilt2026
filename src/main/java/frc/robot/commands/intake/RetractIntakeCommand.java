@@ -15,7 +15,7 @@ public class RetractIntakeCommand extends Command {
 
     @Override
     public void initialize() {
-        intakeSubsystem.setWheelSpeed(0.0);
+        intakeSubsystem.setRollerSpeed(0.0);
 
         intakeSubsystem.grabConstantsFromNetworkTables();
         intakeSubsystem.resetPIDController();
@@ -23,7 +23,7 @@ public class RetractIntakeCommand extends Command {
 
     @Override
     public void execute() {
-        intakeSubsystem.setPivotVoltage(intakeSubsystem.closedLoopCalculate(IntakeConstants.RETRACT_ANGLE));
+        intakeSubsystem.setPivotVoltage(intakeSubsystem.closedLoopCalculate(IntakeConstants.PIVOT_RETRACTED_ANGLE));
     }
 
     @Override

@@ -23,15 +23,26 @@ import edu.wpi.first.math.geometry.Translation2d;
 public final class Constants {
 
     public static final class IntakeConstants {
-        public static final double RETRACT_ANGLE = 0.0;
-        public static final double WHEEL_SPEED = 0.5;
-        public static final double NEXT_VELOCITY = 0.0;
-        public static final int WHEEL_ID = 60;
-        public static final int PIVOT_ID = 0;
-        public static final double PIVOT_GEAR_RATIO = 0.0;
-        public static final double DEPLOYED_ANGLE = 2.0;
-        public static final double HOME_ANGLE = 0;
-        public static final double ANGLE_TOLERANCE = 2.0;
+        // Roller Constants
+        public static final int ROLLER_VORTEX_CAN_ID = 60;
+        public static final int ROLLER_VORTEX_STALL_CURRENT_LIMIT = 30;
+        public static final int ROLLER_VORTEX_FREE_CURRENT_LIMIT = 30;
+        public static final boolean ROLLER_VORTEX_INVERTED = false;
+
+        public static final double ROLLER_ACTIVATED_SPEED = 0.5;
+        
+        // Pivot Constants
+        public static final int PIVOT_VORTEX_CAN_ID = 0;
+        public static final int PIVOT_VORTEX_STALL_CURRENT_LIMIT = 30;
+        public static final int PIVOT_VORTEX_FREE_CURRENT_LIMIT = 30;
+        public static final boolean PIVOT_VORTEX_INVERTED = false;
+        
+        public static final double PIVOT_POSITION_CONVERSION_RATIO = 0.0;
+        public static final double PIVOT_VELOCITY_CONVERSION_RATIO = 0.0;
+        public static final double PIVOT_STARTUP_ANGLE = 0;
+        public static final double PIVOT_RETRACTED_ANGLE = 0.0;
+        public static final double PIVOT_DEPLOYED_ANGLE = 2.0;
+        public static final double PIVOT_PID_TOLERANCE = 2.0;
     }
 
     public static class TurretConstants {

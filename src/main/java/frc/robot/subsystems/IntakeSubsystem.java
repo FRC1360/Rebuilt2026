@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.ResetMode;
@@ -12,7 +13,7 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.util.PIDLogger;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -59,35 +60,51 @@ public class IntakeSubsystem extends SubsystemBase {
                 this.pivotFeedForward.setKv(constants.kV);
             });
 
-    private final SparkFlex wheelMotor = new SparkFlex(Constants.IntakeConstants.WHEEL_ID, MotorType.kBrushless);
-    private final SparkFlex pivotMotor = new SparkFlex(Constants.IntakeConstants.PIVOT_ID, MotorType.kBrushless);
+    private final SparkFlex rollerMotor = new SparkFlex(IntakeConstants.ROLLER_VORTEX_CAN_ID, MotorType.kBrushless);
+    private final SparkFlex pivotMotor = new SparkFlex(IntakeConstants.PIVOT_VORTEX_CAN_ID, MotorType.kBrushless);
 
-    private SparkFlexConfig wheelConfig = new SparkFlexConfig();
+    private SparkFlexConfig rollerConfig = new SparkFlexConfig();
     private SparkFlexConfig pivotConfig = new SparkFlexConfig();
 
+    // Variable used for FeedForward Calculation
     private double lastPivotVelocity = 0.0;
 
     public IntakeSubsystem() {
-        wheelMotor.clearFaults();
-        wheelConfig.inverted(false);
-        wheelConfig.idleMode(IdleMode.kCoast);
-        wheelConfig.smartCurrentLimit(30, 30);
-        wheelMotor.configure(
-                wheelConfig,
+        rollerMotor.clearFaults();
+        rollerConfig.inverted(IntakeConstants.ROLLER_VORTEX_INVERTED);
+        rollerConfig.idleMode(IdleMode.kCoast);
+        rollerConfig.smartCurrentLimit(
+                IntakeConstants.ROLLER_VORTEX_STALL_CURRENT_LIMIT,
+                IntakeConstants.ROLLER_VORTEX_FREE_CURRENT_LIMIT);
+        rollerMotor.configure(
+                rollerConfig,
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
 
         pivotMotor.clearFaults();
-        pivotConfig.inverted(false);
+        pivotConfig.inverted(IntakeConstants.PIVOT_VORTEX_INVERTED);
         pivotConfig.idleMode(IdleMode.kBrake);
-        pivotConfig.smartCurrentLimit(30, 30);
+        pivotConfig.smartCurrentLimit(
+                IntakeConstants.PIVOT_VORTEX_STALL_CURRENT_LIMIT,
+                IntakeConstants.PIVOT_VORTEX_FREE_CURRENT_LIMIT);
+        pivotConfig.apply(
+                new EncoderConfig()
+                        .positionConversionFactor(IntakeConstants.PIVOT_POSITION_CONVERSION_RATIO)
+                        .velocityConversionFactor(IntakeConstants.PIVOT_VELOCITY_CONVERSION_RATIO));
         pivotMotor.configure(
                 pivotConfig,
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
     }
 
-    // Probably not needed
+    public void setRollerSpeed(double speed) {
+        rollerMotor.set(speed);
+    }
+
+    public void setRollerVoltage(double volts) {
+        rollerMotor.setVoltage(volts);
+    }
+
     public void setPivotSpeed(double speed) {
         pivotMotor.set(speed);
     }
@@ -104,24 +121,11 @@ public class IntakeSubsystem extends SubsystemBase {
         return pivotMotor.getEncoder().getPosition();
     }
 
-    public double getWheelSpeed() {
-        return wheelMotor.getEncoder().getVelocity();
-    }
-
-    public void setWheelSpeed(double speed) {
-        wheelMotor.set(speed);
-    }
-    
-    public void setWheelVoltage(double volts) {
-        wheelMotor.setVoltage(volts);
-    }
-
     public double closedLoopCalculate(double target) {
         double pidOutput = pivotPID.calculate(this.getPivotPosition(), target);
         double calculatedOutput = pidOutput + pivotFeedForward.calculateWithVelocities(
                 Units.degreesToRadians(this.getPivotPosition()),
-                lastPivotVelocity, pivotPID.getSetpoint().velocity
-            );
+                lastPivotVelocity, pivotPID.getSetpoint().velocity);
         lastPivotVelocity = pivotPID.getSetpoint().velocity;
         return calculatedOutput;
     }
@@ -141,13 +145,12 @@ public class IntakeSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         pidLogger.logControllerOutputs(
-            pivotPID.getGoal().position,
-            pivotPID.getGoal().velocity,
-            pivotPID.getSetpoint().position,
-            pivotPID.getSetpoint().velocity,
-            this.getPivotPosition(),
-            this.getPivotPosition(),
-            pivotPID.getPositionError()
-        );
+                pivotPID.getGoal().position,
+                pivotPID.getGoal().velocity,
+                pivotPID.getSetpoint().position,
+                pivotPID.getSetpoint().velocity,
+                this.getPivotPosition(),
+                this.getPivotPosition(),
+                pivotPID.getPositionError());
     }
 }

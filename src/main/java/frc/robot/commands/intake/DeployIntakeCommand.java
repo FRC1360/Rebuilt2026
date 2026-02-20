@@ -24,10 +24,10 @@ public class DeployIntakeCommand extends Command {
 
     @Override
     public void execute() {
-        intakeSubsystem.setPivotVoltage(intakeSubsystem.closedLoopCalculate(IntakeConstants.DEPLOYED_ANGLE));
+        intakeSubsystem.setPivotVoltage(intakeSubsystem.closedLoopCalculate(IntakeConstants.PIVOT_DEPLOYED_ANGLE));
 
-        if (wheelsActivatedSupplier.getAsBoolean()) intakeSubsystem.setWheelSpeed(IntakeConstants.WHEEL_SPEED);
-        else intakeSubsystem.setWheelSpeed(0.0);
+        if (wheelsActivatedSupplier.getAsBoolean()) intakeSubsystem.setRollerSpeed(IntakeConstants.ROLLER_ACTIVATED_SPEED);
+        else intakeSubsystem.setRollerSpeed(0.0);
     }
 
     @Override
