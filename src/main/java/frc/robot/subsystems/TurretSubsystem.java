@@ -5,21 +5,15 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.util.ClosedLoopConstants;
 import frc.robot.util.PIDLogger;
@@ -39,7 +33,6 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 
@@ -56,7 +49,6 @@ public class TurretSubsystem extends SubsystemBase {
         0.0,
         0
     );
-    private final Pose2d robotToturret = TurretConstants.ROBOT_TO_TURRET;
     private final VoltageOut turretVoltageRequest = new VoltageOut(0.0);
 
     private final ProfiledPIDController m_pidController = new ProfiledPIDController(
@@ -83,17 +75,15 @@ public class TurretSubsystem extends SubsystemBase {
         }
     );
 
-    private final TalonFX motor = new TalonFX(TURRET_MOTOR_ID);;
-    private static final int TURRET_MOTOR_ID = 60;
-    //private final SysIdRoutine routine;
+    private final TalonFX motor = new TalonFX(TurretConstants.KRAKEN_CAN_ID);
 
     private double pidControllerOutput;
     private double feedForwardControllerOutput;
     private double wrappedTarget;
 
     private final OrbitCamera orbitCamera;
-    private Pose2d estimatedPose;
-    private double estimatedPoseTimestamp;
+    private Pose2d photonCameraEstimatedPose;
+    private double photonCameraEstimatedPoseTimestamp;
 
     private final FeedbackConfigs motorFeedbackConfigs;
     private final MotorOutputConfigs motorOutputConfigs;
@@ -101,26 +91,20 @@ public class TurretSubsystem extends SubsystemBase {
     public TurretSubsystem() {
         motorFeedbackConfigs = new FeedbackConfigs()
             .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
-            .withSensorToMechanismRatio(Constants.TurretConstants.GEAR_RATIO);
-            
+            .withSensorToMechanismRatio(TurretConstants.MECHANISM_CONVERSION_FACTOR);
 
         motorOutputConfigs = new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive)
+            .withInverted(TurretConstants.KRAKEN_INVERTED_VALUE)
             .withNeutralMode(NeutralModeValue.Brake);
 
         motor.getConfigurator().apply(motorFeedbackConfigs);
         motor.getConfigurator().apply(motorOutputConfigs);
-        motor.setPosition(Constants.TurretConstants.ENCODER_STARTUP_ANGLE_DEGREES);
+        motor.setPosition(TurretConstants.ENCODER_STARTUP_ANGLE_DEGREES);
 
-    
         this.pidControllerOutput = 0.0;
         this.feedForwardControllerOutput = 0.0;
 
-        orbitCamera = new OrbitCamera(
-                new Transform3d(
-                        new Translation3d(0.05, 0, 0.045),
-                        new Rotation3d(0, -Math.toRadians(10), Math.toRadians(0))),
-                "photoncamera_turret");
+        orbitCamera = new OrbitCamera(TurretConstants.TURRET_CENTER_TO_CAMERA, "photoncamera_turret");
     }
 
     public void grabConstantsFromNetworkTables() {
@@ -147,15 +131,10 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
     public Rotation2d getCurrentRotation() {
-        return Rotation2d.fromDegrees(this.getCurrentAngle()).plus(this.robotToturret.getRotation());
-    }
-
-    public Pose2d getRobotToTurret() {
-        return this.robotToturret;
+        return Rotation2d.fromDegrees(this.getCurrentAngle()).plus(TurretConstants.ROBOT_TO_TURRET_CENTER.getRotation());
     }
 
     private double calculateWrapAround(Rotation2d target) {
-
         //Converts the angle between the range of 0 to 360 to -180 to 180
         double currentAngle = this.getCurrentAngle();
         double wrappedTargetValue = MathUtil.inputModulus(target.getDegrees(), -180, 180);
@@ -171,11 +150,11 @@ public class TurretSubsystem extends SubsystemBase {
         }
 
         //If the turret is crossing the positive threshold from the positive direction, take the negative path.
-        if (currentAngle > 0 && negativePath > Constants.TurretConstants.NEGATIVE_THRESHOLD) {
+        if (currentAngle > 0 && negativePath > TurretConstants.NEGATIVE_THRESHOLD) {
             return negativePath;
         
         //If the turret is crossing the negative threshold from the negative direction, take the positive path.
-        } else if (currentAngle < 0 && positivePath < Constants.TurretConstants.POSITIVE_THRESHOLD) {
+        } else if (currentAngle < 0 && positivePath < TurretConstants.POSITIVE_THRESHOLD) {
             return positivePath;
         }
 
@@ -184,11 +163,10 @@ public class TurretSubsystem extends SubsystemBase {
             return negativePath;
         }
         return positivePath;
-
     }
 
     public double closedLoopCalculate(Rotation2d target) {
-        wrappedTarget = this.calculateWrapAround(target.minus(this.robotToturret.getRotation()));
+        wrappedTarget = this.calculateWrapAround(target.minus(TurretConstants.ROBOT_TO_TURRET_CENTER.getRotation()));
 
         m_pidController.setGoal(wrappedTarget);
         pidControllerOutput = m_pidController.calculate(this.getCurrentAngle());
@@ -229,21 +207,21 @@ public class TurretSubsystem extends SubsystemBase {
                         // Change our trust in the measurement based on the tags we can see
                         // var estStdDevs = orbitCamera.getEstimationStdDevs();
 
-                        orbitCamera.updateStructPublisher(est.estimatedPose.toPose2d());
-                        this.estimatedPose = est.estimatedPose.toPose2d();
-                        this.estimatedPoseTimestamp = est.timestampSeconds;
+                        this.photonCameraEstimatedPose = est.estimatedPose.toPose2d();
+                        this.photonCameraEstimatedPoseTimestamp = est.timestampSeconds;
+                        orbitCamera.updateStructPublisher(this.photonCameraEstimatedPose);
                     });
         }
     }
 
-    public Pose2d getEstimatedPose() {
-        return this.estimatedPose;
+    public Pose2d getPhotonCameraEstimatedPose() {
+        return this.photonCameraEstimatedPose;
     }
-    public double getEstimatedPoseTimestamp() {
-        return this.estimatedPoseTimestamp;
+    public double getPhotonCameraEstimatedPoseTimestamp() {
+        return this.photonCameraEstimatedPoseTimestamp;
     }
 
-    public Trigger pidAtGoal(){
+    public Trigger pidAtGoal() {
         BooleanSupplier supplier = () -> m_pidController.atGoal(); 
         return new Trigger(supplier);
     }
@@ -253,9 +231,7 @@ public class TurretSubsystem extends SubsystemBase {
             Volts.of(0.1).per(Second),  // Ramp Rate of 0.1V/s
             Volts.of(0.4),              // Dynamic Step Voltage of 0.4V
             Seconds.of(10),                         // Use default timeout (10 s)
-            // Log state with SignalLogger class
-            state -> SignalLogger.writeString("Hood_SysID_State", state.toString())
-            //tHood angle, aHood angle, tFlywheel speed, aFlywheel speed
+            state -> SignalLogger.writeString("Turret_SysID_State", state.toString())
         ),
         new SysIdRoutine.Mechanism(
          (volts) -> motor.setControl(turretVoltageRequest.withOutput(volts.in(Volts))),

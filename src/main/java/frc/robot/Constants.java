@@ -4,9 +4,14 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.signals.InvertedValue;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -30,13 +35,13 @@ public final class Constants {
         public static final boolean ROLLER_VORTEX_INVERTED = false;
 
         public static final double ROLLER_ACTIVATED_SPEED = 0.5;
-        
+
         // Pivot Constants
         public static final int PIVOT_VORTEX_CAN_ID = 0;
         public static final int PIVOT_VORTEX_STALL_CURRENT_LIMIT = 30;
         public static final int PIVOT_VORTEX_FREE_CURRENT_LIMIT = 30;
         public static final boolean PIVOT_VORTEX_INVERTED = false;
-        
+
         public static final double PIVOT_POSITION_CONVERSION_RATIO = 0.0;
         public static final double PIVOT_VELOCITY_CONVERSION_RATIO = 0.0;
         public static final double PIVOT_STARTUP_ANGLE = 0;
@@ -46,38 +51,36 @@ public final class Constants {
     }
 
     public static class TurretConstants {
-        public static final int TURRET_MOTOR_ID = 10;
+        public static final int KRAKEN_CAN_ID = 10;
+        public static final InvertedValue KRAKEN_INVERTED_VALUE = InvertedValue.Clockwise_Positive;
+        public static final double MECHANISM_CONVERSION_FACTOR = (1.0 / 7.0) * 360.0;
+
         public static final double ENCODER_STARTUP_ANGLE_DEGREES = 0.0;
-        public static final double VELOCITY_CONVERSION_FACTOR = 0;
-        public static final double POSITION_CONVERSION_FACTOR = 0;
         public static final double TOTAL_WRAP_AROUND_ANGLE_RANGE = 400;
         public static final double POSITIVE_THRESHOLD = 180 - (TOTAL_WRAP_AROUND_ANGLE_RANGE - 360) / 2;
         public static final double NEGATIVE_THRESHOLD = -180 + (TOTAL_WRAP_AROUND_ANGLE_RANGE - 360) / 2;
 
-        public static final double GEAR_RATIO = (1.0 / 7.0) * 360.0;
-
-        public static final double MAX_V = 3000.0;
-        public static final double MAX_A = 3500.0;
-        public static final double KP = 0.055;
-        public static final double KI = 0.01;
-        public static final double KD = 0.0;
-        public static final double KS = 0.11;
-        public static final double KV = 0.0022;
-        public static final double KA = 0.0;
-        public static final double KG = 0.0;
-
-        public static final Pose2d ROBOT_TO_TURRET = 
-            new Pose2d(
+        public static final Pose2d ROBOT_TO_TURRET_CENTER = new Pose2d(
                 new Translation2d(0.225, 0.0),
-                new Rotation2d()
-            );
+                new Rotation2d());
+        public static final Transform3d TURRET_CENTER_TO_CAMERA = new Transform3d(
+                new Translation3d(0.05, 0, 0.045),
+                new Rotation3d(0, -Math.toRadians(10), Math.toRadians(0)));
+
+        /*
+         * Note: The rotation offset for turret to center is measured relative to where the encoder
+         * reading will be zero. 
+         * Zero degrees on the encoder is ALWAYS OPPOSITE the MIDDLE of the wraparound range.
+         * The startup angle degrees is the delta between wraparound opposite and where the turret
+         * actually starts.
+         */
     }
 
     public static class IndexConstants {
         public static final int HOPPER_CONVEYOR_ID = 0;
         public static final int MAGAZINE_CONVEYOR_ID = 0;
         public static final int MAGAZINE_SENSOR_ID = 1;
-        
+
         public static final double HOPPER_SPEED = 0.5;
         public static final double MAGAZINE_TARGET_SPEED = 0.0;
     }

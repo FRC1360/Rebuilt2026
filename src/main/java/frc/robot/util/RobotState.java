@@ -26,8 +26,6 @@ public class RobotState {
     private Supplier<Pose2d> turretCameraPoseSupplier;
     private DoubleSupplier turretCameraEstimationTimestampSupplier;
     
-    private static final Pose2d ROBOT_TO_TURRET_OFFSET = TurretConstants.ROBOT_TO_TURRET;
-    
     private Pose2d calculatedTurretOdomPose;
 
     public void setAllSuppliers(Supplier<Pose2d> robotOdomPoseSupplier, Supplier<Rotation2d> turretRotationSupplier, Supplier<Pose2d> turretCameraPoseSupplier, DoubleSupplier turretCameraEstimationTimestampSupplier) {
@@ -65,7 +63,7 @@ public class RobotState {
         // Step Uno: Create initial turret position by adding offset to robot position
         Pose2d estimatedTurretPose = new Pose2d(
             robotPose.getTranslation()
-                .plus(ROBOT_TO_TURRET_OFFSET.getTranslation()),
+                .plus(TurretConstants.ROBOT_TO_TURRET_CENTER.getTranslation()),
             new Rotation2d()
         );
         

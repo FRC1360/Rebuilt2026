@@ -48,8 +48,8 @@ public class RobotContainer {
         robotState.setAllSuppliers(
             () -> drivetrain.samplePoseAt(Timer.getFPGATimestamp()).get(),
             () -> m_turretSubsystem.getCurrentRotation(),
-            () -> m_turretSubsystem.getEstimatedPose(),
-            () -> m_turretSubsystem.getEstimatedPoseTimestamp()
+            () -> m_turretSubsystem.getPhotonCameraEstimatedPose(),
+            () -> m_turretSubsystem.getPhotonCameraEstimatedPoseTimestamp()
         );
 
         configureBindings();

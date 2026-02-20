@@ -52,7 +52,7 @@ public class GetCurrentLocalAngleCommand extends Command {
         robotRotation = robotState.getRobotOdomPose().getRotation();
 
         robotRotationPublisher.accept(robotRotation);
-        turretPosePublisher.accept(turretSubsystem.getEstimatedPose());
+        turretPosePublisher.accept(turretSubsystem.getPhotonCameraEstimatedPose());
 
         targetTurretRotation = targetFieldRotation.minus(robotRotation);
         turretSubsystem.setVoltage(
