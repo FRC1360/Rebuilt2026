@@ -8,10 +8,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants.TurretConstants;
 
 public class RobotState {
-    
+
     private static RobotState instance = null;
 
-    private RobotState() {}
+    private RobotState() {
+    }
 
     public static synchronized RobotState getInstance() {
         if (instance == null) {
@@ -25,10 +26,11 @@ public class RobotState {
     private Supplier<Rotation2d> turretRotationSupplier;
     private Supplier<Pose2d> turretCameraPoseSupplier;
     private DoubleSupplier turretCameraEstimationTimestampSupplier;
-    
+
     private Pose2d calculatedTurretOdomPose;
 
-    public void setAllSuppliers(Supplier<Pose2d> robotOdomPoseSupplier, Supplier<Rotation2d> turretRotationSupplier, Supplier<Pose2d> turretCameraPoseSupplier, DoubleSupplier turretCameraEstimationTimestampSupplier) {
+    public void setAllSuppliers(Supplier<Pose2d> robotOdomPoseSupplier, Supplier<Rotation2d> turretRotationSupplier,
+            Supplier<Pose2d> turretCameraPoseSupplier, DoubleSupplier turretCameraEstimationTimestampSupplier) {
         this.robotOdomPoseSupplier = robotOdomPoseSupplier;
         this.turretRotationSupplier = turretRotationSupplier;
         this.turretCameraPoseSupplier = turretCameraPoseSupplier;
@@ -45,9 +47,8 @@ public class RobotState {
 
     public Pose2d getTurretOdomPose() {
         updateTurretPose(
-            this.getRobotOdomPose(), 
-            this.getTurretRotation()
-        );
+                this.getRobotOdomPose(),
+                this.getTurretRotation());
         return calculatedTurretOdomPose;
     }
 
@@ -60,26 +61,24 @@ public class RobotState {
     }
 
     public void updateTurretPose(Pose2d robotPose, Rotation2d turretRotation) {
-        // Step Uno: Create initial turret position by adding offset to robot position
-        Pose2d estimatedTurretPose = new Pose2d(
-            robotPose.getTranslation()
-                .plus(TurretConstants.ROBOT_TO_TURRET_CENTER.getTranslation()),
-            new Rotation2d()
-        );
-        
-        // Step Dos: Rotate turret position around robot center to account for robot rotation
+        /*
+         * Step Uno: Create initial turret position by adding offset to robot position
+         * Note: Transform affects it in the following way:
+         * - X value becomes robot relative forward/backward
+         * - Y value becomes robot relative left/right
+         * - Z value rotates the shifted pose around it's own center
+         */
+        Pose2d estimatedTurretPose = robotPose.transformBy(TurretConstants.ROBOT_TO_TURRET_CENTER);
+
+        /*
+         * Step Dos: Rotate around turret's own position to account for turret's
+         * rotation
+         */
         estimatedTurretPose = estimatedTurretPose.rotateAround(
-            robotPose.getTranslation(),
-            robotPose.getRotation()
-        );
-        
-        // Step 3: Rotate around turret's own position to account for turret's rotation
-        estimatedTurretPose = estimatedTurretPose.rotateAround(
-            estimatedTurretPose.getTranslation(), 
-            turretRotation
-        );
-        
-        // Step the Last: Update the stored turret pose
+                estimatedTurretPose.getTranslation(),
+                turretRotation);
+
+        // Step the Third: Update the stored turret pose
         this.calculatedTurretOdomPose = estimatedTurretPose;
     }
 }
