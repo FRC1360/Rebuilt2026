@@ -27,6 +27,15 @@ import edu.wpi.first.math.geometry.Translation3d;
  */
 public final class Constants {
 
+    public static final class HoodConstants {
+        public static final int KRAKEN_CAN_ID = 60;
+        public static final int KRAKEN_STATOR_CURRENT_LIMIT = 30;
+        public static final InvertedValue KRAKEN_INVERTED_VALUE = InvertedValue.Clockwise_Positive;
+
+        public static final double STARTUP_ANGLE_DEGREES = 75.0;
+        public static final double MECHANISM_CONVERSION_FACTOR = ((164.0 / 12.0) * (60.0 / 18.0)) / 360.0;
+    }
+
     public static final class IntakeConstants {
         // Roller Constants
         public static final int ROLLER_VORTEX_CAN_ID = 60;

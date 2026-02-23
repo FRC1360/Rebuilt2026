@@ -8,20 +8,12 @@ package frc.robot.commands.hood;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
-public class CreateMapCommand{
+public class CreateMapCommand {
 
-    
-    
     public static InterpolatingDoubleTreeMap turretPowerAngleDistancetable = new InterpolatingDoubleTreeMap();
 
-
-
-    public CreateMapCommand(){
-        turretPowerAngleDistancetable.put(1.0,2.0); //meters and degrees 
+    public CreateMapCommand() {
+        turretPowerAngleDistancetable.put(1.0, 2.0); // meters and degrees
     }
 
-
-
-    
- 
 }
