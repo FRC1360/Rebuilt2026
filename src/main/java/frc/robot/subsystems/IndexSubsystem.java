@@ -12,54 +12,63 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants;
+import frc.robot.Constants.IndexConstants;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class IndexSubsystem extends SubsystemBase {
 
-  private SparkFlex hopperMotor;
-  private SparkFlexConfig hopperMotorConfig;
-  private SparkFlex magazineMotor;
-  private SparkFlexConfig magazineMotorConfig;
-  private DigitalInput magazineSensor;
-  public Trigger magazineSensorTriggered;
+    private final SparkFlex hopperMotor;
+    private SparkFlexConfig hopperMotorConfig;
+    private final SparkFlex magazineMotor;
+    private SparkFlexConfig magazineMotorConfig;
+    private final DigitalInput magazineSensor;
+    public final Trigger magazineSensorTriggered;
 
-  /** Creates a new IndexSubsystem. */
+    /** Creates a new IndexSubsystem. */
 
-  public IndexSubsystem() {
-    hopperMotor = new SparkFlex(Constants.IndexConstants.HOPPER_CONVEYOR_ID, MotorType.kBrushless);
-    hopperMotorConfig = new SparkFlexConfig();
+    public IndexSubsystem() {
+        hopperMotor = new SparkFlex(IndexConstants.HOPPER_VORTEX_CAN_ID, MotorType.kBrushless);
+        hopperMotorConfig = new SparkFlexConfig();
+        magazineMotor = new SparkFlex(IndexConstants.MAGAZINE_VORTEX_CAN_ID, MotorType.kBrushless);
+        magazineMotorConfig = new SparkFlexConfig();
 
-    hopperMotorConfig.idleMode(IdleMode.kBrake);
-    hopperMotor.configure(hopperMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        hopperMotor.clearFaults();
+        hopperMotorConfig.idleMode(IdleMode.kBrake);
+        hopperMotorConfig.inverted(IndexConstants.HOPPER_VORTEX_INVERTED);
+        hopperMotorConfig.smartCurrentLimit(
+                IndexConstants.HOPPER_VORTEX_STALL_CURRENT_LIMIT,
+                IndexConstants.HOPPER_VORTEX_FREE_CURRENT_LIMIT);
+        hopperMotor.configure(hopperMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    magazineMotor = new SparkFlex(Constants.IndexConstants.MAGAZINE_CONVEYOR_ID, MotorType.kBrushless);
-    magazineMotorConfig = new SparkFlexConfig();
+        magazineMotor.clearFaults();
+        magazineMotorConfig.idleMode(IdleMode.kBrake);
+        magazineMotorConfig.inverted(IndexConstants.MAGAZINE_VORTEX_INVERTED);
+        magazineMotorConfig.smartCurrentLimit(
+                IndexConstants.MAGAZINE_VORTEX_STALL_CURRENT_LIMIT,
+                IndexConstants.MAGAZINE_VORTEX_FREE_CURRENT_LIMIT);
+        magazineMotor.configure(magazineMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    magazineMotorConfig.idleMode(IdleMode.kBrake);
-    magazineMotor.configure(magazineMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        this.magazineSensor = new DigitalInput(IndexConstants.MAGAZINE_SENSOR_DIGITAL_CHANNEL);
+        this.magazineSensorTriggered = new Trigger((() -> (!magazineSensor.get())));
+    }
 
-    this.magazineSensor = new DigitalInput(Constants.IndexConstants.MAGAZINE_SENSOR_ID);
-    this.magazineSensorTriggered = new Trigger((() -> (!magazineSensor.get())));
-  }
+    public void setHopperVoltage(double volts) {
+        hopperMotor.setVoltage(volts);
+    }
 
-  public void setHopperVoltage(double volts) {
-    hopperMotor.setVoltage(volts);
-  }
-
-  public void setHopperSpeed(double speed) {
-    hopperMotor.set(speed);
-  }
+    public void setHopperSpeed(double speed) {
+        hopperMotor.set(speed);
+    }
 
     public void setMagazineVoltage(double volts) {
-    magazineMotor.setVoltage(volts);
-  }
+        magazineMotor.setVoltage(volts);
+    }
 
-  public void setMagazineSpeed(double speed) {
-    magazineMotor.set(speed);
-  }
+    public void setMagazineSpeed(double speed) {
+        magazineMotor.set(speed);
+    }
 
-  @Override
-  public void periodic() {
-  }
+    @Override
+    public void periodic() {
+    }
 }

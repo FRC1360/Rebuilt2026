@@ -77,9 +77,17 @@ public final class Constants {
     }
 
     public static class IndexConstants {
-        public static final int HOPPER_CONVEYOR_ID = 0;
-        public static final int MAGAZINE_CONVEYOR_ID = 0;
-        public static final int MAGAZINE_SENSOR_ID = 1;
+        public static final int HOPPER_VORTEX_CAN_ID = 0;
+        public static final int HOPPER_VORTEX_STALL_CURRENT_LIMIT = 40;
+        public static final int HOPPER_VORTEX_FREE_CURRENT_LIMIT = 40;
+        public static final boolean HOPPER_VORTEX_INVERTED = false;
+
+        public static final int MAGAZINE_VORTEX_CAN_ID = 0;
+        public static final int MAGAZINE_VORTEX_STALL_CURRENT_LIMIT = 40;
+        public static final int MAGAZINE_VORTEX_FREE_CURRENT_LIMIT = 40;
+        public static final boolean MAGAZINE_VORTEX_INVERTED = false;
+
+        public static final int MAGAZINE_SENSOR_DIGITAL_CHANNEL = 1;
 
         public static final double HOPPER_SPEED = 0.5;
         public static final double MAGAZINE_SPEED = 0.0;
