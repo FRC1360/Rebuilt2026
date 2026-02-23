@@ -6,17 +6,31 @@ package frc.robot.commands.hood;
 
 import java.util.function.Supplier;
 
+import org.photonvision.PhotonUtils;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.util.FieldConstants;
+import frc.robot.util.RobotState;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class AimHoodAtHub extends Command {
+public class SetHoodAngleFromPose extends Command {
 
     private final HoodSubsystem hoodSubsystem;
+    private Pose2d turretPose;
+    private Pose2d PoseToAimAt; 
+    private  InterpolatingDoubleTreeMap angletable = CreateMapCommand.turretPowerAngleDistancetable;
+     private final RobotState robotState = RobotState.getInstance();
 
-    /** Creates a new RetractHoodCommand. */
-    public AimHoodAtHub(HoodSubsystem hoodSubsystem ) {
+    
+
+    /** Creates a new RetractHoodCommand.  */
+    public SetHoodAngleFromPose(HoodSubsystem hoodSubsystem, Pose2d PoseToAimAt) {
         this.hoodSubsystem = hoodSubsystem;
+        this.turretPose = robotState.getTurretOdomPose();
+        this.PoseToAimAt = PoseToAimAt;
         
 
         // Use addRequirements() here to declare subsystem dependencies.
@@ -26,11 +40,16 @@ public class AimHoodAtHub extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
+        hoodSubsystem.grabConstantsFromNetworkTables();
+        hoodSubsystem.resetPIDController();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
+        double distance = PhotonUtils.getDistanceToPose(this.turretPose, this.PoseToAimAt);
+        double targetAngle = angletable.get(distance);
+        hoodSubsystem.setHoodMotorVoltage(hoodSubsystem.closedLoopCalculate(targetAngle));
     }
 
     // Called once the command ends or is interrupted.
