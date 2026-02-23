@@ -4,19 +4,21 @@
 
 package frc.robot.commands.index;
 
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.IndexSubsystem;
 import frc.robot.Constants;
 
+
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class ActivateMagazineCommand extends Command {
+public class PrepareIndexCommand extends Command {
 
     private final IndexSubsystem indexSubsystem;
 
     /** Creates a new ActivateMagazineCommand. */
-    public ActivateMagazineCommand(IndexSubsystem indexSubsystem) {
+    public PrepareIndexCommand(IndexSubsystem indexSubsystem) {
         this.indexSubsystem = indexSubsystem;
-        addRequirements(this.indexSubsystem);
+        addRequirements(indexSubsystem);
     }
 
     // Called when the command is initially scheduled.
@@ -27,7 +29,13 @@ public class ActivateMagazineCommand extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_TARGET_SPEED);
+        if (indexSubsystem.magazineSensorTriggered.getAsBoolean()) {
+            indexSubsystem.setMagazineSpeed(0.0);
+            indexSubsystem.setHopperSpeed(0.0);
+        } else {
+            indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_SPEED);
+            indexSubsystem.setHopperSpeed(Constants.IndexConstants.HOPPER_SPEED);
+        }
     }
 
     // Called once the command ends or is interrupted.
