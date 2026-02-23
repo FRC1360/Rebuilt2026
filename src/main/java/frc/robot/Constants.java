@@ -62,6 +62,7 @@ public final class Constants {
     public static class TurretConstants {
         public static final int KRAKEN_CAN_ID = 10;
         public static final InvertedValue KRAKEN_INVERTED_VALUE = InvertedValue.Clockwise_Positive;
+        public static final int KRAKEN_STATOR_CURRENT_LIMIT = 30;
         public static final double MECHANISM_CONVERSION_FACTOR = (1.0 / 7.0) * 360.0;
 
         public static final double ENCODER_STARTUP_ANGLE_DEGREES = 0.0;

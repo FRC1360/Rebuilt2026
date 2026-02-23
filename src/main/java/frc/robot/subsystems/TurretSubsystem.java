@@ -29,6 +29,7 @@ import java.util.function.BooleanSupplier;
 import org.photonvision.EstimatedRobotPose;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -87,6 +88,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     private final FeedbackConfigs motorFeedbackConfigs;
     private final MotorOutputConfigs motorOutputConfigs;
+    private final CurrentLimitsConfigs motorCurrentLimitsConfigs;
 
     public TurretSubsystem() {
         motorFeedbackConfigs = new FeedbackConfigs()
@@ -96,9 +98,14 @@ public class TurretSubsystem extends SubsystemBase {
         motorOutputConfigs = new MotorOutputConfigs()
             .withInverted(TurretConstants.KRAKEN_INVERTED_VALUE)
             .withNeutralMode(NeutralModeValue.Brake);
+        
+        motorCurrentLimitsConfigs = new CurrentLimitsConfigs()
+            .withStatorCurrentLimit(TurretConstants.KRAKEN_STATOR_CURRENT_LIMIT)
+            .withStatorCurrentLimitEnable(true);
 
         motor.getConfigurator().apply(motorFeedbackConfigs);
         motor.getConfigurator().apply(motorOutputConfigs);
+        motor.getConfigurator().apply(motorCurrentLimitsConfigs);
         motor.setPosition(TurretConstants.ENCODER_STARTUP_ANGLE_DEGREES);
 
         this.pidControllerOutput = 0.0;
