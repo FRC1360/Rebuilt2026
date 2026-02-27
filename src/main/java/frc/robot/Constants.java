@@ -107,5 +107,9 @@ public final class Constants {
         public static final double HIGH_SPEED = 0;
         public static final double LOW_SPEED = 0;
         public static final double DISTANCE_THRESHOLD = 0;
+        public static final int FLYWHEEL_STALL_CURRENT_LIMIT = 40;
+        public static final int FLYWHEEL_FREE_CURRENT_LIMIT = 40;
+        public static final boolean FLYWHEEL_LEADER_INVERTED = false;
+        public static final boolean FLYWHEEL_FOLLOWER_INVERTED = false;
     }
 }
