@@ -21,17 +21,20 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.Constants;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class JiggleIndexCommand extends Command {
+public class AgitationIndexCommand extends Command {
 
     private final IndexSubsystem indexSubsystem;
-    private double lastRecordedInterval = 0.0;
 
-    private double intervalOnePeriod;
+    private double intervalOneLength;
     private double intervalOneSpeed;
-    private double intervalTwoPeriod;
+    private double intervalTwoLength;
     private double intervalTwoSpeed;
 
-    private boolean rotatingClockwise = false;
+    private double intervalThreeLength;
+    private double intervalThreeSpeed;
+    private double intervalFourLength;
+    private double intervalFourSpeed;
+
     private Timer timer;
 
     private final NetworkTable loggingTable = NetworkTableInstance.getDefault().getTable("Subsystems/Jiggle Index");
@@ -41,15 +44,35 @@ public class JiggleIndexCommand extends Command {
     private DoubleEntry intervalTwoPeriodEntry;
     private DoubleEntry intervalTwoSpeedEntry;
 
+    private DoubleEntry intervalThreePeriodEntry;
+    private DoubleEntry intervalThreeSpeedEntry;
+    private DoubleEntry intervalFourPeriodEntry;
+    private DoubleEntry intervalFourSpeedEntry;
+
+    private double firstIntervalPeriod;
+    private double secondIntervalPeriod;
+    private double thirdIntervalPeriod;
+    private double fourthIntervalPeriod;
+
     /** Creates a new ActivateMagazineCommand. */
-    public JiggleIndexCommand(IndexSubsystem indexSubsystem) {
+    public AgitationIndexCommand(IndexSubsystem indexSubsystem) {
         this.timer = new Timer();
         this.indexSubsystem = indexSubsystem;
 
-        intervalOnePeriodEntry = createEntry(loggingTable, "FeedForward/kS", this.intervalOnePeriod);
+        intervalOnePeriodEntry = createEntry(loggingTable, "FeedForward/kS", this.intervalOneLength);
         intervalOneSpeedEntry = createEntry(loggingTable, "FeedForward/kV", this.intervalOneSpeed);
-        intervalTwoPeriodEntry = createEntry(loggingTable, "FeedForward/kA", this.intervalTwoPeriod);
+        intervalTwoPeriodEntry = createEntry(loggingTable, "FeedForward/kA", this.intervalTwoLength);
         intervalTwoPeriodEntry = createEntry(loggingTable, "FeedForward/kG", this.intervalTwoSpeed);
+
+        intervalThreePeriodEntry = createEntry(loggingTable, "FeedForward/kS", this.intervalThreeLength);
+        intervalThreeSpeedEntry = createEntry(loggingTable, "FeedForward/kV", this.intervalThreeSpeed);
+        intervalFourPeriodEntry = createEntry(loggingTable, "FeedForward/kA", this.intervalFourLength);
+        intervalFourPeriodEntry = createEntry(loggingTable, "FeedForward/kG", this.intervalFourSpeed);
+
+        firstIntervalPeriod = intervalOneLength;
+        secondIntervalPeriod = firstIntervalPeriod + intervalTwoLength;
+        thirdIntervalPeriod = secondIntervalPeriod + intervalThreeLength;
+        fourthIntervalPeriod = thirdIntervalPeriod + intervalFourLength;
 
         addRequirements(indexSubsystem);
     }
@@ -64,19 +87,41 @@ public class JiggleIndexCommand extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        //sets the index in the positive direction.
-        if (timer.get() < intervalOnePeriod) {
+        //sets the index speed for interval one.
+        if (timer.get() < firstIntervalPeriod) 
+        {
             indexSubsystem.setHopperSpeed(intervalOneSpeed);
 
-        //sets the index in the negative direction.
-        } else if (timer.get() > intervalOnePeriod && timer.get() < intervalOnePeriod + intervalTwoPeriod) {
+        } 
+
+        //sets the index speed for interval two.
+        else if (timer.get() > firstIntervalPeriod && timer.get() < secondIntervalPeriod) 
+        {
             indexSubsystem.setHopperSpeed(intervalTwoSpeed);
 
-        //resets the timer and restarts the loop process.
-        } else {
+      
+        } 
+        
+        //sets the index speed for interval three.
+        else if (timer.get() > secondIntervalPeriod && timer.get() < thirdIntervalPeriod) 
+        {
+            indexSubsystem.setHopperSpeed(intervalThreeSpeed);
+        
+        } 
+
+        //sets the index speed for interval four.
+        else if (timer.get() > thirdIntervalPeriod && timer.get() < fourthIntervalPeriod) 
+        {
+            indexSubsystem.setHopperSpeed(intervalFourSpeed);
+        } 
+
+         //resets the timer and restarts the loop process.
+        else{
             timer.reset();
         }
 
+
+        indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_SPEED);
     }
 
     private DoubleEntry createEntry(NetworkTable table, String key, double defaultValue) {
