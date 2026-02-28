@@ -9,7 +9,9 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants;
 import frc.robot.Constants.HoodConstants;
 import frc.robot.util.ClosedLoopConstants;
 import frc.robot.util.PIDLogger;
@@ -39,7 +41,7 @@ public class HoodSubsystem extends SubsystemBase {
             0.0023902,
             0.0);
 
-    private ProfiledPIDController hoodPIDController = new ProfiledPIDController(
+    private ProfiledPIDController hoodProfiledPIDController = new ProfiledPIDController(
             defaultPIDConstants.kP, defaultPIDConstants.kI, defaultPIDConstants.kD,
             new TrapezoidProfile.Constraints(defaultPIDConstants.maxVelocity, defaultPIDConstants.maxAcceleration));
     private SimpleMotorFeedforward hoodFFController = new SimpleMotorFeedforward(
@@ -51,8 +53,8 @@ public class HoodSubsystem extends SubsystemBase {
             "Subsystems/" + getName(),
             defaultPIDConstants,
             constants -> {
-                this.hoodPIDController.setPID(constants.kP, constants.kI, constants.kD);
-                this.hoodPIDController.setConstraints(
+                this.hoodProfiledPIDController.setPID(constants.kP, constants.kI, constants.kD);
+                this.hoodProfiledPIDController.setConstraints(
                         new TrapezoidProfile.Constraints(constants.maxVelocity, constants.maxAcceleration));
                 this.hoodFFController.setKa(constants.kA);
                 this.hoodFFController.setKs(constants.kS);
@@ -65,6 +67,8 @@ public class HoodSubsystem extends SubsystemBase {
     private final FeedbackConfigs motorFeedbackConfigs;
     private final MotorOutputConfigs motorOutputConfigs;
     private final CurrentLimitsConfigs motorCurrentLimitsConfigs;
+
+    public Trigger hoodAtTarget;
 
     /** Creates a new HoodSubsystem. */
     public HoodSubsystem() {
@@ -84,18 +88,22 @@ public class HoodSubsystem extends SubsystemBase {
         hoodMotor.getConfigurator().apply(motorOutputConfigs);
         hoodMotor.getConfigurator().apply(motorCurrentLimitsConfigs);
         hoodMotor.setPosition(HoodConstants.STARTUP_ANGLE_DEGREES);
+
+        hoodProfiledPIDController.setTolerance(Constants.HoodConstants.PID_TOLERANCE);
+
+        hoodAtTarget = new Trigger(() -> (hoodProfiledPIDController.atGoal()));
     }
 
     @Override
     public void periodic() {
         pidLogger.logControllerOutputs(
-                hoodPIDController.getGoal().position,
-                hoodPIDController.getGoal().velocity,
-                hoodPIDController.getSetpoint().position,
-                hoodPIDController.getSetpoint().velocity,
+                hoodProfiledPIDController.getGoal().position,
+                hoodProfiledPIDController.getGoal().velocity,
+                hoodProfiledPIDController.getSetpoint().position,
+                hoodProfiledPIDController.getSetpoint().velocity,
                 this.getCurrentAngle(),
                 this.getCurrentVelocity(),
-                hoodPIDController.getPositionError());
+                hoodProfiledPIDController.getPositionError());
     }
 
     public void setHoodMotorVoltage(double volts) {
@@ -111,12 +119,12 @@ public class HoodSubsystem extends SubsystemBase {
     }
 
     public double closedLoopCalculate(double target) {
-        return hoodPIDController.calculate(getCurrentAngle(), target)
-                + hoodFFController.calculate(hoodPIDController.getSetpoint().velocity); // double check pid input
+        return hoodProfiledPIDController.calculate(getCurrentAngle(), target)
+                + hoodFFController.calculate(hoodProfiledPIDController.getSetpoint().velocity); // double check pid input
     }
 
     public void resetPIDController() {
-        hoodPIDController.reset(
+        hoodProfiledPIDController.reset(
                 this.getCurrentAngle(),
                 this.getCurrentVelocity());
     }

@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.util.ClosedLoopConstants;
 import frc.robot.util.PIDLogger;
@@ -52,7 +53,7 @@ public class TurretSubsystem extends SubsystemBase {
     );
     private final VoltageOut turretVoltageRequest = new VoltageOut(0.0);
 
-    private final ProfiledPIDController m_pidController = new ProfiledPIDController(
+    private final ProfiledPIDController m_profiledpidController = new ProfiledPIDController(
         defaultPIDConstants.kP, defaultPIDConstants.kI, defaultPIDConstants.kD,
         new TrapezoidProfile.Constraints(defaultPIDConstants.maxVelocity, defaultPIDConstants.maxAcceleration)
     );
@@ -66,8 +67,8 @@ public class TurretSubsystem extends SubsystemBase {
         "Subsystems/" + getName(),
         defaultPIDConstants,
         constants -> {
-            this.m_pidController.setPID(constants.kP, constants.kI, constants.kD);
-            this.m_pidController.setConstraints(
+            this.m_profiledpidController.setPID(constants.kP, constants.kI, constants.kD);
+            this.m_profiledpidController.setConstraints(
                 new TrapezoidProfile.Constraints(constants.maxVelocity, constants.maxAcceleration)
             );
             this.m_feedForward.setKa(constants.kA);
@@ -89,6 +90,8 @@ public class TurretSubsystem extends SubsystemBase {
     private final FeedbackConfigs motorFeedbackConfigs;
     private final MotorOutputConfigs motorOutputConfigs;
     private final CurrentLimitsConfigs motorCurrentLimitsConfigs;
+
+    public Trigger turretAtTarget;
 
     public TurretSubsystem() {
         motorFeedbackConfigs = new FeedbackConfigs()
@@ -112,6 +115,10 @@ public class TurretSubsystem extends SubsystemBase {
         this.feedForwardControllerOutput = 0.0;
 
         orbitCamera = new OrbitCamera(TurretConstants.TURRET_CENTER_TO_CAMERA, "photoncamera_turret");
+    
+        m_profiledpidController.setTolerance(Constants.TurretConstants.PID_TOLERANCE);
+
+        turretAtTarget = new Trigger(() -> (m_profiledpidController.atGoal()));
     }
 
     public void grabConstantsFromNetworkTables() {
@@ -119,7 +126,7 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
     public void resetPIDController() {
-        m_pidController.reset(
+        m_profiledpidController.reset(
             this.getCurrentEncoderAngle(),
             this.getCurrentEncoderVelocity()
         );
@@ -175,9 +182,9 @@ public class TurretSubsystem extends SubsystemBase {
     public double closedLoopCalculate(Rotation2d target) {
         wrappedTarget = this.calculateWrapAround(target.minus(TurretConstants.ROBOT_TO_TURRET_CENTER.getRotation()));
 
-        m_pidController.setGoal(wrappedTarget);
-        pidControllerOutput = m_pidController.calculate(this.getCurrentEncoderAngle());
-        feedForwardControllerOutput = m_feedForward.calculate(m_pidController.getSetpoint().velocity);
+        m_profiledpidController.setGoal(wrappedTarget);
+        pidControllerOutput = m_profiledpidController.calculate(this.getCurrentEncoderAngle());
+        feedForwardControllerOutput = m_feedForward.calculate(m_profiledpidController.getSetpoint().velocity);
 
         return pidControllerOutput + feedForwardControllerOutput;
     }
@@ -185,13 +192,13 @@ public class TurretSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         pidLogger.logControllerOutputs(
-            m_pidController.getGoal().position,
-            m_pidController.getGoal().velocity,
-            m_pidController.getSetpoint().position,
-            m_pidController.getSetpoint().velocity,
+            m_profiledpidController.getGoal().position,
+            m_profiledpidController.getGoal().velocity,
+            m_profiledpidController.getSetpoint().position,
+            m_profiledpidController.getSetpoint().velocity,
             this.getCurrentEncoderAngle(),
             this.getCurrentEncoderVelocity(),
-            m_pidController.getPositionError()
+            m_profiledpidController.getPositionError()
         );
 
         this.updatePose();
@@ -226,11 +233,6 @@ public class TurretSubsystem extends SubsystemBase {
     }
     public double getPhotonCameraEstimatedPoseTimestamp() {
         return this.photonCameraEstimatedPoseTimestamp;
-    }
-
-    public Trigger pidAtGoal() {
-        BooleanSupplier supplier = () -> m_pidController.atGoal(); 
-        return new Trigger(supplier);
     }
 
      private SysIdRoutine sysIdRoutine = new SysIdRoutine(

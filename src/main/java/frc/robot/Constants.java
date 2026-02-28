@@ -34,6 +34,7 @@ public final class Constants {
 
         public static final double STARTUP_ANGLE_DEGREES = 75.0;
         public static final double MECHANISM_CONVERSION_FACTOR = ((164.0 / 12.0) * (60.0 / 18.0)) / 360.0;
+        public static final double PID_TOLERANCE = 0;
     }
 
     public static final class IntakeConstants {
@@ -57,9 +58,10 @@ public final class Constants {
         public static final double PIVOT_RETRACTED_ANGLE = 0.0;
         public static final double PIVOT_DEPLOYED_ANGLE = 2.0;
         public static final double PIVOT_PID_TOLERANCE = 2.0;
+        public static final double PID_TOLERANCE = 0;
     }
 
-    public static class TurretConstants {
+    public static final class TurretConstants {
         public static final int KRAKEN_CAN_ID = 10;
         public static final InvertedValue KRAKEN_INVERTED_VALUE = InvertedValue.Clockwise_Positive;
         public static final int KRAKEN_STATOR_CURRENT_LIMIT = 30;
@@ -69,6 +71,7 @@ public final class Constants {
         public static final double TOTAL_WRAP_AROUND_ANGLE_RANGE = 400;
         public static final double POSITIVE_THRESHOLD = 180 - (TOTAL_WRAP_AROUND_ANGLE_RANGE - 360) / 2;
         public static final double NEGATIVE_THRESHOLD = -180 + (TOTAL_WRAP_AROUND_ANGLE_RANGE - 360) / 2;
+        public static final double PID_TOLERANCE = 0;
 
         public static final Transform2d ROBOT_TO_TURRET_CENTER = new Transform2d(
                 new Translation2d(0.225, 0.0),
@@ -76,7 +79,6 @@ public final class Constants {
         public static final Transform3d TURRET_CENTER_TO_CAMERA = new Transform3d(
                 new Translation3d(0.05, 0, 0.045),
                 new Rotation3d(0, -Math.toRadians(10), Math.toRadians(0)));
-
         /*
          * Note: The rotation offset for turret to center is measured relative to where the encoder
          * reading will be zero. 
@@ -86,7 +88,7 @@ public final class Constants {
          */
     }
 
-    public static class IndexConstants {
+    public static final class IndexConstants {
         public static final int HOPPER_VORTEX_CAN_ID = 0;
         public static final int HOPPER_VORTEX_STALL_CURRENT_LIMIT = 40;
         public static final int HOPPER_VORTEX_FREE_CURRENT_LIMIT = 40;
@@ -103,7 +105,8 @@ public final class Constants {
         public static final double MAGAZINE_SPEED = 0.0;
     }
 
-    public static class FlywheelConstants {
+    public static final class FlywheelConstants {
+        public static final double PID_TOLERANCE = 0.0;
         public static final double HIGH_SPEED = 0;
         public static final double LOW_SPEED = 0;
         public static final double DISTANCE_THRESHOLD = 0;
@@ -111,5 +114,7 @@ public final class Constants {
         public static final int FLYWHEEL_FREE_CURRENT_LIMIT = 40;
         public static final boolean FLYWHEEL_LEADER_INVERTED = false;
         public static final boolean FLYWHEEL_FOLLOWER_INVERTED = false;
+        public static final double VELOCITY_CONVERSION_FACTOR = (4 * Math.PI) / (60 * 12);
+        public static final double POSITION_CONVERSION_FACTOR = (4 * Math.PI) / (12);
     }
 }

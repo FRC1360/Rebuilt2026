@@ -8,11 +8,17 @@ import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.ResetMode;
+
+import java.io.Console;
+import java.lang.invoke.ConstantBootstraps;
+
 import com.revrobotics.PersistMode;
 
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.util.PIDLogger;
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -23,7 +29,7 @@ import frc.robot.util.ClosedLoopConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
 
-    private final ClosedLoopConstants defaultPivotPIDConstants = new ClosedLoopConstants(
+    private final ClosedLoopConstants defaultpivotProfiledPIDControllerConstants = new ClosedLoopConstants(
             0.0,
             0.0,
             0.0,
@@ -34,26 +40,26 @@ public class IntakeSubsystem extends SubsystemBase {
             0.0,
             0.0);
 
-    private ProfiledPIDController pivotPID = new ProfiledPIDController(
-            defaultPivotPIDConstants.kP,
-            defaultPivotPIDConstants.kI,
-            defaultPivotPIDConstants.kD,
+    private ProfiledPIDController pivotProfiledPIDController = new ProfiledPIDController(
+            defaultpivotProfiledPIDControllerConstants.kP,
+            defaultpivotProfiledPIDControllerConstants.kI,
+            defaultpivotProfiledPIDControllerConstants.kD,
             new TrapezoidProfile.Constraints(
-                    defaultPivotPIDConstants.maxVelocity,
-                    defaultPivotPIDConstants.maxAcceleration));
+                    defaultpivotProfiledPIDControllerConstants.maxVelocity,
+                    defaultpivotProfiledPIDControllerConstants.maxAcceleration));
 
     private ArmFeedforward pivotFeedForward = new ArmFeedforward(
-            defaultPivotPIDConstants.kG,
-            defaultPivotPIDConstants.kS,
-            defaultPivotPIDConstants.kV,
-            defaultPivotPIDConstants.kA);
+            defaultpivotProfiledPIDControllerConstants.kG,
+            defaultpivotProfiledPIDControllerConstants.kS,
+            defaultpivotProfiledPIDControllerConstants.kV,
+            defaultpivotProfiledPIDControllerConstants.kA);
 
     private final PIDLogger pidLogger = new PIDLogger(
             "Subsystems/" + getName(),
-            defaultPivotPIDConstants,
+            defaultpivotProfiledPIDControllerConstants,
             constants -> {
-                this.pivotPID.setPID(constants.kP, constants.kI, constants.kD);
-                this.pivotPID.setConstraints(
+                this.pivotProfiledPIDController.setPID(constants.kP, constants.kI, constants.kD);
+                this.pivotProfiledPIDController.setConstraints(
                         new TrapezoidProfile.Constraints(constants.maxVelocity, constants.maxAcceleration));
                 this.pivotFeedForward.setKa(constants.kA);
                 this.pivotFeedForward.setKs(constants.kS);
@@ -65,6 +71,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private SparkFlexConfig rollerConfig = new SparkFlexConfig();
     private SparkFlexConfig pivotConfig = new SparkFlexConfig();
+
+    public Trigger IntakePivotAtTarget;
 
     // Variable used for FeedForward Calculation
     private double lastPivotVelocity = 0.0;
@@ -94,7 +102,12 @@ public class IntakeSubsystem extends SubsystemBase {
         pivotMotor.configure(
                 pivotConfig,
                 ResetMode.kResetSafeParameters,
-                PersistMode.kPersistParameters);
+                PersistMode.kPersistParameters
+        );
+
+        pivotProfiledPIDController.setTolerance(Constants.IntakeConstants.PID_TOLERANCE);
+
+        IntakePivotAtTarget = new Trigger(() -> (pivotProfiledPIDController.atGoal()));
     }
 
     public void setRollerSpeed(double speed) {
@@ -122,20 +135,20 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public double closedLoopCalculate(double target) {
-        double pidOutput = pivotPID.calculate(this.getPivotPosition(), target);
+        double pidOutput = pivotProfiledPIDController.calculate(this.getPivotPosition(), target);
         double calculatedOutput = pidOutput + pivotFeedForward.calculateWithVelocities(
                 Units.degreesToRadians(this.getPivotPosition()),
-                lastPivotVelocity, pivotPID.getSetpoint().velocity);
-        lastPivotVelocity = pivotPID.getSetpoint().velocity;
+                lastPivotVelocity, pivotProfiledPIDController.getSetpoint().velocity);
+        lastPivotVelocity = pivotProfiledPIDController.getSetpoint().velocity;
         return calculatedOutput;
     }
 
     public void resetPIDController() {
-        pivotPID.reset(
+        pivotProfiledPIDController.reset(
                 this.getPivotPosition(),
                 this.getPivotVelocity());
 
-        lastPivotVelocity = pivotPID.getSetpoint().velocity;
+        lastPivotVelocity = pivotProfiledPIDController.getSetpoint().velocity;
     }
 
     public void grabConstantsFromNetworkTables() {
@@ -145,12 +158,12 @@ public class IntakeSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         pidLogger.logControllerOutputs(
-                pivotPID.getGoal().position,
-                pivotPID.getGoal().velocity,
-                pivotPID.getSetpoint().position,
-                pivotPID.getSetpoint().velocity,
+                pivotProfiledPIDController.getGoal().position,
+                pivotProfiledPIDController.getGoal().velocity,
+                pivotProfiledPIDController.getSetpoint().position,
+                pivotProfiledPIDController.getSetpoint().velocity,
                 this.getPivotPosition(),
                 this.getPivotPosition(),
-                pivotPID.getPositionError());
+                pivotProfiledPIDController.getPositionError());
     }
 }

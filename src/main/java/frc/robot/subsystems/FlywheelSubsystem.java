@@ -25,6 +25,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.util.ClosedLoopConstants;
@@ -45,6 +46,8 @@ public class FlywheelSubsystem extends SubsystemBase {
     private static final int flywheelFollowerID = 21;
 
     private SysIdRoutine routine;
+
+    public Trigger flywheelAtVelocity;
 
     private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
         0.03,
@@ -80,8 +83,8 @@ public class FlywheelSubsystem extends SubsystemBase {
 
     public FlywheelSubsystem() {
 
-        motorEncoderConfig.velocityConversionFactor((4 * Math.PI) / (60 * 12));
-        motorEncoderConfig.positionConversionFactor((4 * Math.PI) / (12));
+        motorEncoderConfig.velocityConversionFactor(Constants.FlywheelConstants.VELOCITY_CONVERSION_FACTOR);
+        motorEncoderConfig.positionConversionFactor(Constants.FlywheelConstants.POSITION_CONVERSION_FACTOR);
 
         flywheelMotor.clearFaults();
         config.idleMode(IdleMode.kCoast);
@@ -137,6 +140,10 @@ public class FlywheelSubsystem extends SubsystemBase {
                 this
             )
         );
+
+        flywheelPIDController.setTolerance(Constants.FlywheelConstants.PID_TOLERANCE);
+        
+        flywheelAtVelocity = new Trigger(() -> (flywheelPIDController.atSetpoint()));
     }
 
     public void resetPIDController() {
