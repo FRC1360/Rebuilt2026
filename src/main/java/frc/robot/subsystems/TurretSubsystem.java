@@ -25,8 +25,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 
 
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
-
 import org.photonvision.EstimatedRobotPose;
 
 import com.ctre.phoenix6.SignalLogger;

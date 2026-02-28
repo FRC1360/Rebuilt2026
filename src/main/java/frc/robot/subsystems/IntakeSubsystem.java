@@ -9,9 +9,6 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.ResetMode;
 
-import java.io.Console;
-import java.lang.invoke.ConstantBootstraps;
-
 import com.revrobotics.PersistMode;
 
 import com.revrobotics.spark.SparkFlex;
