@@ -59,6 +59,7 @@ public final class Constants {
         public static final double PIVOT_DEPLOYED_ANGLE = 2.0;
         public static final double PIVOT_PID_TOLERANCE = 2.0;
         public static final double PID_TOLERANCE = 0;
+        public static final double STARTING_ANGLE = 0;
     }
 
     public static final class TurretConstants {

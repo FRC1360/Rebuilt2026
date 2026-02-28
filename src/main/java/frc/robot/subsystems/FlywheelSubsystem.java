@@ -82,7 +82,6 @@ public class FlywheelSubsystem extends SubsystemBase {
     );
 
     public FlywheelSubsystem() {
-
         motorEncoderConfig.velocityConversionFactor(Constants.FlywheelConstants.VELOCITY_CONVERSION_FACTOR);
         motorEncoderConfig.positionConversionFactor(Constants.FlywheelConstants.POSITION_CONVERSION_FACTOR);
 
@@ -142,7 +141,7 @@ public class FlywheelSubsystem extends SubsystemBase {
         );
 
         flywheelPIDController.setTolerance(Constants.FlywheelConstants.PID_TOLERANCE);
-        
+
         flywheelAtVelocity = new Trigger(() -> (flywheelPIDController.atSetpoint()));
     }
 

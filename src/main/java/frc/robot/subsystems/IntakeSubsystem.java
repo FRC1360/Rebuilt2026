@@ -73,6 +73,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     // Variable used for FeedForward Calculation
     private double lastPivotVelocity = 0.0;
+    private double startingAngle;
 
     public IntakeSubsystem() {
         rollerMotor.clearFaults();
@@ -86,12 +87,16 @@ public class IntakeSubsystem extends SubsystemBase {
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
 
+
+        startingAngle = Constants.IntakeConstants.STARTING_ANGLE;
+
         pivotMotor.clearFaults();
         pivotConfig.inverted(IntakeConstants.PIVOT_VORTEX_INVERTED);
         pivotConfig.idleMode(IdleMode.kBrake);
         pivotConfig.smartCurrentLimit(
                 IntakeConstants.PIVOT_VORTEX_STALL_CURRENT_LIMIT,
                 IntakeConstants.PIVOT_VORTEX_FREE_CURRENT_LIMIT);
+        pivotMotor.getEncoder().setPosition(startingAngle);
         pivotConfig.apply(
                 new EncoderConfig()
                         .positionConversionFactor(IntakeConstants.PIVOT_POSITION_CONVERSION_RATIO)
