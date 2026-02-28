@@ -4,10 +4,7 @@
 
 package frc.robot.commands.hood;
 
-import org.photonvision.PhotonUtils;
-
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.util.RobotState;
@@ -16,15 +13,12 @@ import frc.robot.util.RobotState;
 public class SetHoodAngleFromPose extends Command {
 
     private final HoodSubsystem hoodSubsystem;
-    private Pose2d turretPose;
-    private Pose2d PoseToAimAt;
-    private InterpolatingDoubleTreeMap angletable = CreateMapCommand.turretPowerAngleDistancetable;
     private final RobotState robotState = RobotState.getInstance();
+    private Pose2d PoseToAimAt;
 
     /** Creates a new RetractHoodCommand. */
     public SetHoodAngleFromPose(HoodSubsystem hoodSubsystem, Pose2d PoseToAimAt) {
         this.hoodSubsystem = hoodSubsystem;
-        this.turretPose = robotState.getTurretOdomPose();
         this.PoseToAimAt = PoseToAimAt;
 
         // Use addRequirements() here to declare subsystem dependencies.
@@ -41,9 +35,9 @@ public class SetHoodAngleFromPose extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        double distance = PhotonUtils.getDistanceToPose(this.turretPose, this.PoseToAimAt);
-        double targetAngle = angletable.get(distance);
-        hoodSubsystem.setHoodMotorVoltage(hoodSubsystem.closedLoopCalculate(targetAngle));
+        hoodSubsystem.setHoodMotorVoltage(hoodSubsystem.closedLoopCalculate(
+            robotState.getHoodAngleFromGoalPose(PoseToAimAt)
+        ));
     }
 
     // Called once the command ends or is interrupted.

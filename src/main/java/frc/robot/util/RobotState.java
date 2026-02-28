@@ -5,13 +5,29 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import frc.robot.Constants.TurretConstants;
 
 public class RobotState {
 
+    private Supplier<Pose2d> robotOdomPoseSupplier;
+    private Supplier<Rotation2d> turretRotationSupplier;
+    private Supplier<Pose2d> turretCameraPoseSupplier;
+    private DoubleSupplier turretCameraEstimationTimestampSupplier;
+
+    private Pose2d calculatedTurretOdomPose;
+
+    private InterpolatingDoubleTreeMap turretDistanceToHoodAngleMap;
+    private InterpolatingDoubleTreeMap turretDistanceToTimeOfFlightMap;
+
     private static RobotState instance = null;
 
     private RobotState() {
+        turretDistanceToHoodAngleMap = new InterpolatingDoubleTreeMap();
+        turretDistanceToHoodAngleMap.put(0.0, 0.0);
+
+        turretDistanceToTimeOfFlightMap = new InterpolatingDoubleTreeMap();
+        turretDistanceToTimeOfFlightMap.put(0.0, 0.0);
     }
 
     public static synchronized RobotState getInstance() {
@@ -22,19 +38,18 @@ public class RobotState {
         return instance;
     }
 
-    private Supplier<Pose2d> robotOdomPoseSupplier;
-    private Supplier<Rotation2d> turretRotationSupplier;
-    private Supplier<Pose2d> turretCameraPoseSupplier;
-    private DoubleSupplier turretCameraEstimationTimestampSupplier;
-
-    private Pose2d calculatedTurretOdomPose;
-
     public void setAllSuppliers(Supplier<Pose2d> robotOdomPoseSupplier, Supplier<Rotation2d> turretRotationSupplier,
             Supplier<Pose2d> turretCameraPoseSupplier, DoubleSupplier turretCameraEstimationTimestampSupplier) {
         this.robotOdomPoseSupplier = robotOdomPoseSupplier;
         this.turretRotationSupplier = turretRotationSupplier;
         this.turretCameraPoseSupplier = turretCameraPoseSupplier;
         this.turretCameraEstimationTimestampSupplier = turretCameraEstimationTimestampSupplier;
+    }
+
+    public double getHoodAngleFromGoalPose(Pose2d poseToSetAngleFrom) {
+        // Get distance between turret position and goal position, plug that into the map
+        return turretDistanceToHoodAngleMap.get(
+                poseToSetAngleFrom.getTranslation().getDistance(this.getTurretOdomPose().getTranslation()));
     }
 
     public Pose2d getRobotOdomPose() {
@@ -60,7 +75,7 @@ public class RobotState {
         return turretCameraEstimationTimestampSupplier.getAsDouble();
     }
 
-    public void updateTurretPose(Pose2d robotPose, Rotation2d turretRotation) {
+    private void updateTurretPose(Pose2d robotPose, Rotation2d turretRotation) {
         /*
          * Step Uno: Create initial turret position by adding offset to robot position
          * Note: Transform affects it in the following way:
