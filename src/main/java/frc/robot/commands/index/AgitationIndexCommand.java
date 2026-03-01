@@ -69,10 +69,6 @@ public class AgitationIndexCommand extends Command {
         intervalFourPeriodEntry = createEntry(loggingTable, "FeedForward/kA", this.intervalFourLength);
         intervalFourPeriodEntry = createEntry(loggingTable, "FeedForward/kG", this.intervalFourSpeed);
 
-        firstIntervalPeriod = intervalOneLength;
-        secondIntervalPeriod = firstIntervalPeriod + intervalTwoLength;
-        thirdIntervalPeriod = secondIntervalPeriod + intervalThreeLength;
-        fourthIntervalPeriod = thirdIntervalPeriod + intervalFourLength;
 
         addRequirements(indexSubsystem);
     }
@@ -80,6 +76,23 @@ public class AgitationIndexCommand extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
+        intervalOneLength = intervalOnePeriodEntry.get();
+        intervalOneSpeed = intervalOneSpeedEntry.get();
+
+        intervalTwoLength = intervalTwoPeriodEntry.get();
+        intervalTwoSpeed = intervalTwoSpeedEntry.get();
+
+        intervalThreeLength = intervalThreePeriodEntry.get();
+        intervalThreeSpeed = intervalThreeSpeedEntry.get();
+
+        intervalFourLength = intervalFourPeriodEntry.get();
+        intervalFourSpeed = intervalFourSpeedEntry.get();
+
+        firstIntervalPeriod = intervalOneLength;
+        secondIntervalPeriod = firstIntervalPeriod + intervalTwoLength;
+        thirdIntervalPeriod = secondIntervalPeriod + intervalThreeLength;
+        fourthIntervalPeriod = thirdIntervalPeriod + intervalFourLength;
+        
         timer.start();
 
     }
