@@ -27,14 +27,14 @@ import frc.robot.util.ClosedLoopConstants;
 public class IntakeSubsystem extends SubsystemBase {
 
     private final ClosedLoopConstants defaultpivotProfiledPIDControllerConstants = new ClosedLoopConstants(
+            0.4,
             0.0,
             0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
+            180.0,
+            360.0,
+            0.15,
+            0.017,
+            0.002,
             0.0);
 
     private ProfiledPIDController pivotProfiledPIDController = new ProfiledPIDController(
@@ -73,7 +73,6 @@ public class IntakeSubsystem extends SubsystemBase {
 
     // Variable used for FeedForward Calculation
     private double lastPivotVelocity = 0.0;
-    private double startingAngle;
 
     public IntakeSubsystem() {
         rollerMotor.clearFaults();
@@ -87,16 +86,12 @@ public class IntakeSubsystem extends SubsystemBase {
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
 
-
-        startingAngle = Constants.IntakeConstants.STARTING_ANGLE;
-
         pivotMotor.clearFaults();
         pivotConfig.inverted(IntakeConstants.PIVOT_VORTEX_INVERTED);
         pivotConfig.idleMode(IdleMode.kBrake);
         pivotConfig.smartCurrentLimit(
                 IntakeConstants.PIVOT_VORTEX_STALL_CURRENT_LIMIT,
                 IntakeConstants.PIVOT_VORTEX_FREE_CURRENT_LIMIT);
-        pivotMotor.getEncoder().setPosition(startingAngle);
         pivotConfig.apply(
                 new EncoderConfig()
                         .positionConversionFactor(IntakeConstants.PIVOT_POSITION_CONVERSION_RATIO)
@@ -106,8 +101,9 @@ public class IntakeSubsystem extends SubsystemBase {
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters
         );
+        pivotMotor.getEncoder().setPosition(IntakeConstants.PIVOT_STARTUP_ANGLE);
 
-        pivotProfiledPIDController.setTolerance(Constants.IntakeConstants.PID_TOLERANCE);
+        pivotProfiledPIDController.setTolerance(Constants.IntakeConstants.PIVOT_PID_TOLERANCE);
 
         IntakePivotAtTarget = new Trigger(() -> (pivotProfiledPIDController.atGoal()));
     }
@@ -165,7 +161,7 @@ public class IntakeSubsystem extends SubsystemBase {
                 pivotProfiledPIDController.getSetpoint().position,
                 pivotProfiledPIDController.getSetpoint().velocity,
                 this.getPivotPosition(),
-                this.getPivotPosition(),
+                this.getPivotVelocity(),
                 pivotProfiledPIDController.getPositionError());
     }
 }

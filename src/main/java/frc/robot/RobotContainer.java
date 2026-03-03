@@ -12,24 +12,23 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.turret.AimTurretAtPoseCommand;
-import frc.robot.commands.turret.SetTurretToRobotRelativeAngleCommand;
+import frc.robot.Constants.IntakeConstants;
+import frc.robot.commands.intake.DeployIntakeCommand;
+import frc.robot.commands.intake.RetractIntakeCommand;
+import frc.robot.commands.intake.SetIntakePivotAngleCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.TurretSubsystem;
-import frc.robot.util.FieldConstants;
-import frc.robot.util.RobotState;
+import frc.robot.subsystems.IntakeSubsystem;
 
 public class RobotContainer {
 
     //Replace with CommandPS4Controller or CommandJoystick if needed
     private final CommandXboxController m_controller = new CommandXboxController(0);
-    private static final RobotState robotState = RobotState.getInstance();
 
     private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -40,18 +39,13 @@ public class RobotContainer {
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    private final TurretSubsystem m_turretSubsystem = new TurretSubsystem();
+
+    private final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        robotState.setAllSuppliers(
-            () -> drivetrain.samplePoseAt(Timer.getFPGATimestamp()).get(),
-            () -> m_turretSubsystem.getCurrentRobotRelativeRotation(),
-            () -> m_turretSubsystem.getPhotonCameraEstimatedPose(),
-            () -> m_turretSubsystem.getPhotonCameraEstimatedPoseTimestamp()
-        );
 
         configureBindings();
 
@@ -70,12 +64,16 @@ public class RobotContainer {
                     .withRotationalRate(-m_controller.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
-        m_turretSubsystem.setDefaultCommand(
-            new SetTurretToRobotRelativeAngleCommand(m_turretSubsystem, new Rotation2d())
+        m_intakeSubsystem.setDefaultCommand(
+            new RetractIntakeCommand(m_intakeSubsystem)
         );
 
-        m_controller.leftBumper().whileTrue(
-            new AimTurretAtPoseCommand(m_turretSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE)
+        m_controller.leftBumper().onTrue(
+            Commands.runOnce(() -> drivetrain.seedFieldCentric(), drivetrain)
+        );
+
+        m_controller.a().toggleOnTrue(
+            new DeployIntakeCommand(m_intakeSubsystem, m_controller.rightBumper())
         );
     }
 
