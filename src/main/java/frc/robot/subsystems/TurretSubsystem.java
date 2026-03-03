@@ -184,7 +184,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        pidLogger.logControllerOutputs(z
+        pidLogger.logControllerOutputs(
             m_pidController.getGoal().position,
             m_pidController.getGoal().velocity,
             m_pidController.getSetpoint().position,
