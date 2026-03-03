@@ -12,9 +12,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -50,9 +48,7 @@ public class RobotContainer {
     public RobotContainer() {
         robotState.setAllSuppliers(
             () -> drivetrain.getState().Pose,
-            () -> {return new Rotation2d();},
-            () -> {return new Pose2d();},
-            () -> Timer.getFPGATimestamp()
+            () -> {return new Rotation2d();}
         );
 
         configureBindings();

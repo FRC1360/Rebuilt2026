@@ -1,6 +1,5 @@
 package frc.robot.util;
 
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,8 +18,6 @@ public class RobotState {
 
     private Supplier<Pose2d> robotOdomPoseSupplier;
     private Supplier<Rotation2d> turretRotationSupplier;
-    private Supplier<Pose2d> turretCameraPoseSupplier;
-    private DoubleSupplier turretCameraEstimationTimestampSupplier;
 
     private Pose2d calculatedTurretOdomPose;
 
@@ -49,12 +46,9 @@ public class RobotState {
         return instance;
     }
 
-    public void setAllSuppliers(Supplier<Pose2d> robotOdomPoseSupplier, Supplier<Rotation2d> turretRotationSupplier,
-            Supplier<Pose2d> turretCameraPoseSupplier, DoubleSupplier turretCameraEstimationTimestampSupplier) {
+    public void setAllSuppliers(Supplier<Pose2d> robotOdomPoseSupplier, Supplier<Rotation2d> turretRotationSupplier) {
         this.robotOdomPoseSupplier = robotOdomPoseSupplier;
         this.turretRotationSupplier = turretRotationSupplier;
-        this.turretCameraPoseSupplier = turretCameraPoseSupplier;
-        this.turretCameraEstimationTimestampSupplier = turretCameraEstimationTimestampSupplier;
     }
 
     public void logAllInputs() {
@@ -81,14 +75,6 @@ public class RobotState {
                 this.getRobotOdomPose(),
                 this.getTurretRotation());
         return calculatedTurretOdomPose;
-    }
-
-    public Pose2d getTurretCameraPose() {
-        return turretCameraPoseSupplier.get();
-    }
-
-    public double getTurretCameraEstimationTimestamp() {
-        return turretCameraEstimationTimestampSupplier.getAsDouble();
     }
 
     private void updateTurretPose(Pose2d robotPose, Rotation2d turretRotation) {
