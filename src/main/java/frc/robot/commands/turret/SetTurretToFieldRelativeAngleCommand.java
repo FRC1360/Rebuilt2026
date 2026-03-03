@@ -52,7 +52,7 @@ public class SetTurretToFieldRelativeAngleCommand extends Command {
         robotRotation = robotState.getRobotOdomPose().getRotation();
 
         robotRotationPublisher.accept(robotRotation);
-        turretPosePublisher.accept(turretSubsystem.getPhotonCameraEstimatedPose());
+        turretPosePublisher.accept(robotState.getTurretOdomPose());
 
         targetTurretRotation = targetFieldRotation.minus(robotRotation);
         turretSubsystem.setVoltage(

@@ -6,9 +6,16 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import frc.robot.Constants.TurretConstants;
 
 public class RobotState {
+
+    private final NetworkTable loggingTable;
+    private final StructPublisher<Pose2d> robotPosePublisher;
+    private final StructPublisher<Pose2d> turretOdomPosePublisher;
 
     private Supplier<Pose2d> robotOdomPoseSupplier;
     private Supplier<Rotation2d> turretRotationSupplier;
@@ -28,6 +35,10 @@ public class RobotState {
 
         turretDistanceToTimeOfFlightMap = new InterpolatingDoubleTreeMap();
         turretDistanceToTimeOfFlightMap.put(0.0, 0.0);
+
+        loggingTable = NetworkTableInstance.getDefault().getTable("RobotState");
+        robotPosePublisher = loggingTable.getStructTopic("Robot Odometry Pose", Pose2d.struct).publish();
+        turretOdomPosePublisher = loggingTable.getStructTopic("Turret Odometry Pose", Pose2d.struct).publish();
     }
 
     public static synchronized RobotState getInstance() {
@@ -44,6 +55,11 @@ public class RobotState {
         this.turretRotationSupplier = turretRotationSupplier;
         this.turretCameraPoseSupplier = turretCameraPoseSupplier;
         this.turretCameraEstimationTimestampSupplier = turretCameraEstimationTimestampSupplier;
+    }
+
+    public void logAllInputs() {
+        robotPosePublisher.accept(this.getRobotOdomPose());
+        turretOdomPosePublisher.accept(this.getTurretOdomPose());
     }
 
     public double getHoodAngleFromGoalPose(Pose2d poseToSetAngleFrom) {

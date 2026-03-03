@@ -7,11 +7,8 @@ package frc.robot;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -77,9 +74,6 @@ public final class Constants {
         public static final Transform2d ROBOT_TO_TURRET_CENTER = new Transform2d(
                 new Translation2d(0.225, 0.0),
                 new Rotation2d());
-        public static final Transform3d TURRET_CENTER_TO_CAMERA = new Transform3d(
-                new Translation3d(0.05, 0, 0.045),
-                new Rotation3d(0, -Math.toRadians(10), Math.toRadians(0)));
         /*
          * Note: The rotation offset for turret to center is measured relative to where the encoder
          * reading will be zero. 

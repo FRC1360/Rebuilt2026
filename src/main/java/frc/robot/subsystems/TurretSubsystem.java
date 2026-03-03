@@ -7,7 +7,6 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,9 +22,6 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import com.ctre.phoenix6.controls.VoltageOut;
 
-
-import java.util.Optional;
-import org.photonvision.EstimatedRobotPose;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -81,10 +77,6 @@ public class TurretSubsystem extends SubsystemBase {
     private double feedForwardControllerOutput;
     private double wrappedTarget;
 
-    private final OrbitCamera orbitCamera;
-    private Pose2d photonCameraEstimatedPose;
-    private double photonCameraEstimatedPoseTimestamp;
-
     private final FeedbackConfigs motorFeedbackConfigs;
     private final MotorOutputConfigs motorOutputConfigs;
     private final CurrentLimitsConfigs motorCurrentLimitsConfigs;
@@ -111,8 +103,6 @@ public class TurretSubsystem extends SubsystemBase {
 
         this.pidControllerOutput = 0.0;
         this.feedForwardControllerOutput = 0.0;
-
-        orbitCamera = new OrbitCamera(TurretConstants.TURRET_CENTER_TO_CAMERA, "photoncamera_turret");
     
         m_profiledpidController.setTolerance(Constants.TurretConstants.PID_TOLERANCE);
 
@@ -198,39 +188,6 @@ public class TurretSubsystem extends SubsystemBase {
             this.getCurrentEncoderVelocity(),
             m_profiledpidController.getPositionError()
         );
-
-        this.updatePose();
-    }
-
-    private void updatePose() {
-        orbitCamera.updatePipelineResults();
-        //Creates an optional object to prevent NullPointerException if the pipeline results return nothing.
-        Optional<EstimatedRobotPose> visionEst = Optional.empty();
-        //
-        for (var result : orbitCamera.getPipelineResults()) {
-            visionEst = orbitCamera.getPhotonPoseEstimator().estimateCoprocMultiTagPose(result);
-            if (visionEst.isEmpty()) {
-                visionEst = orbitCamera.getPhotonPoseEstimator().estimateLowestAmbiguityPose(result);
-            }
-            orbitCamera.updateEstimationStdDevs(visionEst, result.getTargets());
-
-            visionEst.ifPresent(
-                    est -> {
-                        // Change our trust in the measurement based on the tags we can see
-                        // var estStdDevs = orbitCamera.getEstimationStdDevs();
-
-                        this.photonCameraEstimatedPose = est.estimatedPose.toPose2d();
-                        this.photonCameraEstimatedPoseTimestamp = est.timestampSeconds;
-                        orbitCamera.updateStructPublisher(this.photonCameraEstimatedPose);
-                    });
-        }
-    }
-
-    public Pose2d getPhotonCameraEstimatedPose() {
-        return this.photonCameraEstimatedPose;
-    }
-    public double getPhotonCameraEstimatedPoseTimestamp() {
-        return this.photonCameraEstimatedPoseTimestamp;
     }
 
      private SysIdRoutine sysIdRoutine = new SysIdRoutine(
