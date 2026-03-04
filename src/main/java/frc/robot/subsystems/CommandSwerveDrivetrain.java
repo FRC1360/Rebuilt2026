@@ -20,9 +20,6 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -33,7 +30,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
+import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -63,14 +60,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     /* Swerve request to apply when following a path via PathPlanner */
     private final SwerveRequest.ApplyRobotSpeeds m_pathPlannerApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
-    private final OrbitCamera frontLeftSwerveCamera =
-        new OrbitCamera(
-            new Transform3d(
-                new Translation3d(0.2809, 0.2809, 0.192),
-                new Rotation3d(0, -Math.toRadians(10), Math.toRadians(45))),
-            "photoncamera_fl"
-        );
-    private final OrbitCamera[] swerveCameras = new OrbitCamera[1];
+    private final OrbitCamera backLeftSwerveCamera = new OrbitCamera(
+            DrivetrainConstants.BACK_LEFT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM,
+            "photoncamera_bl");
+    private final OrbitCamera backRightSwerveCamera = new OrbitCamera(
+            DrivetrainConstants.BACK_RIGHT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM,
+            "photoncamera_br");
+    private final OrbitCamera[] swerveCameras = new OrbitCamera[2];
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -153,7 +149,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
         configureAutoBuilder();
-        swerveCameras[0] = frontLeftSwerveCamera;
+        swerveCameras[0] = backLeftSwerveCamera;
+        swerveCameras[1] = backRightSwerveCamera;
     }
 
     /**
@@ -179,7 +176,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
         configureAutoBuilder();
-        swerveCameras[0] = frontLeftSwerveCamera;
+        swerveCameras[0] = backLeftSwerveCamera;
+        swerveCameras[1] = backRightSwerveCamera;
     }
 
     /**
@@ -213,7 +211,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
         configureAutoBuilder();
-        swerveCameras[0] = frontLeftSwerveCamera;
+        swerveCameras[0] = backLeftSwerveCamera;
+        swerveCameras[1] = backRightSwerveCamera;
     }
 
     private void configureAutoBuilder() {

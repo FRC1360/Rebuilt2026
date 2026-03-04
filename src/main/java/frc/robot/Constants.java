@@ -7,8 +7,11 @@ package frc.robot;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -75,10 +78,13 @@ public final class Constants {
                 new Translation2d(0.225, 0.0),
                 new Rotation2d());
         /*
-         * Note: The rotation offset for turret to center is measured relative to where the encoder
-         * reading will be zero. 
-         * Zero degrees on the encoder is ALWAYS OPPOSITE the MIDDLE of the wraparound range.
-         * The startup angle degrees is the delta between wraparound opposite and where the turret
+         * Note: The rotation offset for turret to center is measured relative to where
+         * the encoder
+         * reading will be zero.
+         * Zero degrees on the encoder is ALWAYS OPPOSITE the MIDDLE of the wraparound
+         * range.
+         * The startup angle degrees is the delta between wraparound opposite and where
+         * the turret
          * actually starts.
          */
     }
@@ -111,5 +117,14 @@ public final class Constants {
         public static final boolean FLYWHEEL_FOLLOWER_INVERTED = false;
         public static final double VELOCITY_CONVERSION_FACTOR = (4 * Math.PI) / (60 * 12);
         public static final double POSITION_CONVERSION_FACTOR = (4 * Math.PI) / (12);
+    }
+
+    public static final class DrivetrainConstants {
+        public static final Transform3d BACK_LEFT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM = new Transform3d(
+                new Translation3d(-((27.75 / 2.0) - 0.094180), (27.75 / 2.0) - 0.094180, (27.75 / 2.0)),
+                new Rotation3d(0, -Math.toRadians(10), Math.toRadians(134.136029)));
+        public static final Transform3d BACK_RIGHT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM = new Transform3d(
+                new Translation3d(-((27.75 / 2.0) - 0.056758), -((27.75 / 2.0) - 0.121178), (27.75 / 2.0)),
+                new Rotation3d(0, -Math.toRadians(10), Math.toRadians(-134.136029)));
     }
 }

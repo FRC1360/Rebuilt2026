@@ -36,6 +36,7 @@ public class OrbitCamera {
   private List<PhotonPipelineResult> currentUnreadResults;
 
   StructPublisher<Pose2d> photonPose;
+  StructPublisher<Transform3d> robotToCameraOffset;
   private Matrix<N3, N1> curStdDevs;
   private Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 0);
   private Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
@@ -54,8 +55,14 @@ public class OrbitCamera {
 
     photonPose =
         NetworkTableInstance.getDefault()
-            .getStructTopic(cameraName + "/Photon_Pose", Pose2d.struct)
+            .getStructTopic("Photon Cameras/" + cameraName + "/Photon_Pose", Pose2d.struct)
             .publish();
+
+    robotToCameraOffset =
+        NetworkTableInstance.getDefault()
+            .getStructTopic("Photon Cameras/" + cameraName + "/Robot To Cam Offset", Transform3d.struct)
+            .publish();
+    robotToCameraOffset.accept(this.robotToCamera);
 
     this.currentUnreadResults = new ArrayList<PhotonPipelineResult>();
 

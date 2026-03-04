@@ -5,6 +5,10 @@
 package frc.robot.commands.hood;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.util.RobotState;
@@ -14,12 +18,22 @@ public class SetHoodAngleFromPose extends Command {
 
     private final HoodSubsystem hoodSubsystem;
     private final RobotState robotState = RobotState.getInstance();
-    private Pose2d PoseToAimAt;
+    private Pose2d poseToAimAt;
+
+    private final NetworkTable loggingTable;
+    private final DoublePublisher distanceToTargetPublisher;
+    private final StructPublisher<Pose2d> turretPosePublisher;
+    private final StructPublisher<Pose2d> goalPosePublisher;
 
     /** Creates a new RetractHoodCommand. */
     public SetHoodAngleFromPose(HoodSubsystem hoodSubsystem, Pose2d PoseToAimAt) {
         this.hoodSubsystem = hoodSubsystem;
-        this.PoseToAimAt = PoseToAimAt;
+        this.poseToAimAt = PoseToAimAt;
+
+        loggingTable = NetworkTableInstance.getDefault().getTable("Commands/" + getName());
+        distanceToTargetPublisher = loggingTable.getDoubleTopic("Distance To Goal").publish();
+        turretPosePublisher = loggingTable.getStructTopic("Turret Pose", Pose2d.struct).publish();
+        goalPosePublisher = loggingTable.getStructTopic("Goal Pose", Pose2d.struct).publish();
 
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(this.hoodSubsystem);
@@ -36,8 +50,13 @@ public class SetHoodAngleFromPose extends Command {
     @Override
     public void execute() {
         hoodSubsystem.setHoodMotorVoltage(hoodSubsystem.closedLoopCalculate(
-            robotState.getHoodAngleFromGoalPose(PoseToAimAt)
-        ));
+                robotState.getHoodAngleFromGoalPose(poseToAimAt)));
+
+        // Update publishers
+        distanceToTargetPublisher.accept(
+                poseToAimAt.getTranslation().getDistance(robotState.getTurretOdomPose().getTranslation()));
+        turretPosePublisher.accept(robotState.getTurretOdomPose());
+        goalPosePublisher.accept(poseToAimAt);
     }
 
     // Called once the command ends or is interrupted.
