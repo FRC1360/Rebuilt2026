@@ -44,7 +44,7 @@ public final class Constants {
         public static final int ROLLER_VORTEX_FREE_CURRENT_LIMIT = 80;
         public static final boolean ROLLER_VORTEX_INVERTED = true;
 
-        public static final double ROLLER_ACTIVATED_SPEED = 1.0;
+        public static final double ROLLER_ACTIVATED_SPEED = 0.6;
 
         // Pivot Constants
         public static final int PIVOT_VORTEX_CAN_ID = 30;
@@ -75,7 +75,7 @@ public final class Constants {
         public static final double PID_TOLERANCE = 0;
 
         public static final Transform2d ROBOT_TO_TURRET_CENTER = new Transform2d(
-                new Translation2d(0.225, 0.0),
+                new Translation2d(-((0.705 / 2.0) - 0.268852), ((0.705 / 2.0) - 0.212725)),
                 new Rotation2d());
         /*
          * Note: The rotation offset for turret to center is measured relative to where
@@ -103,7 +103,7 @@ public final class Constants {
         public static final int MAGAZINE_SENSOR_DIGITAL_CHANNEL = 1;
 
         public static final double HOPPER_SPEED = 0.5;
-        public static final double MAGAZINE_SPEED = 0.4;
+        public static final double MAGAZINE_SPEED = 1.0;
     }
 
     public static final class FlywheelConstants {
@@ -124,10 +124,10 @@ public final class Constants {
 
     public static final class DrivetrainConstants {
         public static final Transform3d BACK_LEFT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM = new Transform3d(
-                new Translation3d(-((27.75 / 2.0) - 0.094180), (27.75 / 2.0) - 0.094180, (27.75 / 2.0)),
+                new Translation3d(-((0.704850 / 2.0) - 0.094180), (0.704850 / 2.0) - 0.094180, 0.208540),
                 new Rotation3d(0, -Math.toRadians(10), Math.toRadians(134.136029)));
         public static final Transform3d BACK_RIGHT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM = new Transform3d(
-                new Translation3d(-((27.75 / 2.0) - 0.056758), -((27.75 / 2.0) - 0.121178), (27.75 / 2.0)),
+                new Translation3d(-((0.704850 / 2.0) - 0.056758), -((0.704850 / 2.0) - 0.121178), 0.353590),
                 new Rotation3d(0, -Math.toRadians(10), Math.toRadians(-134.136029)));
     }
 }
