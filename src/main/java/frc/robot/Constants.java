@@ -60,6 +60,9 @@ public final class Constants {
         public static final double PIVOT_RETRACTED_ANGLE = 120.0;
         public static final double PIVOT_DEPLOYED_ANGLE = -7.0;
         public static final double PIVOT_PID_TOLERANCE = 2.0;
+
+        // Used in RobotState to manage toggling functionality
+        public static final boolean INTAKE_DEPLOYED_BY_DEFAULT = false;
     }
 
     public static final class TurretConstants {

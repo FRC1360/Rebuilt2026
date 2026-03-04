@@ -8,6 +8,10 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.TurretConstants;
 
 public class RobotState {
@@ -20,6 +24,7 @@ public class RobotState {
     private Supplier<Rotation2d> turretRotationSupplier;
 
     private Pose2d calculatedTurretOdomPose;
+    private boolean currentIntakeState;
 
     private InterpolatingDoubleTreeMap turretDistanceToHoodAngleMap;
     private InterpolatingDoubleTreeMap turretDistanceToTimeOfFlightMap;
@@ -32,6 +37,8 @@ public class RobotState {
 
         turretDistanceToTimeOfFlightMap = new InterpolatingDoubleTreeMap();
         turretDistanceToTimeOfFlightMap.put(0.0, 0.0);
+
+        currentIntakeState = IntakeConstants.INTAKE_DEPLOYED_BY_DEFAULT;
 
         loggingTable = NetworkTableInstance.getDefault().getTable("RobotState");
         robotPosePublisher = loggingTable.getStructTopic("Robot Odometry Pose", Pose2d.struct).publish();
@@ -55,6 +62,12 @@ public class RobotState {
         robotPosePublisher.accept(this.getRobotOdomPose());
         turretOdomPosePublisher.accept(this.getTurretOdomPose());
     }
+
+    public Trigger isIntakeCurrentlyDeployed = new Trigger(() -> this.currentIntakeState);
+
+    public Command toggleIntakeState = Commands.runOnce(() -> {
+        this.currentIntakeState = !this.currentIntakeState;
+    });
 
     public double getHoodAngleFromGoalPose(Pose2d poseToSetAngleFrom) {
         // Get distance between turret position and goal position, plug that into the map

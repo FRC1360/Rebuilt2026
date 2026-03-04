@@ -68,7 +68,7 @@ public class HoodSubsystem extends SubsystemBase {
     private final MotorOutputConfigs motorOutputConfigs;
     private final CurrentLimitsConfigs motorCurrentLimitsConfigs;
 
-    public Trigger hoodAtTarget;
+    public final Trigger hoodAtTarget;
 
     /** Creates a new HoodSubsystem. */
     public HoodSubsystem() {

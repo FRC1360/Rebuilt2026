@@ -48,7 +48,7 @@ public class FlywheelSubsystem extends SubsystemBase {
 
     // Boolean used for internal logic, trigger returns value in robotcontainer
     private boolean flywheelAtVelocity;
-    public final Trigger atSetpoint;
+    public final Trigger flywheelAtTarget;
 
     private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
             0.03,
@@ -109,7 +109,7 @@ public class FlywheelSubsystem extends SubsystemBase {
                 PersistMode.kPersistParameters);
 
         flywheelAtVelocity = false;
-        atSetpoint = new Trigger(() -> {
+        flywheelAtTarget = new Trigger(() -> {
             return this.flywheelAtVelocity;
         });
 

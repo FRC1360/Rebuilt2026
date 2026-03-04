@@ -19,14 +19,15 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.flywheel.SetFlywheelVelocityCommand;
 import frc.robot.commands.hood.SetHoodAngleCommand;
 import frc.robot.commands.index.ActivateAgitatedIndexCommand;
 import frc.robot.commands.index.SetIndexSpeedsCommand;
 import frc.robot.commands.intake.DeployIntakeCommand;
 import frc.robot.commands.intake.RetractIntakeCommand;
-import frc.robot.commands.intake.SetIntakePivotAngleCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelSubsystem;
@@ -67,9 +68,7 @@ public class RobotContainer {
     public RobotContainer() {
         robotState.setAllSuppliers(
                 () -> drivetrain.getState().Pose,
-                () -> {
-                    return new Rotation2d();
-                });
+                () -> new Rotation2d());
 
         configureBindings();
         drivetrain.registerTelemetry(swerveLogger::telemeterize);
@@ -79,34 +78,35 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        // Note that X is defined as forward according to WPILib convention,
-        // and Y is defined as to the left according to WPILib convention.
+        // Driving
         drivetrain.setDefaultCommand(
-                // Drivetrain will execute this command periodically
                 drivetrain.applyRequest(() -> drive.withVelocityX(-m_controller.getLeftY() * MaxSpeed)
                         .withVelocityY(-m_controller.getLeftX() * MaxSpeed)
                         .withRotationalRate(-m_controller.getRightX() * MaxAngularRate)));
-        m_controller.b().onTrue(
-                Commands.runOnce(() -> drivetrain.seedFieldCentric(), drivetrain));
+        m_controller.b().onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric(), drivetrain));
 
+        // Intaking
         m_intakeSubsystem.setDefaultCommand(
-                new RetractIntakeCommand(m_intakeSubsystem));
-        m_controller.leftTrigger(0.8).toggleOnTrue(
-                new DeployIntakeCommand(m_intakeSubsystem, m_controller.leftBumper()));
+                new ConditionalCommand(
+                        new DeployIntakeCommand(m_intakeSubsystem, m_controller.leftBumper()),
+                        new RetractIntakeCommand(m_intakeSubsystem),
+                        robotState.isIntakeCurrentlyDeployed));
+        m_controller.leftTrigger(0.8).onTrue(robotState.toggleIntakeState);
+
+        // Shooting
+        Trigger readyToShoot = m_flywheelSubsystem.flywheelAtTarget.and(m_HoodSubsystem.hoodAtTarget);
+        Command prepareToShoot = new SetFlywheelVelocityCommand(m_flywheelSubsystem, 50)
+                .alongWith(new SetHoodAngleCommand(m_HoodSubsystem, 65));
 
         m_flywheelSubsystem.setDefaultCommand(
                 Commands.run(() -> m_flywheelSubsystem.setFlywheelVoltage(0.0), m_flywheelSubsystem));
         m_HoodSubsystem.setDefaultCommand(new SetHoodAngleCommand(m_HoodSubsystem, 74));
         m_indexSubsystem.setDefaultCommand(new SetIndexSpeedsCommand(m_indexSubsystem, 0.0, 0.0));
 
-        m_controller.rightTrigger(0.8).whileTrue(new SetFlywheelVelocityCommand(m_flywheelSubsystem, 50)
-                .alongWith(new SetHoodAngleCommand(m_HoodSubsystem, 65)));
-        m_controller.rightTrigger(0.8).and(m_flywheelSubsystem.atSetpoint).and(m_HoodSubsystem.hoodAtTarget).whileTrue(
-                new ActivateAgitatedIndexCommand(m_indexSubsystem)
-                        .alongWith(new SetIntakePivotAngleCommand(m_intakeSubsystem, 45, () -> {
-                            return true;
-                        })));
-        readyToShootEntry.accept((m_flywheelSubsystem.atSetpoint).and(m_HoodSubsystem.hoodAtTarget).getAsBoolean());
+        m_controller.rightBumper().or(m_controller.rightTrigger(0.8)).whileTrue(prepareToShoot);
+        m_controller.rightBumper().and(readyToShoot).whileTrue(new ActivateAgitatedIndexCommand(m_indexSubsystem));
+        readyToShootEntry
+                .accept((m_flywheelSubsystem.flywheelAtTarget).and(m_HoodSubsystem.hoodAtTarget).getAsBoolean());
     }
 
     public Command getAutonomousCommand() {
