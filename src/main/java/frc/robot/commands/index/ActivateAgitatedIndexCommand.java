@@ -47,15 +47,14 @@ public class ActivateAgitatedIndexCommand extends Command {
         this.timer = new Timer();
         this.indexSubsystem = indexSubsystem;
 
-        intervalOneDurationEntry = createEntry(loggingTable, "Interval 1", this.intervalOneDuration);
-        intervalOneSpeedEntry = createEntry(loggingTable, "Interval 1", this.intervalOneSpeed);
-        intervalTwoDurationEntry = createEntry(loggingTable, "Interval 1", this.intervalTwoDuration);
-        intervalTwoSpeedEntry = createEntry(loggingTable, "Interval 1", this.intervalTwoSpeed);
-
-        intervalThreeDurationEntry = createEntry(loggingTable, "Interval 1", this.intervalThreeDuration);
-        intervalThreeSpeedEntry = createEntry(loggingTable, "Interval 1", this.intervalThreeSpeed);
-        intervalFourDurationEntry = createEntry(loggingTable, "Interval 1", this.intervalFourDuration);
-        intervalFourSpeedEntry = createEntry(loggingTable, "Interval 1", this.intervalFourSpeed);
+        intervalOneDurationEntry = createEntry(loggingTable, "Interval 1 Duration", 0.5);
+        intervalOneSpeedEntry = createEntry(loggingTable, "Interval 1 Speed", 0.6);
+        intervalTwoDurationEntry = createEntry(loggingTable, "Interval 2 Duration", 0.04);
+        intervalTwoSpeedEntry = createEntry(loggingTable, "Interval 2 Speed", 0.00);
+        intervalThreeDurationEntry = createEntry(loggingTable, "Interval 3 Duration", 0.02);
+        intervalThreeSpeedEntry = createEntry(loggingTable, "Interval 3 Speed", -0.2);
+        intervalFourDurationEntry = createEntry(loggingTable, "Interval 4 Duration", 0.0);
+        intervalFourSpeedEntry = createEntry(loggingTable, "Interval 4 Speed", 0.0);
 
         addRequirements(indexSubsystem);
     }
@@ -110,6 +109,7 @@ public class ActivateAgitatedIndexCommand extends Command {
         // resets the timer and restarts the loop process.
         else {
             timer.reset();
+            timer.start();
         }
 
         indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_SPEED);

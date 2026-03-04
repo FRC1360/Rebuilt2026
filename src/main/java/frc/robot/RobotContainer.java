@@ -13,28 +13,47 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.flywheel.SetFlywheelVelocityCommand;
+import frc.robot.commands.hood.SetHoodAngleCommand;
+import frc.robot.commands.index.ActivateAgitatedIndexCommand;
+import frc.robot.commands.index.SetIndexSpeedsCommand;
 import frc.robot.commands.intake.DeployIntakeCommand;
 import frc.robot.commands.intake.RetractIntakeCommand;
+import frc.robot.commands.intake.SetIntakePivotAngleCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.FlywheelSubsystem;
+import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.subsystems.IndexSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.util.RobotState;
 
 public class RobotContainer {
 
+    private final NetworkTable loggingTable = NetworkTableInstance.getDefault().getTable("Robot Container");
+    private final BooleanPublisher readyToShootEntry = loggingTable.getBooleanTopic("Ready To Shoot").publish();
+
     private final RobotState robotState = RobotState.getInstance();
 
-    //Replace with CommandPS4Controller or CommandJoystick if needed
+    // Replace with CommandPS4Controller or CommandJoystick if needed
     private final CommandXboxController m_controller = new CommandXboxController(0);
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
+    private final IndexSubsystem m_indexSubsystem = new IndexSubsystem();
+    private final FlywheelSubsystem m_flywheelSubsystem = new FlywheelSubsystem();
+    private final HoodSubsystem m_HoodSubsystem = new HoodSubsystem();
 
-    private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+                                                                                        // speed
+    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
+                                                                                      // max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -47,9 +66,10 @@ public class RobotContainer {
      */
     public RobotContainer() {
         robotState.setAllSuppliers(
-            () -> drivetrain.getState().Pose,
-            () -> {return new Rotation2d();}
-        );
+                () -> drivetrain.getState().Pose,
+                () -> {
+                    return new Rotation2d();
+                });
 
         configureBindings();
         drivetrain.registerTelemetry(swerveLogger::telemeterize);
@@ -62,24 +82,31 @@ public class RobotContainer {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
-            // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(-m_controller.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-m_controller.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-m_controller.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
-            )
-        );
+                // Drivetrain will execute this command periodically
+                drivetrain.applyRequest(() -> drive.withVelocityX(-m_controller.getLeftY() * MaxSpeed)
+                        .withVelocityY(-m_controller.getLeftX() * MaxSpeed)
+                        .withRotationalRate(-m_controller.getRightX() * MaxAngularRate)));
+        m_controller.b().onTrue(
+                Commands.runOnce(() -> drivetrain.seedFieldCentric(), drivetrain));
+
         m_intakeSubsystem.setDefaultCommand(
-            new RetractIntakeCommand(m_intakeSubsystem)
-        );
+                new RetractIntakeCommand(m_intakeSubsystem));
+        m_controller.leftTrigger(0.8).toggleOnTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, m_controller.leftBumper()));
 
-        m_controller.leftBumper().onTrue(
-            Commands.runOnce(() -> drivetrain.seedFieldCentric(), drivetrain)
-        );
+        m_flywheelSubsystem.setDefaultCommand(
+                Commands.run(() -> m_flywheelSubsystem.setFlywheelVoltage(0.0), m_flywheelSubsystem));
+        m_HoodSubsystem.setDefaultCommand(new SetHoodAngleCommand(m_HoodSubsystem, 74));
+        m_indexSubsystem.setDefaultCommand(new SetIndexSpeedsCommand(m_indexSubsystem, 0.0, 0.0));
 
-        m_controller.a().toggleOnTrue(
-            new DeployIntakeCommand(m_intakeSubsystem, m_controller.rightBumper())
-        );
+        m_controller.rightTrigger(0.8).whileTrue(new SetFlywheelVelocityCommand(m_flywheelSubsystem, 50)
+                .alongWith(new SetHoodAngleCommand(m_HoodSubsystem, 65)));
+        m_controller.rightTrigger(0.8).and(m_flywheelSubsystem.atSetpoint).and(m_HoodSubsystem.hoodAtTarget).whileTrue(
+                new ActivateAgitatedIndexCommand(m_indexSubsystem)
+                        .alongWith(new SetIntakePivotAngleCommand(m_intakeSubsystem, 45, () -> {
+                            return true;
+                        })));
+        readyToShootEntry.accept((m_flywheelSubsystem.atSetpoint).and(m_HoodSubsystem.hoodAtTarget).getAsBoolean());
     }
 
     public Command getAutonomousCommand() {

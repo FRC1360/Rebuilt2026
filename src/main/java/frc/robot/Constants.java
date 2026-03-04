@@ -28,20 +28,20 @@ import edu.wpi.first.math.geometry.Translation3d;
 public final class Constants {
 
     public static final class HoodConstants {
-        public static final int KRAKEN_CAN_ID = 60;
+        public static final int KRAKEN_CAN_ID = 41;
         public static final int KRAKEN_STATOR_CURRENT_LIMIT = 30;
         public static final InvertedValue KRAKEN_INVERTED_VALUE = InvertedValue.Clockwise_Positive;
 
         public static final double STARTUP_ANGLE_DEGREES = 75.0;
         public static final double MECHANISM_CONVERSION_FACTOR = ((164.0 / 12.0) * (60.0 / 18.0)) / 360.0;
-        public static final double PID_TOLERANCE = 0;
+        public static final double PID_TOLERANCE = 1.0;
     }
 
     public static final class IntakeConstants {
         // Roller Constants
         public static final int ROLLER_VORTEX_CAN_ID = 31;
-        public static final int ROLLER_VORTEX_STALL_CURRENT_LIMIT = 40;
-        public static final int ROLLER_VORTEX_FREE_CURRENT_LIMIT = 40;
+        public static final int ROLLER_VORTEX_STALL_CURRENT_LIMIT = 80;
+        public static final int ROLLER_VORTEX_FREE_CURRENT_LIMIT = 80;
         public static final boolean ROLLER_VORTEX_INVERTED = true;
 
         public static final double ROLLER_ACTIVATED_SPEED = 1.0;
@@ -63,7 +63,7 @@ public final class Constants {
     }
 
     public static final class TurretConstants {
-        public static final int KRAKEN_CAN_ID = 10;
+        public static final int KRAKEN_CAN_ID = 40;
         public static final InvertedValue KRAKEN_INVERTED_VALUE = InvertedValue.Clockwise_Positive;
         public static final int KRAKEN_STATOR_CURRENT_LIMIT = 30;
         public static final double MECHANISM_CONVERSION_FACTOR = (1.0 / 7.0) * 360.0;
@@ -90,12 +90,12 @@ public final class Constants {
     }
 
     public static final class IndexConstants {
-        public static final int HOPPER_VORTEX_CAN_ID = 0;
-        public static final int HOPPER_VORTEX_STALL_CURRENT_LIMIT = 40;
-        public static final int HOPPER_VORTEX_FREE_CURRENT_LIMIT = 40;
+        public static final int HOPPER_VORTEX_CAN_ID = 32;
+        public static final int HOPPER_VORTEX_STALL_CURRENT_LIMIT = 80;
+        public static final int HOPPER_VORTEX_FREE_CURRENT_LIMIT = 80;
         public static final boolean HOPPER_VORTEX_INVERTED = false;
 
-        public static final int MAGAZINE_VORTEX_CAN_ID = 0;
+        public static final int MAGAZINE_VORTEX_CAN_ID = 33;
         public static final int MAGAZINE_VORTEX_STALL_CURRENT_LIMIT = 40;
         public static final int MAGAZINE_VORTEX_FREE_CURRENT_LIMIT = 40;
         public static final boolean MAGAZINE_VORTEX_INVERTED = false;
@@ -103,11 +103,14 @@ public final class Constants {
         public static final int MAGAZINE_SENSOR_DIGITAL_CHANNEL = 1;
 
         public static final double HOPPER_SPEED = 0.5;
-        public static final double MAGAZINE_SPEED = 0.0;
+        public static final double MAGAZINE_SPEED = 0.4;
     }
 
     public static final class FlywheelConstants {
-        public static final double PID_TOLERANCE = 0.0;
+        public static final int VORTEX_LEADER_CAN_ID = 42;
+        public static final int VORTEX_FOLLOWER_CAN_ID = 43;
+
+        public static final double PID_TOLERANCE = 5.0;
         public static final double HIGH_SPEED = 0;
         public static final double LOW_SPEED = 0;
         public static final double DISTANCE_THRESHOLD = 0;

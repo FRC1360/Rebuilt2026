@@ -28,13 +28,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.Constants.FlywheelConstants;
 import frc.robot.util.ClosedLoopConstants;
 import frc.robot.util.PIDLogger;
 
 public class FlywheelSubsystem extends SubsystemBase {
 
-    private final SparkFlex flywheelMotor = new SparkFlex(flywheelmotorID, MotorType.kBrushless);
-    private final SparkFlex flywheelFollower = new SparkFlex(flywheelFollowerID, MotorType.kBrushless);
+    private final SparkFlex flywheelMotor = new SparkFlex(FlywheelConstants.VORTEX_LEADER_CAN_ID, MotorType.kBrushless);
+    private final SparkFlex flywheelFollower = new SparkFlex(FlywheelConstants.VORTEX_FOLLOWER_CAN_ID,
+            MotorType.kBrushless);
 
     private final SparkFlexConfig config = new SparkFlexConfig();
     private final SparkFlexConfig followerConfig = new SparkFlexConfig();
@@ -42,44 +44,39 @@ public class FlywheelSubsystem extends SubsystemBase {
     private final RelativeEncoder flywheelEncoder;
     private final EncoderConfig motorEncoderConfig = new EncoderConfig();
 
-    private static final int flywheelmotorID = 20;
-    private static final int flywheelFollowerID = 21;
-
     private SysIdRoutine routine;
 
-    public Trigger flywheelAtVelocity;
+    // Boolean used for internal logic, trigger returns value in robotcontainer
+    private boolean flywheelAtVelocity;
+    public final Trigger atSetpoint;
 
     private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
-        0.03,
-        0.0,
-        0.0014,
-        0.0,
-        0.0,
-        0.05901,
-        0.10232,
-        0.0,
-        0.0
-    );
+            0.03,
+            0.0,
+            0.0014,
+            0.0,
+            0.0,
+            0.05901,
+            0.10232,
+            0.0,
+            0.0);
 
     private PIDController flywheelPIDController = new PIDController(
-        defaultPIDConstants.kP, defaultPIDConstants.kI, defaultPIDConstants.kD
-    );
+            defaultPIDConstants.kP, defaultPIDConstants.kI, defaultPIDConstants.kD);
     private SimpleMotorFeedforward flywheelFFController = new SimpleMotorFeedforward(
-        defaultPIDConstants.kS,
-        defaultPIDConstants.kV,
-        defaultPIDConstants.kA
-    );
+            defaultPIDConstants.kS,
+            defaultPIDConstants.kV,
+            defaultPIDConstants.kA);
 
     private final PIDLogger pidLogger = new PIDLogger(
-        "Subsystems/" + getName(),
-        defaultPIDConstants,
-        constants -> {
-            this.flywheelPIDController.setPID(constants.kP, constants.kI, constants.kD);
-            this.flywheelFFController.setKa(constants.kA);
-            this.flywheelFFController.setKs(constants.kS);
-            this.flywheelFFController.setKv(constants.kV);
-        }
-    );
+            "Subsystems/" + getName(),
+            defaultPIDConstants,
+            constants -> {
+                this.flywheelPIDController.setPID(constants.kP, constants.kI, constants.kD);
+                this.flywheelFFController.setKa(constants.kA);
+                this.flywheelFFController.setKs(constants.kS);
+                this.flywheelFFController.setKv(constants.kV);
+            });
 
     public FlywheelSubsystem() {
         motorEncoderConfig.velocityConversionFactor(Constants.FlywheelConstants.VELOCITY_CONVERSION_FACTOR);
@@ -89,15 +86,13 @@ public class FlywheelSubsystem extends SubsystemBase {
         config.idleMode(IdleMode.kCoast);
         config.inverted(Constants.FlywheelConstants.FLYWHEEL_LEADER_INVERTED);
         config.smartCurrentLimit(
-            Constants.FlywheelConstants.FLYWHEEL_STALL_CURRENT_LIMIT,
-            Constants.FlywheelConstants.FLYWHEEL_FREE_CURRENT_LIMIT
-        );
+                Constants.FlywheelConstants.FLYWHEEL_STALL_CURRENT_LIMIT,
+                Constants.FlywheelConstants.FLYWHEEL_FREE_CURRENT_LIMIT);
         config.apply(motorEncoderConfig);
         flywheelMotor.configure(
-            config, 
-            ResetMode.kResetSafeParameters, 
-            PersistMode.kPersistParameters
-        );
+                config,
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
 
         flywheelEncoder = flywheelMotor.getEncoder();
 
@@ -105,44 +100,45 @@ public class FlywheelSubsystem extends SubsystemBase {
         followerConfig.idleMode(IdleMode.kCoast);
         followerConfig.inverted(Constants.FlywheelConstants.FLYWHEEL_FOLLOWER_INVERTED);
         followerConfig.smartCurrentLimit(
-            Constants.FlywheelConstants.FLYWHEEL_STALL_CURRENT_LIMIT,
-            Constants.FlywheelConstants.FLYWHEEL_FREE_CURRENT_LIMIT
-        );
+                Constants.FlywheelConstants.FLYWHEEL_STALL_CURRENT_LIMIT,
+                Constants.FlywheelConstants.FLYWHEEL_FREE_CURRENT_LIMIT);
         followerConfig.follow(flywheelMotor, true);
         flywheelFollower.configure(
-            followerConfig, 
-            ResetMode.kResetSafeParameters, 
-            PersistMode.kPersistParameters
-        );
+                followerConfig,
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
+
+        flywheelAtVelocity = false;
+        atSetpoint = new Trigger(() -> {
+            return this.flywheelAtVelocity;
+        });
 
         routine = new SysIdRoutine(
-            new SysIdRoutine.Config(
-                Volts.of(1).per(Second),
-                Volts.of(7),
-                Seconds.of(5)),
-            new SysIdRoutine.Mechanism(
-                (voltage) -> flywheelMotor.setVoltage(voltage),
-                // Tell SysId how to record a frame of data for each motor on the mechanism
-                // being
-                log -> {
-                    // Record a frame for the shooter motor.
-                    log.motor("flywheel")
-                            .voltage(Volts
-                                    .of(flywheelMotor.getAppliedOutput() * RobotController.getBatteryVoltage()))
-                            .linearPosition(Distance.ofBaseUnits(flywheelEncoder.getPosition(), Feet))
-                            .linearVelocity(LinearVelocity.ofBaseUnits(flywheelEncoder.getVelocity(),
-                                    Feet.per(Second)));
-                },
-                // Tell SysId to make generated commands require this subsystem, suffix test
-                // state in
-                // WPILog with this subsystem's name ("shooter")
-                this
-            )
-        );
+                new SysIdRoutine.Config(
+                        Volts.of(1).per(Second),
+                        Volts.of(7),
+                        Seconds.of(5)),
+                new SysIdRoutine.Mechanism(
+                        (voltage) -> flywheelMotor.setVoltage(voltage),
+                        // Tell SysId how to record a frame of data for each motor on the mechanism
+                        // being
+                        log -> {
+                            // Record a frame for the shooter motor.
+                            log.motor("flywheel")
+                                    .voltage(Volts
+                                            .of(flywheelMotor.getAppliedOutput() * RobotController.getBatteryVoltage()))
+                                    .linearPosition(Distance.ofBaseUnits(flywheelEncoder.getPosition(), Feet))
+                                    .linearVelocity(LinearVelocity.ofBaseUnits(flywheelEncoder.getVelocity(),
+                                            Feet.per(Second)));
+                        },
+                        // Tell SysId to make generated commands require this subsystem, suffix test
+                        // state in
+                        // WPILog with this subsystem's name ("shooter")
+                        this));
 
         flywheelPIDController.setTolerance(Constants.FlywheelConstants.PID_TOLERANCE);
 
-        flywheelAtVelocity = new Trigger(() -> (flywheelPIDController.atSetpoint()));
+        flywheelAtVelocity = false;
     }
 
     public void resetPIDController() {
@@ -192,5 +188,14 @@ public class FlywheelSubsystem extends SubsystemBase {
                 0.0,
                 this.getFlywheelSpeed(),
                 flywheelPIDController.getVelocityError());
+
+        if (Math.abs(flywheelMotor.getAppliedOutput()) > 0.05) {
+            if (flywheelPIDController.atSetpoint())
+                flywheelAtVelocity = true;
+            if (this.getFlywheelSpeed() < flywheelPIDController.getSetpoint() - 20.0)
+                flywheelAtVelocity = false;
+        } else {
+            flywheelAtVelocity = false;
+        }
     }
 }
