@@ -58,6 +58,7 @@ public class RobotContainer {
 
     private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
                                                                                         // speed
+    private double DriveSpeedWhileIntaking = 0.3 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
                                                                                       // max angular velocity
 
@@ -93,11 +94,15 @@ public class RobotContainer {
                         .withVelocityY(-m_controller.getLeftX() * MaxSpeed)
                         .withRotationalRate(-m_controller.getRightX() * MaxAngularRate)));
         m_controller.b().onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric(), drivetrain));
+        m_controller.leftTrigger(0.8).whileTrue(
+                drivetrain.applyRequest(() -> drive.withVelocityX(-m_controller.getLeftY() * DriveSpeedWhileIntaking)
+                        .withVelocityY(-m_controller.getLeftX() * DriveSpeedWhileIntaking)
+                        .withRotationalRate(-m_controller.getRightX() * MaxAngularRate)));
 
         // Intaking
         m_intakeSubsystem.setDefaultCommand(new RetractIntakeCommand(m_intakeSubsystem));
-        m_controller.leftTrigger(0.8)
-                .toggleOnTrue(new DeployIntakeCommand(m_intakeSubsystem, m_controller.leftBumper()));
+        m_controller.a()
+                .toggleOnTrue(new DeployIntakeCommand(m_intakeSubsystem, m_controller.leftTrigger(0.8)));
 
         // Shooting
         Trigger readyToShoot = m_flywheelSubsystem.flywheelAtTarget.and(m_HoodSubsystem.hoodAtTarget)
@@ -120,8 +125,8 @@ public class RobotContainer {
         m_HoodSubsystem.setDefaultCommand(new SetHoodAngleCommand(m_HoodSubsystem, 74));
         m_indexSubsystem.setDefaultCommand(new SetIndexSpeedsCommand(m_indexSubsystem, 0.0, 0.0));
 
-        m_controller.rightBumper().or(m_controller.rightTrigger(0.8)).whileTrue(prepareToShoot);
-        m_controller.rightBumper().and(readyToShoot).whileTrue(new ActivateAgitatedIndexCommand(m_indexSubsystem));
+        m_controller.rightTrigger(0.8).or(m_controller.leftBumper()).whileTrue(prepareToShoot);
+        m_controller.rightTrigger(0.8).and(readyToShoot).whileTrue(new ActivateAgitatedIndexCommand(m_indexSubsystem));
         readyToShootEntry
                 .accept((m_flywheelSubsystem.flywheelAtTarget).and(m_HoodSubsystem.hoodAtTarget).getAsBoolean());
     }
