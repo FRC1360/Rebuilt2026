@@ -27,13 +27,27 @@ public class RobotState {
     private boolean currentIntakeState;
 
     private InterpolatingDoubleTreeMap turretDistanceToHoodAngleMap;
+    private InterpolatingDoubleTreeMap turretDistanceToFlywheelVelocityMap;
     private InterpolatingDoubleTreeMap turretDistanceToTimeOfFlightMap;
 
     private static RobotState instance = null;
 
     private RobotState() {
         turretDistanceToHoodAngleMap = new InterpolatingDoubleTreeMap();
-        turretDistanceToHoodAngleMap.put(0.0, 0.0);
+        turretDistanceToHoodAngleMap.put(1.423, 74.0);
+        turretDistanceToHoodAngleMap.put(2.511, 71.0);
+        turretDistanceToHoodAngleMap.put(2.75, 70.0);
+        turretDistanceToHoodAngleMap.put(3.54, 65.0);
+        turretDistanceToHoodAngleMap.put(4.26, 63.0);
+        turretDistanceToHoodAngleMap.put(5.016, 60.0);
+
+        turretDistanceToFlywheelVelocityMap = new InterpolatingDoubleTreeMap();
+        turretDistanceToFlywheelVelocityMap.put(1.423, 45.0);
+        turretDistanceToFlywheelVelocityMap.put(2.511, 50.0);
+        turretDistanceToFlywheelVelocityMap.put(2.75, 55.0);
+        turretDistanceToFlywheelVelocityMap.put(3.54, 56.0);
+        turretDistanceToFlywheelVelocityMap.put(4.26, 58.0);
+        turretDistanceToFlywheelVelocityMap.put(5.016, 60.0);
 
         turretDistanceToTimeOfFlightMap = new InterpolatingDoubleTreeMap();
         turretDistanceToTimeOfFlightMap.put(0.0, 0.0);
@@ -72,6 +86,11 @@ public class RobotState {
     public double getHoodAngleFromGoalPose(Pose2d poseToSetAngleFrom) {
         // Get distance between turret position and goal position, plug that into the map
         return turretDistanceToHoodAngleMap.get(
+                poseToSetAngleFrom.getTranslation().getDistance(this.getTurretOdomPose().getTranslation()));
+    }
+    public double getFlywheelVelocityFromGoalPose(Pose2d poseToSetAngleFrom) {
+        // Get distance between turret position and goal position, plug that into the map
+        return turretDistanceToFlywheelVelocityMap.get(
                 poseToSetAngleFrom.getTranslation().getDistance(this.getTurretOdomPose().getTranslation()));
     }
 

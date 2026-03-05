@@ -4,26 +4,21 @@
 
 package frc.robot.commands.flywheel;
 
-import java.util.function.Supplier;
-
-import org.photonvision.PhotonUtils;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.FlywheelSubsystem;
-import frc.robot.Constants.FlywheelConstants;
+import frc.robot.util.RobotState;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class SetFlywheelFromPoseCommand extends Command {
+public class SetFlywheelVelocityFromPoseCommand extends Command {
 
     private final FlywheelSubsystem m_flywheelSubsystem;
+    private final RobotState robotState = RobotState.getInstance();
     private final Pose2d m_targetPose;
-    private final Pose2d turretPose; 
       
     /** Creates a new SetFlywheelToHubSpeedCommand. */
-    public SetFlywheelFromPoseCommand(FlywheelSubsystem flywheelSubsystem, Pose2d targetPose, Supplier<Pose2d> turretPose) {
+    public SetFlywheelVelocityFromPoseCommand(FlywheelSubsystem flywheelSubsystem, Pose2d targetPose) {
         m_flywheelSubsystem = flywheelSubsystem;
         m_targetPose = targetPose;
-        this.turretPose = turretPose.get();
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(this.m_flywheelSubsystem);
     } 
@@ -31,20 +26,16 @@ public class SetFlywheelFromPoseCommand extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        
+        m_flywheelSubsystem.grabConstantsFromNetworkTables();
+        m_flywheelSubsystem.resetPIDController();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        double distance = PhotonUtils.getDistanceToPose(this.turretPose, this.m_targetPose);
-         if (distance > FlywheelConstants.DISTANCE_THRESHOLD) {
-            m_flywheelSubsystem.setFlywheelSpeed(FlywheelConstants.HIGH_SPEED);
-         } 
-         else{
-            m_flywheelSubsystem.setFlywheelSpeed(FlywheelConstants.LOW_SPEED);
-         }
-        }
+        m_flywheelSubsystem.setFlywheelVoltage(m_flywheelSubsystem.closedLoopCalculate(
+                robotState.getFlywheelVelocityFromGoalPose(m_targetPose)));
+    }
 
     // Called once the command ends or is interrupted.
     @Override

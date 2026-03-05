@@ -8,22 +8,26 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import org.photonvision.PhotonUtils;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.flywheel.SetFlywheelVelocityCommand;
+import frc.robot.commands.flywheel.SetFlywheelVelocityFromPoseCommand;
 import frc.robot.commands.hood.SetHoodAngleCommand;
+import frc.robot.commands.hood.SetHoodAngleFromPose;
 import frc.robot.commands.index.ActivateAgitatedIndexCommand;
 import frc.robot.commands.index.SetIndexSpeedsCommand;
 import frc.robot.commands.intake.DeployIntakeCommand;
@@ -34,6 +38,7 @@ import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.IndexSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.util.FieldConstants;
 import frc.robot.util.RobotState;
 
 public class RobotContainer {
@@ -60,6 +65,10 @@ public class RobotContainer {
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.15).withRotationalDeadband(MaxAngularRate * 0.15) // Add a 15% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+    private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
+            .withDeadband(MaxSpeed * 0.15) // Add a 15% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
+            .withHeadingPID(5.0, 0.0, 0.0); // Use open-loop control for drive motors
     private final SwerveTelemetry swerveLogger = new SwerveTelemetry(MaxSpeed);
 
     /**
@@ -86,17 +95,25 @@ public class RobotContainer {
         m_controller.b().onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric(), drivetrain));
 
         // Intaking
-        m_intakeSubsystem.setDefaultCommand(
-                new ConditionalCommand(
-                        new DeployIntakeCommand(m_intakeSubsystem, m_controller.leftBumper()),
-                        new RetractIntakeCommand(m_intakeSubsystem),
-                        robotState.isIntakeCurrentlyDeployed));
-        m_controller.leftTrigger(0.8).onTrue(robotState.toggleIntakeState);
+        m_intakeSubsystem.setDefaultCommand(new RetractIntakeCommand(m_intakeSubsystem));
+        m_controller.leftTrigger(0.8)
+                .toggleOnTrue(new DeployIntakeCommand(m_intakeSubsystem, m_controller.leftBumper()));
 
         // Shooting
-        Trigger readyToShoot = m_flywheelSubsystem.flywheelAtTarget.and(m_HoodSubsystem.hoodAtTarget);
-        Command prepareToShoot = new SetFlywheelVelocityCommand(m_flywheelSubsystem, 50)
-                .alongWith(new SetHoodAngleCommand(m_HoodSubsystem, 65));
+        Trigger readyToShoot = m_flywheelSubsystem.flywheelAtTarget.and(m_HoodSubsystem.hoodAtTarget)
+                .and(() -> Math.abs(driveFacingAngle.HeadingController.getPositionError()) < Units
+                        .degreesToRadians(2.0));
+        Command prepareToShoot = new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
+                FieldConstants.RED_ALLIANCE_HUB_POSE)
+                .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE))
+                .alongWith(drivetrain.applyRequest(() -> driveFacingAngle.withTargetDirection(
+                        PhotonUtils.getYawToPose(
+                                new Pose2d(
+                                        robotState.getTurretOdomPose().getTranslation(),
+                                        new Rotation2d()),
+                                FieldConstants.RED_ALLIANCE_HUB_POSE).plus(Rotation2d.fromDegrees(90)))
+                        .withVelocityX(-m_controller.getLeftY() * MaxSpeed)
+                        .withVelocityY(-m_controller.getLeftX() * MaxSpeed)));
 
         m_flywheelSubsystem.setDefaultCommand(
                 Commands.run(() -> m_flywheelSubsystem.setFlywheelVoltage(0.0), m_flywheelSubsystem));

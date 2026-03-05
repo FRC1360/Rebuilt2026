@@ -119,6 +119,9 @@ public class HoodSubsystem extends SubsystemBase {
     }
 
     public double closedLoopCalculate(double target) {
+        if (target < HoodConstants.MIN_ANGLE) target = HoodConstants.MIN_ANGLE;
+        else if (target > HoodConstants.MAX_ANGLE) target = HoodConstants.MAX_ANGLE;
+        
         return hoodProfiledPIDController.calculate(getCurrentAngle(), target)
                 + hoodFFController.calculate(hoodProfiledPIDController.getSetpoint().velocity); // double check pid input
     }

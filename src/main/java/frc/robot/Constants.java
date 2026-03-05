@@ -35,6 +35,9 @@ public final class Constants {
         public static final double STARTUP_ANGLE_DEGREES = 75.0;
         public static final double MECHANISM_CONVERSION_FACTOR = ((164.0 / 12.0) * (60.0 / 18.0)) / 360.0;
         public static final double PID_TOLERANCE = 1.0;
+
+        public static final double MIN_ANGLE = 57.0;
+        public static final double MAX_ANGLE = 74.0;
     }
 
     public static final class IntakeConstants {
