@@ -27,6 +27,7 @@ import frc.robot.commands.index.ActivateAgitatedIndexCommand;
 import frc.robot.commands.index.SetIndexSpeedsCommand;
 import frc.robot.commands.intake.DeployIntakeCommand;
 import frc.robot.commands.intake.RetractIntakeCommand;
+import frc.robot.commands.intake.SetIntakePivotAngleCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelSubsystem;
@@ -98,12 +99,13 @@ public class RobotContainer {
         Trigger shootingInput = m_controller.rightTrigger(0.8);
         Trigger intakePivotInput = m_controller.a();
         Trigger intakeRollerInput = m_controller.leftTrigger(0.8);
+        Trigger intakeAgitateInput = m_controller.b();
 
         Trigger preparedAndReadyToShoot = shootingInput
                 .and(m_flywheelSubsystem.flywheelAtTarget)
                 .and(m_HoodSubsystem.hoodAtTarget);
 
-        Trigger slowDriveModeActivated = intakeRollerInput.and(shootingInput);
+        Trigger slowDriveModeActivated = intakeRollerInput.or(shootingInput);
 
         // Driving
         Command joystickDriveAtNormalSpeed = drivetrain.applyRequest(
@@ -128,8 +130,15 @@ public class RobotContainer {
                         .until(robotState.isIntakeCurrentlyDeployed),
                 robotState.isIntakeCurrentlyDeployed).repeatedly();
 
+        Command agitateIntake = Commands.repeatingSequence(
+                new SetIntakePivotAngleCommand(m_intakeSubsystem, 45.0, () -> true)
+                        .withTimeout(0.75),
+                new SetIntakePivotAngleCommand(m_intakeSubsystem, 15.0, () -> true)
+                        .withTimeout(0.75));
+
         m_intakeSubsystem.setDefaultCommand(setIntakePivotBasedOnState);
         intakePivotInput.onTrue(robotState.toggleIntakeState);
+        intakeAgitateInput.whileTrue(agitateIntake);
 
         // Shooting
         Command disableFlywheels = Commands.run(() -> m_flywheelSubsystem.setFlywheelVoltage(0.0), m_flywheelSubsystem);

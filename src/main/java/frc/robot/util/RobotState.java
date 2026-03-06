@@ -77,7 +77,7 @@ public class RobotState {
         turretOdomPosePublisher.accept(this.getTurretOdomPose());
     }
 
-    public Trigger isIntakeCurrentlyDeployed = new Trigger(() -> this.currentIntakeState);
+    public final Trigger isIntakeCurrentlyDeployed = new Trigger(() -> this.currentIntakeState);
 
     public Command toggleIntakeState = Commands.runOnce(() -> {
         this.currentIntakeState = !this.currentIntakeState;
