@@ -8,16 +8,11 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import org.photonvision.PhotonUtils;
-
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -44,7 +39,6 @@ import frc.robot.util.RobotState;
 public class RobotContainer {
 
     private final NetworkTable loggingTable = NetworkTableInstance.getDefault().getTable("Robot Container");
-    private final BooleanPublisher readyToShootEntry = loggingTable.getBooleanTopic("Ready To Shoot").publish();
 
     private final RobotState robotState = RobotState.getInstance();
 
@@ -56,21 +50,31 @@ public class RobotContainer {
     private final FlywheelSubsystem m_flywheelSubsystem = new FlywheelSubsystem();
     private final HoodSubsystem m_HoodSubsystem = new HoodSubsystem();
 
-    private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
-                                                                                        // speed
-    private double DriveSpeedWhileIntaking = 0.3 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
-                                                                                      // max angular velocity
+    // Use theoretical 'max' speed for normal driving & 3/4ths rotations per sec.
+    private static final double NORMAL_DRIVE_TRANSLATIONAL_SPEED = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    private static final double NORMAL_DRIVE_ANGULAR_SPEED = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
+
+    // Slow down speed when intaking and/or shooting
+    private static final double SLOW_DRIVE_TRANSLATIONAL_SPEED = 0.3 * NORMAL_DRIVE_TRANSLATIONAL_SPEED;
+    private static final double SLOW_DRIVE_ANGULAR_SPEED = 1.0 * NORMAL_DRIVE_ANGULAR_SPEED;
 
     /* Setting up bindings for necessary control of the swerve drive platform */
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.15).withRotationalDeadband(MaxAngularRate * 0.15) // Add a 15% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+    private final SwerveRequest.FieldCentric normalTeleopDriveRequest = new SwerveRequest.FieldCentric()
+            .withDeadband(NORMAL_DRIVE_TRANSLATIONAL_SPEED * 0.15)
+            .withRotationalDeadband(NORMAL_DRIVE_ANGULAR_SPEED * 0.15)
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
+    private final SwerveRequest.FieldCentric slowTeleopDriveRequest = new SwerveRequest.FieldCentric()
+            .withDeadband(SLOW_DRIVE_TRANSLATIONAL_SPEED * 0.15)
+            .withRotationalDeadband(SLOW_DRIVE_ANGULAR_SPEED * 0.15)
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
     private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
-            .withDeadband(MaxSpeed * 0.15) // Add a 15% deadband
+            .withDeadband(NORMAL_DRIVE_TRANSLATIONAL_SPEED * 0.15)
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
-            .withHeadingPID(5.0, 0.0, 0.0); // Use open-loop control for drive motors
-    private final SwerveTelemetry swerveLogger = new SwerveTelemetry(MaxSpeed);
+            .withHeadingPID(5.0, 0.0, 0.0);
+
+    private final SwerveTelemetry swerveLogger = new SwerveTelemetry(NORMAL_DRIVE_TRANSLATIONAL_SPEED);
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -88,47 +92,58 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+        /*
+         * Triger Configuration For Inputs and Setpoints
+         */
+        Trigger shootingInput = m_controller.rightTrigger(0.8);
+        Trigger intakePivotInput = m_controller.a();
+        Trigger intakeRollerInput = m_controller.leftTrigger(0.8);
+
+        Trigger preparedAndReadyToShoot = shootingInput
+                .and(m_flywheelSubsystem.flywheelAtTarget)
+                .and(m_HoodSubsystem.hoodAtTarget);
+
+        Trigger slowDriveModeActivated = intakeRollerInput.and(shootingInput);
+
         // Driving
-        drivetrain.setDefaultCommand(
-                drivetrain.applyRequest(() -> drive.withVelocityX(-m_controller.getLeftY() * MaxSpeed)
-                        .withVelocityY(-m_controller.getLeftX() * MaxSpeed)
-                        .withRotationalRate(-m_controller.getRightX() * MaxAngularRate)));
-        m_controller.b().onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric(), drivetrain));
-        m_controller.leftTrigger(0.8).whileTrue(
-                drivetrain.applyRequest(() -> drive.withVelocityX(-m_controller.getLeftY() * DriveSpeedWhileIntaking)
-                        .withVelocityY(-m_controller.getLeftX() * DriveSpeedWhileIntaking)
-                        .withRotationalRate(-m_controller.getRightX() * MaxAngularRate)));
+        Command joystickDriveAtNormalSpeed = drivetrain.applyRequest(
+                () -> normalTeleopDriveRequest
+                        .withVelocityX(-m_controller.getLeftY() * NORMAL_DRIVE_TRANSLATIONAL_SPEED)
+                        .withVelocityY(-m_controller.getLeftX() * NORMAL_DRIVE_TRANSLATIONAL_SPEED)
+                        .withRotationalRate(-m_controller.getRightX() * NORMAL_DRIVE_ANGULAR_SPEED));
+        Command joystickDriveAtSlowSpeed = drivetrain.applyRequest(
+                () -> slowTeleopDriveRequest
+                        .withVelocityX(-m_controller.getLeftY() * SLOW_DRIVE_TRANSLATIONAL_SPEED)
+                        .withVelocityY(-m_controller.getLeftX() * SLOW_DRIVE_TRANSLATIONAL_SPEED)
+                        .withRotationalRate(-m_controller.getRightX() * SLOW_DRIVE_ANGULAR_SPEED));
+
+        drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
+        slowDriveModeActivated.whileTrue(joystickDriveAtSlowSpeed);
 
         // Intaking
-        m_intakeSubsystem.setDefaultCommand(new RetractIntakeCommand(m_intakeSubsystem));
-        m_controller.a()
-                .toggleOnTrue(new DeployIntakeCommand(m_intakeSubsystem, m_controller.leftTrigger(0.8)));
+        Command setIntakePivotBasedOnState = Commands.either(
+                new DeployIntakeCommand(m_intakeSubsystem, intakeRollerInput)
+                        .until(robotState.isIntakeCurrentlyDeployed.negate()),
+                new RetractIntakeCommand(m_intakeSubsystem)
+                        .until(robotState.isIntakeCurrentlyDeployed),
+                robotState.isIntakeCurrentlyDeployed).repeatedly();
+
+        m_intakeSubsystem.setDefaultCommand(setIntakePivotBasedOnState);
+        intakePivotInput.onTrue(robotState.toggleIntakeState);
 
         // Shooting
-        Trigger readyToShoot = m_flywheelSubsystem.flywheelAtTarget.and(m_HoodSubsystem.hoodAtTarget)
-                .and(() -> Math.abs(driveFacingAngle.HeadingController.getPositionError()) < Units
-                        .degreesToRadians(2.0));
+        Command disableFlywheels = Commands.run(() -> m_flywheelSubsystem.setFlywheelVoltage(0.0), m_flywheelSubsystem);
+
         Command prepareToShoot = new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
                 FieldConstants.RED_ALLIANCE_HUB_POSE)
-                .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE))
-                .alongWith(drivetrain.applyRequest(() -> driveFacingAngle.withTargetDirection(
-                        PhotonUtils.getYawToPose(
-                                new Pose2d(
-                                        robotState.getTurretOdomPose().getTranslation(),
-                                        new Rotation2d()),
-                                FieldConstants.RED_ALLIANCE_HUB_POSE).plus(Rotation2d.fromDegrees(90)))
-                        .withVelocityX(-m_controller.getLeftY() * MaxSpeed)
-                        .withVelocityY(-m_controller.getLeftX() * MaxSpeed)));
+                .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE));
 
-        m_flywheelSubsystem.setDefaultCommand(
-                Commands.run(() -> m_flywheelSubsystem.setFlywheelVoltage(0.0), m_flywheelSubsystem));
+        m_flywheelSubsystem.setDefaultCommand(disableFlywheels);
         m_HoodSubsystem.setDefaultCommand(new SetHoodAngleCommand(m_HoodSubsystem, 74));
         m_indexSubsystem.setDefaultCommand(new SetIndexSpeedsCommand(m_indexSubsystem, 0.0, 0.0));
 
-        m_controller.rightTrigger(0.8).or(m_controller.leftBumper()).whileTrue(prepareToShoot);
-        m_controller.rightTrigger(0.8).and(readyToShoot).whileTrue(new ActivateAgitatedIndexCommand(m_indexSubsystem));
-        readyToShootEntry
-                .accept((m_flywheelSubsystem.flywheelAtTarget).and(m_HoodSubsystem.hoodAtTarget).getAsBoolean());
+        shootingInput.whileTrue(prepareToShoot);
+        preparedAndReadyToShoot.whileTrue(new ActivateAgitatedIndexCommand(m_indexSubsystem));
     }
 
     public Command getAutonomousCommand() {
