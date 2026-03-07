@@ -12,9 +12,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -34,12 +31,11 @@ import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.IndexSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.RobotState;
 
 public class RobotContainer {
-
-    private final NetworkTable loggingTable = NetworkTableInstance.getDefault().getTable("Robot Container");
 
     private final RobotState robotState = RobotState.getInstance();
 
@@ -50,6 +46,7 @@ public class RobotContainer {
     private final IndexSubsystem m_indexSubsystem = new IndexSubsystem();
     private final FlywheelSubsystem m_flywheelSubsystem = new FlywheelSubsystem();
     private final HoodSubsystem m_HoodSubsystem = new HoodSubsystem();
+    private final TurretSubsystem m_turretSubsysem = new TurretSubsystem();
 
     // Use theoretical 'max' speed for normal driving & 3/4ths rotations per sec.
     private static final double NORMAL_DRIVE_TRANSLATIONAL_SPEED = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
@@ -83,7 +80,7 @@ public class RobotContainer {
     public RobotContainer() {
         robotState.setAllSuppliers(
                 () -> drivetrain.getState().Pose,
-                () -> new Rotation2d());
+                () -> m_turretSubsysem.getCurrentRobotRelativeRotation());
 
         configureBindings();
         drivetrain.registerTelemetry(swerveLogger::telemeterize);
@@ -121,6 +118,7 @@ public class RobotContainer {
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
         slowDriveModeActivated.whileTrue(joystickDriveAtSlowSpeed);
+        m_controller.y().onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric(), drivetrain));
 
         // Intaking
         Command setIntakePivotBasedOnState = Commands.either(
@@ -133,7 +131,7 @@ public class RobotContainer {
         Command agitateIntake = Commands.repeatingSequence(
                 new SetIntakePivotAngleCommand(m_intakeSubsystem, 45.0, () -> true)
                         .withTimeout(0.75),
-                new SetIntakePivotAngleCommand(m_intakeSubsystem, 15.0, () -> true)
+                new SetIntakePivotAngleCommand(m_intakeSubsystem, 5.0, () -> true)
                         .withTimeout(0.75));
 
         m_intakeSubsystem.setDefaultCommand(setIntakePivotBasedOnState);
@@ -149,6 +147,7 @@ public class RobotContainer {
 
         m_flywheelSubsystem.setDefaultCommand(disableFlywheels);
         m_HoodSubsystem.setDefaultCommand(new SetHoodAngleCommand(m_HoodSubsystem, 74));
+        m_turretSubsysem.setDefaultCommand(Commands.run(() -> m_turretSubsysem.setVoltage(0.0), m_turretSubsysem));
         m_indexSubsystem.setDefaultCommand(new SetIndexSpeedsCommand(m_indexSubsystem, 0.0, 0.0));
 
         shootingInput.whileTrue(prepareToShoot);

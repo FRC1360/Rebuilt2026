@@ -70,19 +70,19 @@ public final class Constants {
 
     public static final class TurretConstants {
         public static final int KRAKEN_CAN_ID = 40;
-        public static final InvertedValue KRAKEN_INVERTED_VALUE = InvertedValue.Clockwise_Positive;
+        public static final InvertedValue KRAKEN_INVERTED_VALUE = InvertedValue.CounterClockwise_Positive;
         public static final int KRAKEN_STATOR_CURRENT_LIMIT = 30;
-        public static final double MECHANISM_CONVERSION_FACTOR = (1.0 / 7.0) * 360.0;
+        public static final double MECHANISM_CONVERSION_FACTOR = (651.0 / 22.0) / 360.0;
 
-        public static final double ENCODER_STARTUP_ANGLE_DEGREES = 0.0;
-        public static final double TOTAL_WRAP_AROUND_ANGLE_RANGE = 400;
+        public static final double ENCODER_STARTUP_ANGLE_DEGREES = -195.0;
+        public static final double TOTAL_WRAP_AROUND_ANGLE_RANGE = 390.0;
         public static final double POSITIVE_THRESHOLD = 180 - (TOTAL_WRAP_AROUND_ANGLE_RANGE - 360) / 2;
         public static final double NEGATIVE_THRESHOLD = -180 + (TOTAL_WRAP_AROUND_ANGLE_RANGE - 360) / 2;
-        public static final double PID_TOLERANCE = 0;
+        public static final double PID_TOLERANCE = 3;
 
         public static final Transform2d ROBOT_TO_TURRET_CENTER = new Transform2d(
                 new Translation2d(-((0.705 / 2.0) - 0.268852), ((0.705 / 2.0) - 0.212725)),
-                new Rotation2d());
+                Rotation2d.fromDegrees(-70.0));
         /*
          * Note: The rotation offset for turret to center is measured relative to where
          * the encoder

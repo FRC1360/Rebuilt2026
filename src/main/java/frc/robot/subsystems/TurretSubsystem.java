@@ -35,15 +35,15 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 public class TurretSubsystem extends SubsystemBase {
 
     private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
-        0.055,
-        0.01,
         0.0,
-        3000,
-        3500,
-        0.11,
-        0.0022,
         0.0,
-        0
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
     );
     private final VoltageOut turretVoltageRequest = new VoltageOut(0.0);
 
@@ -90,7 +90,7 @@ public class TurretSubsystem extends SubsystemBase {
 
         motorOutputConfigs = new MotorOutputConfigs()
             .withInverted(TurretConstants.KRAKEN_INVERTED_VALUE)
-            .withNeutralMode(NeutralModeValue.Brake);
+            .withNeutralMode(NeutralModeValue.Coast);
         
         motorCurrentLimitsConfigs = new CurrentLimitsConfigs()
             .withStatorCurrentLimit(TurretConstants.KRAKEN_STATOR_CURRENT_LIMIT)
