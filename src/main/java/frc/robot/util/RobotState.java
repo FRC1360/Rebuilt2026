@@ -9,6 +9,8 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -67,6 +69,8 @@ public class RobotState {
 
         return instance;
     }
+
+    public Trigger isBlueAlliance = new Trigger(() -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red);
 
     public void setAllSuppliers(Supplier<Pose2d> robotOdomPoseSupplier, Supplier<Rotation2d> turretRotationSupplier) {
         this.robotOdomPoseSupplier = robotOdomPoseSupplier;

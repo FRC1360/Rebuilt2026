@@ -15,6 +15,12 @@
           "data": {
             "pathName": "LCenter to LShoot"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "EXECUTE_SHOT_ROUTINE"
+          }
         }
       ]
     }

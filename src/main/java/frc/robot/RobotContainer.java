@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import org.photonvision.PhotonUtils;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -81,7 +82,7 @@ public class RobotContainer {
 
     private final SwerveTelemetry swerveLogger = new SwerveTelemetry(NORMAL_DRIVE_TRANSLATIONAL_SPEED);
 
-    private final PathPlannerAuto testAuto1 = new PathPlannerAuto("Left Auto");
+    private PathPlannerAuto testAuto1;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -92,6 +93,7 @@ public class RobotContainer {
                 () -> m_turretSubsysem.getCurrentRobotRelativeRotation());
         driveFacingAngle.HeadingController.setTolerance(Units.degreesToRadians(3.0));
 
+        configureNamedCommands();
         configureAllAutos();
 
         configureBindings();
@@ -101,7 +103,21 @@ public class RobotContainer {
         CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     }
 
+    private void configureNamedCommands() {
+        NamedCommands.registerCommand("EXECUTE_SHOT_ROUTINE", Commands.either(
+                Commands.parallel(
+                        new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE),
+                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
+                                FieldConstants.BLUE_ALLIANCE_HUB_POSE)),
+                Commands.parallel(
+                        new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
+                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
+                                FieldConstants.RED_ALLIANCE_HUB_POSE)),
+                robotState.isBlueAlliance));
+    }
+
     private void configureAllAutos() {
+        testAuto1 = new PathPlannerAuto("Left Auto");
         testAuto1.event("L Deploy Intake").onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> true));
     }
 
@@ -165,9 +181,16 @@ public class RobotContainer {
         // Shooting
         Command disableFlywheels = Commands.run(() -> m_flywheelSubsystem.setFlywheelVoltage(0.0), m_flywheelSubsystem);
 
-        Command prepareToShoot = new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                FieldConstants.BLUE_ALLIANCE_HUB_POSE)
-                .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE));
+        Command prepareToShoot = Commands.either(
+                Commands.parallel(
+                        new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE),
+                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
+                                FieldConstants.BLUE_ALLIANCE_HUB_POSE)),
+                Commands.parallel(
+                        new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
+                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
+                                FieldConstants.RED_ALLIANCE_HUB_POSE)),
+                robotState.isBlueAlliance);
 
         m_flywheelSubsystem.setDefaultCommand(disableFlywheels);
         m_HoodSubsystem.setDefaultCommand(new SetHoodAngleCommand(m_HoodSubsystem, 74));
