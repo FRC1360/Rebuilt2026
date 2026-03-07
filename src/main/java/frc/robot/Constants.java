@@ -47,7 +47,7 @@ public final class Constants {
         public static final int ROLLER_VORTEX_FREE_CURRENT_LIMIT = 80;
         public static final boolean ROLLER_VORTEX_INVERTED = true;
 
-        public static final double ROLLER_ACTIVATED_SPEED = 0.6;
+        public static final double ROLLER_ACTIVATED_SPEED = 0.75;
 
         // Pivot Constants
         public static final int PIVOT_VORTEX_CAN_ID = 30;
@@ -102,8 +102,8 @@ public final class Constants {
         public static final boolean HOPPER_VORTEX_INVERTED = false;
 
         public static final int MAGAZINE_VORTEX_CAN_ID = 33;
-        public static final int MAGAZINE_VORTEX_STALL_CURRENT_LIMIT = 40;
-        public static final int MAGAZINE_VORTEX_FREE_CURRENT_LIMIT = 40;
+        public static final int MAGAZINE_VORTEX_STALL_CURRENT_LIMIT = 80;
+        public static final int MAGAZINE_VORTEX_FREE_CURRENT_LIMIT = 80;
         public static final boolean MAGAZINE_VORTEX_INVERTED = false;
 
         public static final int MAGAZINE_SENSOR_DIGITAL_CHANNEL = 1;

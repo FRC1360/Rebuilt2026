@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LStart to LCenter"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "LCenter to LShoot"
+            "pathName": "2m Path"
           }
         }
       ]

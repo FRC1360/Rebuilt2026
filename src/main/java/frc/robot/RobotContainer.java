@@ -12,10 +12,12 @@ import org.photonvision.PhotonUtils;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -79,6 +81,8 @@ public class RobotContainer {
 
     private final SwerveTelemetry swerveLogger = new SwerveTelemetry(NORMAL_DRIVE_TRANSLATIONAL_SPEED);
 
+    private final PathPlannerAuto testAuto1 = new PathPlannerAuto("Left Auto");
+
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
@@ -86,12 +90,19 @@ public class RobotContainer {
         robotState.setAllSuppliers(
                 () -> drivetrain.getState().Pose,
                 () -> m_turretSubsysem.getCurrentRobotRelativeRotation());
+        driveFacingAngle.HeadingController.setTolerance(Units.degreesToRadians(3.0));
+
+        configureAllAutos();
 
         configureBindings();
         drivetrain.registerTelemetry(swerveLogger::telemeterize);
 
         // Run warmup command for pathplanner as per CTRE example
         CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+    }
+
+    private void configureAllAutos() {
+        testAuto1.event("L Deploy Intake").onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> true));
     }
 
     private void configureBindings() {
@@ -103,8 +114,7 @@ public class RobotContainer {
         Trigger intakeRollerInput = m_controller.leftTrigger(0.8);
         Trigger intakeAgitateInput = m_controller.b();
 
-        Trigger preparedAndReadyToShoot = shootingInput
-                .and(m_flywheelSubsystem.flywheelAtTarget)
+        Trigger preparedAndReadyToShoot = m_flywheelSubsystem.flywheelAtTarget
                 .and(m_HoodSubsystem.hoodAtTarget);
 
         Trigger slowDriveModeActivated = shootingInput;
@@ -128,7 +138,7 @@ public class RobotContainer {
                                 new Pose2d(
                                         robotState.getTurretOdomPose().getTranslation(),
                                         new Rotation2d()),
-                                FieldConstants.RED_ALLIANCE_HUB_POSE).plus(Rotation2d.fromDegrees(90.0))));
+                                FieldConstants.BLUE_ALLIANCE_HUB_POSE).plus(Rotation2d.fromDegrees(-90.0))));
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
         slowDriveModeActivated.whileTrue(joystickDriveWhileFacingHub);
@@ -156,8 +166,8 @@ public class RobotContainer {
         Command disableFlywheels = Commands.run(() -> m_flywheelSubsystem.setFlywheelVoltage(0.0), m_flywheelSubsystem);
 
         Command prepareToShoot = new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                FieldConstants.RED_ALLIANCE_HUB_POSE)
-                .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE));
+                FieldConstants.BLUE_ALLIANCE_HUB_POSE)
+                .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE));
 
         m_flywheelSubsystem.setDefaultCommand(disableFlywheels);
         m_HoodSubsystem.setDefaultCommand(new SetHoodAngleCommand(m_HoodSubsystem, 74));
@@ -175,6 +185,20 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return null;
+        Command aimDrivetrainAtBlueHub = drivetrain.applyRequest(
+                () -> driveFacingAngle
+                        .withVelocityX(0.0).withVelocityY(0.0)
+                        .withTargetDirection(PhotonUtils.getYawToPose(
+                                new Pose2d(
+                                        robotState.getTurretOdomPose().getTranslation(),
+                                        new Rotation2d()),
+                                FieldConstants.BLUE_ALLIANCE_HUB_POSE).plus(Rotation2d.fromDegrees(-90.0))));
+
+        Command executeShotForBlueHub = new DeployIntakeCommand(m_intakeSubsystem, () -> false).alongWith(
+                new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE)
+                        .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE))
+                        .alongWith(aimDrivetrainAtBlueHub));
+
+        return testAuto1;
     }
 }

@@ -19,7 +19,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "RShoot to Climb"
+            "pathName": "RShoot to Human"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Human to RShoot"
           }
         }
       ]

@@ -8,55 +8,58 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.7056708938527,
-        "y": 6.95318661971831
+        "x": 7.7584247084066895,
+        "y": 6.119329680022631
       },
       "isLocked": false,
       "linkedName": "LCenter"
     },
     {
       "anchor": {
-        "x": 4.527776280076291,
-        "y": 7.421899436986503
+        "x": 6.472038300582242,
+        "y": 7.395763781910212
       },
       "prevControl": {
-        "x": 6.319021520548906,
-        "y": 7.46752160981273
+        "x": 7.505906633386407,
+        "y": 7.395763781910212
       },
       "nextControl": {
-        "x": 3.1811467044454225,
-        "y": 7.387601415786385
+        "x": 5.487658434578617,
+        "y": 7.395763781910212
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.6170186417987087,
-        "y": 5.967550753741198
+        "x": 3.598,
+        "y": 7.396
       },
       "prevControl": {
-        "x": 2.6005330747505866,
-        "y": 7.232114372432511
+        "x": 4.927414984465334,
+        "y": 7.372306189432583
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LShoot"
+      "linkedName": null
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.5644725913621261,
-      "rotationDegrees": 180.0
-    },
-    {
-      "waypointRelativePos": 1.3828514327242518,
+      "waypointRelativePos": 1.0114591985049837,
       "rotationDegrees": 180.0
     }
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "L Deploy Intake",
+      "waypointRelativePos": 0.4362758582746477,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -67,7 +70,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -135.0
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": null,
