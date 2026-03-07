@@ -5,12 +5,15 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import frc.robot.util.RobotState;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,8 +40,9 @@ public class OrbitCamera {
 
   StructPublisher<Pose2d> photonPose;
   StructPublisher<Transform3d> robotToCameraOffset;
+  StructPublisher<Pose3d> robotPoseTransformedByCameraOffset;
   private Matrix<N3, N1> curStdDevs;
-  private Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 0);
+  private Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(2, 2, 2);
   private Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
 
   /* Simulation Stuff */
@@ -57,10 +61,13 @@ public class OrbitCamera {
         NetworkTableInstance.getDefault()
             .getStructTopic("Photon Cameras/" + cameraName + "/Photon_Pose", Pose2d.struct)
             .publish();
-
     robotToCameraOffset =
         NetworkTableInstance.getDefault()
             .getStructTopic("Photon Cameras/" + cameraName + "/Robot To Cam Offset", Transform3d.struct)
+            .publish();
+    robotPoseTransformedByCameraOffset =
+        NetworkTableInstance.getDefault()
+            .getStructTopic("Photon Cameras/" + cameraName + "/Robot Pose Transformed By Robot To Cam", Pose3d.struct)
             .publish();
     robotToCameraOffset.accept(this.robotToCamera);
 
@@ -128,7 +135,9 @@ public class OrbitCamera {
         // Increase std devs based on (average) distance
         if (numTags == 1 && avgDist > 4)
           estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-        else estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
+        else {
+            estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
+        }
         curStdDevs = estStdDevs;
       }
     }
@@ -154,6 +163,7 @@ public class OrbitCamera {
 
   public void updateStructPublisher(Pose2d cameraEstimatedPose) {
     photonPose.accept(cameraEstimatedPose);
+    robotPoseTransformedByCameraOffset.accept(new Pose3d(RobotState.getInstance().getRobotOdomPose()).transformBy(this.robotToCamera));
   }
 
   // Functions for updating and retreiving pipeling results

@@ -63,10 +63,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final OrbitCamera backLeftSwerveCamera = new OrbitCamera(
             DrivetrainConstants.BACK_LEFT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM,
             "photoncamera_bl");
-    private final OrbitCamera backRightSwerveCamera = new OrbitCamera(
-            DrivetrainConstants.BACK_RIGHT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM,
-            "photoncamera_br");
-    private final OrbitCamera[] swerveCameras = new OrbitCamera[2];
+    private final OrbitCamera backRightBackSwerveCamera = new OrbitCamera(
+            DrivetrainConstants.BACK_RIGHT_BACK_SWERVECAM_ROBOT_RELATIVE_TRANSFORM,
+            "photoncamera_brb");
+    private final OrbitCamera backRightRightSwerveCamera = new OrbitCamera(
+            DrivetrainConstants.BACK_RIGHT_RIGHT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM,
+            "photoncamera_brr");
+    private final OrbitCamera[] swerveCameras = new OrbitCamera[3];
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -150,7 +153,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         configureAutoBuilder();
         swerveCameras[0] = backLeftSwerveCamera;
-        swerveCameras[1] = backRightSwerveCamera;
+        swerveCameras[1] = backRightBackSwerveCamera;
+        swerveCameras[2] = backRightRightSwerveCamera;
     }
 
     /**
@@ -177,7 +181,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         configureAutoBuilder();
         swerveCameras[0] = backLeftSwerveCamera;
-        swerveCameras[1] = backRightSwerveCamera;
+        swerveCameras[1] = backRightBackSwerveCamera;
+        swerveCameras[2] = backRightRightSwerveCamera;
     }
 
     /**
@@ -212,7 +217,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         configureAutoBuilder();
         swerveCameras[0] = backLeftSwerveCamera;
-        swerveCameras[1] = backRightSwerveCamera;
+        swerveCameras[1] = backRightBackSwerveCamera;
+        swerveCameras[2] = backRightRightSwerveCamera;
     }
 
     private void configureAutoBuilder() {

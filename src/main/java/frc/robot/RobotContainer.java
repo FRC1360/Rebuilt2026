@@ -8,15 +8,20 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import org.photonvision.PhotonUtils;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.flywheel.SetFlywheelVelocityFromPoseCommand;
 import frc.robot.commands.hood.SetHoodAngleCommand;
 import frc.robot.commands.hood.SetHoodAngleFromPose;
@@ -68,7 +73,7 @@ public class RobotContainer {
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
-            .withDeadband(NORMAL_DRIVE_TRANSLATIONAL_SPEED * 0.15)
+            .withDeadband(SLOW_DRIVE_TRANSLATIONAL_SPEED * 0.15)
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
             .withHeadingPID(5.0, 0.0, 0.0);
 
@@ -102,7 +107,7 @@ public class RobotContainer {
                 .and(m_flywheelSubsystem.flywheelAtTarget)
                 .and(m_HoodSubsystem.hoodAtTarget);
 
-        Trigger slowDriveModeActivated = intakeRollerInput.or(shootingInput);
+        Trigger slowDriveModeActivated = shootingInput;
 
         // Driving
         Command joystickDriveAtNormalSpeed = drivetrain.applyRequest(
@@ -115,9 +120,18 @@ public class RobotContainer {
                         .withVelocityX(-m_controller.getLeftY() * SLOW_DRIVE_TRANSLATIONAL_SPEED)
                         .withVelocityY(-m_controller.getLeftX() * SLOW_DRIVE_TRANSLATIONAL_SPEED)
                         .withRotationalRate(-m_controller.getRightX() * SLOW_DRIVE_ANGULAR_SPEED));
+        Command joystickDriveWhileFacingHub = drivetrain.applyRequest(
+                () -> driveFacingAngle
+                        .withVelocityX(-m_controller.getLeftY() * SLOW_DRIVE_TRANSLATIONAL_SPEED)
+                        .withVelocityY(-m_controller.getLeftX() * SLOW_DRIVE_TRANSLATIONAL_SPEED)
+                        .withTargetDirection(PhotonUtils.getYawToPose(
+                                new Pose2d(
+                                        robotState.getTurretOdomPose().getTranslation(),
+                                        new Rotation2d()),
+                                FieldConstants.RED_ALLIANCE_HUB_POSE).plus(Rotation2d.fromDegrees(90.0))));
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
-        slowDriveModeActivated.whileTrue(joystickDriveAtSlowSpeed);
+        slowDriveModeActivated.whileTrue(joystickDriveWhileFacingHub);
         m_controller.y().onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric(), drivetrain));
 
         // Intaking
@@ -152,6 +166,12 @@ public class RobotContainer {
 
         shootingInput.whileTrue(prepareToShoot);
         preparedAndReadyToShoot.whileTrue(new ActivateAgitatedIndexCommand(m_indexSubsystem));
+
+        // SysID
+        m_controller.povUp().whileTrue(m_turretSubsysem.sysIdQuasistatic(Direction.kForward));
+        m_controller.povDown().whileTrue(m_turretSubsysem.sysIdQuasistatic(Direction.kReverse));
+        m_controller.povRight().whileTrue(m_turretSubsysem.sysIdDynamic(Direction.kForward));
+        m_controller.povLeft().whileTrue(m_turretSubsysem.sysIdDynamic(Direction.kReverse));
     }
 
     public Command getAutonomousCommand() {

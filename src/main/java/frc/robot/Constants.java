@@ -71,8 +71,8 @@ public final class Constants {
     public static final class TurretConstants {
         public static final int KRAKEN_CAN_ID = 40;
         public static final InvertedValue KRAKEN_INVERTED_VALUE = InvertedValue.CounterClockwise_Positive;
-        public static final int KRAKEN_STATOR_CURRENT_LIMIT = 30;
-        public static final double MECHANISM_CONVERSION_FACTOR = (651.0 / 22.0) / 360.0;
+        public static final int KRAKEN_STATOR_CURRENT_LIMIT = 80;
+        public static final double MECHANISM_CONVERSION_FACTOR = (27.125) / 360.0;
 
         public static final double ENCODER_STARTUP_ANGLE_DEGREES = -195.0;
         public static final double TOTAL_WRAP_AROUND_ANGLE_RANGE = 390.0;
@@ -82,7 +82,7 @@ public final class Constants {
 
         public static final Transform2d ROBOT_TO_TURRET_CENTER = new Transform2d(
                 new Translation2d(-((0.705 / 2.0) - 0.268852), ((0.705 / 2.0) - 0.212725)),
-                Rotation2d.fromDegrees(-70.0));
+                Rotation2d.fromDegrees(285.0));
         /*
          * Note: The rotation offset for turret to center is measured relative to where
          * the encoder
@@ -120,8 +120,8 @@ public final class Constants {
         public static final double HIGH_SPEED = 0;
         public static final double LOW_SPEED = 0;
         public static final double DISTANCE_THRESHOLD = 0;
-        public static final int FLYWHEEL_STALL_CURRENT_LIMIT = 40;
-        public static final int FLYWHEEL_FREE_CURRENT_LIMIT = 40;
+        public static final int FLYWHEEL_STALL_CURRENT_LIMIT = 80;
+        public static final int FLYWHEEL_FREE_CURRENT_LIMIT = 80;
         public static final boolean FLYWHEEL_LEADER_INVERTED = false;
         public static final boolean FLYWHEEL_FOLLOWER_INVERTED = false;
         public static final double VELOCITY_CONVERSION_FACTOR = (4 * Math.PI) / (60 * 12);
@@ -132,8 +132,11 @@ public final class Constants {
         public static final Transform3d BACK_LEFT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM = new Transform3d(
                 new Translation3d(-((0.704850 / 2.0) - 0.094180), (0.704850 / 2.0) - 0.094180, 0.208540),
                 new Rotation3d(0, -Math.toRadians(10), Math.toRadians(134.136029)));
-        public static final Transform3d BACK_RIGHT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM = new Transform3d(
-                new Translation3d(-((0.704850 / 2.0) - 0.056758), -((0.704850 / 2.0) - 0.121178), 0.353590),
-                new Rotation3d(0, -Math.toRadians(10), Math.toRadians(-134.136029)));
+        public static final Transform3d BACK_RIGHT_BACK_SWERVECAM_ROBOT_RELATIVE_TRANSFORM = new Transform3d(
+                new Translation3d(-0.333, -0.240, 0.353590),
+                new Rotation3d(0, -Math.toRadians(10), Math.toRadians(180.0)));
+        public static final Transform3d BACK_RIGHT_RIGHT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM = new Transform3d(
+                new Translation3d(-0.274, -0.258, 0.353590),
+                new Rotation3d(0, -Math.toRadians(10), Math.toRadians(-90.0)));
     }
 }

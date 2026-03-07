@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -84,12 +85,15 @@ public class RobotState {
     });
 
     public double getHoodAngleFromGoalPose(Pose2d poseToSetAngleFrom) {
-        // Get distance between turret position and goal position, plug that into the map
+        // Get distance between turret position and goal position, plug that into the
+        // map
         return turretDistanceToHoodAngleMap.get(
                 poseToSetAngleFrom.getTranslation().getDistance(this.getTurretOdomPose().getTranslation()));
     }
+
     public double getFlywheelVelocityFromGoalPose(Pose2d poseToSetAngleFrom) {
-        // Get distance between turret position and goal position, plug that into the map
+        // Get distance between turret position and goal position, plug that into the
+        // map
         return turretDistanceToFlywheelVelocityMap.get(
                 poseToSetAngleFrom.getTranslation().getDistance(this.getTurretOdomPose().getTranslation()));
     }
@@ -117,7 +121,10 @@ public class RobotState {
          * - Y value becomes robot relative left/right
          * - Z value rotates the shifted pose around it's own center
          */
-        Pose2d estimatedTurretPose = robotPose.transformBy(TurretConstants.ROBOT_TO_TURRET_CENTER);
+        Pose2d estimatedTurretPose = robotPose.transformBy(
+                new Transform2d(
+                        TurretConstants.ROBOT_TO_TURRET_CENTER.getTranslation(),
+                        new Rotation2d()));
 
         /*
          * Step Dos: Rotate around turret's own position to account for turret's
