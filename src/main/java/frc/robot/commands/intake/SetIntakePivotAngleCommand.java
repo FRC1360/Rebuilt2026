@@ -1,9 +1,7 @@
 package frc.robot.commands.intake;
 
-import java.util.function.BooleanSupplier;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.Constants.IntakeConstants;
 
 public class SetIntakePivotAngleCommand extends Command {
 
