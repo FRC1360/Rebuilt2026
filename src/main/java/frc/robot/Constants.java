@@ -74,7 +74,7 @@ public final class Constants {
         public static final int KRAKEN_STATOR_CURRENT_LIMIT = 80;
         public static final double MECHANISM_CONVERSION_FACTOR = (27.125) / 360.0;
 
-        public static final double ENCODER_STARTUP_ANGLE_DEGREES = -195.0;
+        public static final double ENCODER_STARTUP_ANGLE_DEGREES = 165;
         public static final double TOTAL_WRAP_AROUND_ANGLE_RANGE = 390.0;
         public static final double POSITIVE_THRESHOLD = 180 - (TOTAL_WRAP_AROUND_ANGLE_RANGE - 360) / 2;
         public static final double NEGATIVE_THRESHOLD = -180 + (TOTAL_WRAP_AROUND_ANGLE_RANGE - 360) / 2;

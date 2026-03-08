@@ -35,13 +35,13 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 public class TurretSubsystem extends SubsystemBase {
 
     private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
-        0.0,
-        0.0,
-        0.0,
-        360.0,
-        2000,
+        0.01,
+        0.02,
+        0.002,
+        720.0,
+        2000.0,
         0.24815,
-        0.0088362,
+        0.0085,
         0.0,
         0.0
     );
@@ -81,7 +81,7 @@ public class TurretSubsystem extends SubsystemBase {
     private final MotorOutputConfigs motorOutputConfigs;
     private final CurrentLimitsConfigs motorCurrentLimitsConfigs;
 
-    public Trigger turretAtTarget;
+    public final Trigger turretAtTarget;
 
     public TurretSubsystem() {
         motorFeedbackConfigs = new FeedbackConfigs()
@@ -171,6 +171,14 @@ public class TurretSubsystem extends SubsystemBase {
         wrappedTarget = this.calculateWrapAround(target.minus(TurretConstants.ROBOT_TO_TURRET_CENTER.getRotation()));
 
         m_profiledpidController.setGoal(wrappedTarget);
+        pidControllerOutput = m_profiledpidController.calculate(this.getCurrentEncoderAngle());
+        feedForwardControllerOutput = m_feedForward.calculate(m_profiledpidController.getSetpoint().velocity);
+
+        return pidControllerOutput + feedForwardControllerOutput;
+    }
+
+    public double noWrapEncoderClosedLoopCalculate(double target) {
+        m_profiledpidController.setGoal(target);
         pidControllerOutput = m_profiledpidController.calculate(this.getCurrentEncoderAngle());
         feedForwardControllerOutput = m_feedForward.calculate(m_profiledpidController.getSetpoint().velocity);
 
