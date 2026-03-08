@@ -88,6 +88,12 @@ public class RobotState {
         this.currentIntakeState = !this.currentIntakeState;
     });
 
+    public Command setIntakeState(boolean intakeActivated) {
+        return Commands.runOnce(() -> {
+            this.currentIntakeState = intakeActivated;
+        });
+    }
+
     public double getHoodAngleFromGoalPose(Pose2d poseToSetAngleFrom) {
         // Get distance between turret position and goal position, plug that into the
         // map

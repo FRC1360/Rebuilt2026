@@ -17,15 +17,9 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "RShoot to Human"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Human to RShoot"
+            "name": "EXECUTE_SHOT_ROUTINE_COMMAND"
           }
         }
       ]

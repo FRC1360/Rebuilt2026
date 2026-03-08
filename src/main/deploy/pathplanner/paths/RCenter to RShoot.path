@@ -20,12 +20,12 @@
         "y": 0.5753228158010553
       },
       "prevControl": {
-        "x": 6.335469493814834,
-        "y": 0.5611950102550778
+        "x": 6.649161663027656,
+        "y": 0.5704231486535662
       },
       "nextControl": {
-        "x": 2.781271181778169,
-        "y": 0.5862193735328629
+        "x": 2.7812362727735622,
+        "y": 0.5785910119336637
       },
       "isLocked": false,
       "linkedName": null
@@ -47,16 +47,23 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.7723386785162285,
-      "rotationDegrees": 179.4
+      "rotationDegrees": 180.0
     },
     {
-      "waypointRelativePos": 1.2123985703245754,
-      "rotationDegrees": -179.7873407657603
+      "waypointRelativePos": 1.312603820598008,
+      "rotationDegrees": 180.0
     }
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "DEPLOY_INTAKE_STOP_ROLLERS_TRIGGER",
+      "waypointRelativePos": 0.34207695984703634,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -67,7 +74,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -148.24066361915908
+    "rotation": -54.0
   },
   "reversed": false,
   "folder": null,

@@ -53,7 +53,7 @@ public class DriveCommands {
     public static Command joystickDriveFacingAngleCommand(
             CommandSwerveDrivetrain drivetrain,
             CommandXboxController controller,
-            double translationalVelocityScalar,
+            double translationalScalar,
             Rotation2d fieldRelativeAngle) {
 
         teleopFieldCentricDriveRequestFacingAngle.HeadingController.setTolerance(
@@ -62,12 +62,11 @@ public class DriveCommands {
         return drivetrain.applyRequest(
                 () -> teleopFieldCentricDriveRequestFacingAngle
                         .withDeadband(
-                                MAX_DRIVE_TRANSLATIONAL_SPEED * DEADBAND_AS_DECIMAL * translationalVelocityScalar)
+                                MAX_DRIVE_TRANSLATIONAL_SPEED * DEADBAND_AS_DECIMAL * translationalScalar)
                         .withVelocityX(
-                                -controller.getLeftY() * MAX_DRIVE_TRANSLATIONAL_SPEED * translationalVelocityScalar)
+                                -controller.getLeftY() * MAX_DRIVE_TRANSLATIONAL_SPEED * translationalScalar)
                         .withVelocityY(
-                                -controller.getLeftX() * MAX_DRIVE_TRANSLATIONAL_SPEED
-                                        * translationalVelocityScalar)
+                                -controller.getLeftX() * MAX_DRIVE_TRANSLATIONAL_SPEED * translationalScalar)
                         .withTargetDirection(fieldRelativeAngle));
     }
 

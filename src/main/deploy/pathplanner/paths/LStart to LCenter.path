@@ -63,7 +63,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "L Deploy Intake",
+      "name": "DEPLOY_AND_RUN_INTAKE_TRIGGER",
       "waypointRelativePos": 0.08516073135755252,
       "endWaypointRelativePos": null,
       "command": null

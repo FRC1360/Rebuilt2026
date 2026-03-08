@@ -19,7 +19,7 @@
         {
           "type": "named",
           "data": {
-            "name": "EXECUTE_SHOT_ROUTINE"
+            "name": "EXECUTE_SHOT_ROUTINE_COMMAND"
           }
         }
       ]

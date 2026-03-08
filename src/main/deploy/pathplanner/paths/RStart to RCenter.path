@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.3890160559712434,
-        "y": 0.5871441736355631
+        "x": 3.65,
+        "y": 0.45
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.926998835462338,
-        "y": 0.5773332508089766
+        "x": 5.187982779491094,
+        "y": 0.44018907717341343
       },
       "isLocked": false,
       "linkedName": "RStart"
@@ -45,12 +45,26 @@
     }
   ],
   "rotationTargets": [],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.9059960564053537,
+      "maxWaypointRelativePos": 2.0,
+      "constraints": {
+        "maxVelocity": 1.5,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "R Deploy Intake",
-      "waypointRelativePos": 0.4362758582746477,
+      "name": "DEPLOY_AND_RUN_INTAKE_TRIGGER",
+      "waypointRelativePos": 0.07382289674952204,
       "endWaypointRelativePos": null,
       "command": null
     }

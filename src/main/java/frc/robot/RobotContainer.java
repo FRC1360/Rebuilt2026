@@ -6,6 +6,8 @@ package frc.robot;
 
 import org.photonvision.PhotonUtils;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -51,7 +53,8 @@ public class RobotContainer {
 
     private final SwerveTelemetry swerveLogger = new SwerveTelemetry(DriveCommands.MAX_DRIVE_TRANSLATIONAL_SPEED);
 
-    private PathPlannerAuto testAuto1;
+    private PathPlannerAuto leftSideBasicAuto;
+    private PathPlannerAuto rightSideBasicAuto;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -61,6 +64,7 @@ public class RobotContainer {
                 () -> drivetrain.getState().Pose,
                 () -> Rotation2d.fromDegrees(90));
 
+        configureNamedCommands();
         configureAllAutos();
 
         configureBindings();
@@ -70,9 +74,39 @@ public class RobotContainer {
         CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     }
 
+    private void configureNamedCommands() {
+        Command prepareToShootAtBlueHub = Commands.parallel(
+                new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE),
+                new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE));
+        Command prepareToShootAtRedHub = Commands.parallel(
+                new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
+                new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE));
+        Command prepareToShootAtCurrentAllianceHub = Commands.either(
+                prepareToShootAtBlueHub, prepareToShootAtRedHub,
+                robotState.isBlueAlliance);
+
+        Trigger shooterAtSetpoints = m_flywheelSubsystem.flywheelAtTarget.and(m_HoodSubsystem.hoodAtTarget);
+
+        NamedCommands.registerCommand("EXECUTE_SHOT_ROUTINE_COMMAND", Commands.sequence(
+                prepareToShootAtCurrentAllianceHub.until(shooterAtSetpoints).withTimeout(3.0),
+                prepareToShootAtCurrentAllianceHub.alongWith(new ActivateAgitatedIndexCommand(m_indexSubsystem))
+                        .withTimeout(5.0)));
+    }
+
     private void configureAllAutos() {
-        testAuto1 = new PathPlannerAuto("Left Auto");
-        testAuto1.event("L Deploy Intake").onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        /* Configure stuff for right side */
+        rightSideBasicAuto = new PathPlannerAuto("Right Auto");
+        rightSideBasicAuto.event("DEPLOY_AND_RUN_INTAKE_TRIGGER")
+                .onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        rightSideBasicAuto.event("DEPLOY_INTAKE_STOP_ROLLERS_TRIGGER")
+                .onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> false));
+
+        /* Configure stuff for left side */
+        leftSideBasicAuto = new PathPlannerAuto("Left Auto");
+        leftSideBasicAuto.event("DEPLOY_AND_RUN_INTAKE_TRIGGER")
+                .onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        leftSideBasicAuto.event("DEPLOY_INTAKE_STOP_ROLLERS_TRIGGER")
+                .onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> false));
     }
 
     private void configureBindings() {
@@ -151,6 +185,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return testAuto1;
+        return leftSideBasicAuto;
     }
 }
