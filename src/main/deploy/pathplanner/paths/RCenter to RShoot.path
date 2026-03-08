@@ -47,11 +47,11 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.7723386785162285,
-      "rotationDegrees": 180.0
+      "rotationDegrees": 0.0
     },
     {
       "waypointRelativePos": 1.312603820598008,
-      "rotationDegrees": 180.0
+      "rotationDegrees": 0.0
     }
   ],
   "constraintZones": [],
@@ -60,6 +60,12 @@
     {
       "name": "DEPLOY_INTAKE_STOP_ROLLERS_TRIGGER",
       "waypointRelativePos": 0.34207695984703634,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "EXECUTE_SHOT_ROUTINE_COMMAND",
+      "waypointRelativePos": 1.8454827915869976,
       "endWaypointRelativePos": null,
       "command": null
     }

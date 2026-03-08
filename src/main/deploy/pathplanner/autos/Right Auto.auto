@@ -15,12 +15,6 @@
           "data": {
             "pathName": "RCenter to RShoot"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "EXECUTE_SHOT_ROUTINE_COMMAND"
-          }
         }
       ]
     }

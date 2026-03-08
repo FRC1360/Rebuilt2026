@@ -47,7 +47,7 @@ public final class Constants {
         public static final int ROLLER_VORTEX_FREE_CURRENT_LIMIT = 80;
         public static final boolean ROLLER_VORTEX_INVERTED = true;
 
-        public static final double ROLLER_ACTIVATED_SPEED = 0.75;
+        public static final double ROLLER_ACTIVATED_SPEED = 0.5;
 
         // Pivot Constants
         public static final int PIVOT_VORTEX_CAN_ID = 30;
