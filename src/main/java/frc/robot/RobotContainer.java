@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.commands.flywheel.SetFlywheelVelocityCommand;
 import frc.robot.commands.flywheel.SetFlywheelVelocityFromPoseCommand;
 import frc.robot.commands.hood.SetHoodAngleCommand;
 import frc.robot.commands.hood.SetHoodAngleFromPose;
@@ -33,6 +34,7 @@ import frc.robot.commands.index.SetIndexSpeedsCommand;
 import frc.robot.commands.intake.DeployIntakeCommand;
 import frc.robot.commands.intake.RetractIntakeCommand;
 import frc.robot.commands.intake.SetIntakePivotAngleCommand;
+import frc.robot.commands.turret.SetTurretToRobotRelativeAngleCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelSubsystem;
@@ -54,7 +56,7 @@ public class RobotContainer {
     private final IndexSubsystem m_indexSubsystem = new IndexSubsystem();
     private final FlywheelSubsystem m_flywheelSubsystem = new FlywheelSubsystem();
     private final HoodSubsystem m_HoodSubsystem = new HoodSubsystem();
-    private final TurretSubsystem m_turretSubsysem = new TurretSubsystem();
+    // private final TurretSubsystem m_turretSubsysem = new TurretSubsystem();
 
     // Use theoretical 'max' speed for normal driving & 3/4ths rotations per sec.
     private static final double NORMAL_DRIVE_TRANSLATIONAL_SPEED = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
@@ -88,9 +90,12 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
+        // robotState.setAllSuppliers(
+        //         () -> drivetrain.getState().Pose,
+        //         () -> m_turretSubsysem.getCurrentRobotRelativeRotation());
         robotState.setAllSuppliers(
                 () -> drivetrain.getState().Pose,
-                () -> m_turretSubsysem.getCurrentRobotRelativeRotation());
+                () -> new Rotation2d());
         driveFacingAngle.HeadingController.setTolerance(Units.degreesToRadians(3.0));
 
         configureNamedCommands();
@@ -130,7 +135,8 @@ public class RobotContainer {
         Trigger intakeRollerInput = m_controller.leftTrigger(0.8);
         Trigger intakeAgitateInput = m_controller.b();
 
-        Trigger preparedAndReadyToShoot = m_flywheelSubsystem.flywheelAtTarget
+        Trigger preparedAndReadyToShoot = shootingInput
+                .and(m_flywheelSubsystem.flywheelAtTarget)
                 .and(m_HoodSubsystem.hoodAtTarget);
 
         Trigger slowDriveModeActivated = shootingInput;
@@ -157,7 +163,7 @@ public class RobotContainer {
                                 FieldConstants.BLUE_ALLIANCE_HUB_POSE).plus(Rotation2d.fromDegrees(-90.0))));
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
-        slowDriveModeActivated.whileTrue(joystickDriveWhileFacingHub);
+        slowDriveModeActivated.whileTrue(joystickDriveAtSlowSpeed);
         m_controller.y().onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric(), drivetrain));
 
         // Intaking
@@ -169,9 +175,9 @@ public class RobotContainer {
                 robotState.isIntakeCurrentlyDeployed).repeatedly();
 
         Command agitateIntake = Commands.repeatingSequence(
-                new SetIntakePivotAngleCommand(m_intakeSubsystem, 45.0, () -> true)
+                new SetIntakePivotAngleCommand(m_intakeSubsystem, 45.0, -0.3)
                         .withTimeout(0.75),
-                new SetIntakePivotAngleCommand(m_intakeSubsystem, 5.0, () -> true)
+                new SetIntakePivotAngleCommand(m_intakeSubsystem, 5.0, -0.3)
                         .withTimeout(0.75));
 
         m_intakeSubsystem.setDefaultCommand(setIntakePivotBasedOnState);
@@ -179,32 +185,35 @@ public class RobotContainer {
         intakeAgitateInput.whileTrue(agitateIntake);
 
         // Shooting
-        Command disableFlywheels = Commands.run(() -> m_flywheelSubsystem.setFlywheelVoltage(0.0), m_flywheelSubsystem);
+        // Command prepareToShoot = Commands.either(
+        // Commands.parallel(
+        // new SetHoodAngleFromPose(m_HoodSubsystem,
+        // FieldConstants.BLUE_ALLIANCE_HUB_POSE),
+        // new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
+        // FieldConstants.BLUE_ALLIANCE_HUB_POSE)),
+        // Commands.parallel(
+        // new SetHoodAngleFromPose(m_HoodSubsystem,
+        // FieldConstants.RED_ALLIANCE_HUB_POSE),
+        // new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
+        // FieldConstants.RED_ALLIANCE_HUB_POSE)),
+        // robotState.isBlueAlliance);
+        Command prepareToShoot = Commands.parallel(
+                new SetHoodAngleCommand(m_HoodSubsystem, 70),
+                new SetFlywheelVelocityCommand(m_flywheelSubsystem, 55));
 
-        Command prepareToShoot = Commands.either(
-                Commands.parallel(
-                        new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE),
-                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                FieldConstants.BLUE_ALLIANCE_HUB_POSE)),
-                Commands.parallel(
-                        new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
-                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                FieldConstants.RED_ALLIANCE_HUB_POSE)),
-                robotState.isBlueAlliance);
-
-        m_flywheelSubsystem.setDefaultCommand(disableFlywheels);
+        m_flywheelSubsystem.setDefaultCommand(new SetFlywheelVelocityCommand(m_flywheelSubsystem, 10.0));
         m_HoodSubsystem.setDefaultCommand(new SetHoodAngleCommand(m_HoodSubsystem, 74));
-        m_turretSubsysem.setDefaultCommand(Commands.run(() -> m_turretSubsysem.setVoltage(0.0), m_turretSubsysem));
-        m_indexSubsystem.setDefaultCommand(new SetIndexSpeedsCommand(m_indexSubsystem, 0.0, 0.0));
+        // m_turretSubsysem.setDefaultCommand(Commands.run(() -> m_turretSubsysem.setVoltage(0.0), m_turretSubsysem));
+        m_indexSubsystem.setDefaultCommand(new SetIndexSpeedsCommand(m_indexSubsystem, 0.0, 0.3));
 
         shootingInput.whileTrue(prepareToShoot);
         preparedAndReadyToShoot.whileTrue(new ActivateAgitatedIndexCommand(m_indexSubsystem));
 
         // SysID
-        m_controller.povUp().whileTrue(m_turretSubsysem.sysIdQuasistatic(Direction.kForward));
-        m_controller.povDown().whileTrue(m_turretSubsysem.sysIdQuasistatic(Direction.kReverse));
-        m_controller.povRight().whileTrue(m_turretSubsysem.sysIdDynamic(Direction.kForward));
-        m_controller.povLeft().whileTrue(m_turretSubsysem.sysIdDynamic(Direction.kReverse));
+        // m_controller.povUp().whileTrue(new SetTurretToRobotRelativeAngleCommand(m_turretSubsysem, Rotation2d.fromDegrees(0.0)));
+        // m_controller.povDown().whileTrue(new SetTurretToRobotRelativeAngleCommand(m_turretSubsysem, Rotation2d.fromDegrees(180.0)));
+        // m_controller.povLeft().whileTrue(new SetTurretToRobotRelativeAngleCommand(m_turretSubsysem, Rotation2d.fromDegrees(270)));
+        // m_controller.povRight().whileTrue(new SetTurretToRobotRelativeAngleCommand(m_turretSubsysem, Rotation2d.fromDegrees(-270)));
     }
 
     public Command getAutonomousCommand() {

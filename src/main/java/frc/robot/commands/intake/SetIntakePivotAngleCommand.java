@@ -9,12 +9,12 @@ public class SetIntakePivotAngleCommand extends Command {
 
     private final IntakeSubsystem intakeSubsystem;
     private final double intakePivotAngle;
-    private final BooleanSupplier wheelsActivatedSupplier;
+    private final double rollerSpeed;
 
-    public SetIntakePivotAngleCommand(IntakeSubsystem intakeSubsystem, double intakePivotAngle, BooleanSupplier wheelsActivatedSupplier) {
+    public SetIntakePivotAngleCommand(IntakeSubsystem intakeSubsystem, double intakePivotAngle, double rollerSpeed) {
       this.intakeSubsystem = intakeSubsystem;
       this.intakePivotAngle = intakePivotAngle;
-      this.wheelsActivatedSupplier = wheelsActivatedSupplier;
+      this.rollerSpeed = rollerSpeed;
 
       addRequirements(intakeSubsystem);
       }
@@ -28,9 +28,7 @@ public class SetIntakePivotAngleCommand extends Command {
     @Override
     public void execute() {
         intakeSubsystem.setPivotVoltage(intakeSubsystem.closedLoopCalculate(intakePivotAngle));
-
-        if (wheelsActivatedSupplier.getAsBoolean()) intakeSubsystem.setRollerSpeed(IntakeConstants.ROLLER_ACTIVATED_SPEED);
-        else intakeSubsystem.setRollerSpeed(0.0);
+        intakeSubsystem.setRollerSpeed(rollerSpeed);
     }
 
     @Override

@@ -13,9 +13,16 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.IndexConstants;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class IndexSubsystem extends SubsystemBase {
+
+    private final NetworkTable loggingTable = NetworkTableInstance.getDefault().getTable("Subsystems/" + getName());
+    private final DoublePublisher magazineOutputCurrentPublisher = loggingTable.getDoubleTopic("Magazine Current")
+            .publish();
 
     private final SparkFlex hopperMotor;
     private SparkFlexConfig hopperMotorConfig;
@@ -70,5 +77,6 @@ public class IndexSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        magazineOutputCurrentPublisher.accept(magazineMotor.getOutputCurrent());
     }
 }

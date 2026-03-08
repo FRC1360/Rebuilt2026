@@ -102,8 +102,8 @@ public final class Constants {
         public static final boolean HOPPER_VORTEX_INVERTED = false;
 
         public static final int MAGAZINE_VORTEX_CAN_ID = 33;
-        public static final int MAGAZINE_VORTEX_STALL_CURRENT_LIMIT = 80;
-        public static final int MAGAZINE_VORTEX_FREE_CURRENT_LIMIT = 80;
+        public static final int MAGAZINE_VORTEX_STALL_CURRENT_LIMIT = 55;
+        public static final int MAGAZINE_VORTEX_FREE_CURRENT_LIMIT = 55;
         public static final boolean MAGAZINE_VORTEX_INVERTED = false;
 
         public static final int MAGAZINE_SENSOR_DIGITAL_CHANNEL = 1;
@@ -120,8 +120,8 @@ public final class Constants {
         public static final double HIGH_SPEED = 0;
         public static final double LOW_SPEED = 0;
         public static final double DISTANCE_THRESHOLD = 0;
-        public static final int FLYWHEEL_STALL_CURRENT_LIMIT = 80;
-        public static final int FLYWHEEL_FREE_CURRENT_LIMIT = 80;
+        public static final int FLYWHEEL_STALL_CURRENT_LIMIT = 40;
+        public static final int FLYWHEEL_FREE_CURRENT_LIMIT = 40;
         public static final boolean FLYWHEEL_LEADER_INVERTED = false;
         public static final boolean FLYWHEEL_FOLLOWER_INVERTED = false;
         public static final double VELOCITY_CONVERSION_FACTOR = (4 * Math.PI) / (60 * 12);

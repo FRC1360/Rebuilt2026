@@ -38,10 +38,10 @@ public class TurretSubsystem extends SubsystemBase {
         0.0,
         0.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        360.0,
+        2000,
+        0.24815,
+        0.0088362,
         0.0,
         0.0
     );
@@ -192,7 +192,7 @@ public class TurretSubsystem extends SubsystemBase {
 
      private SysIdRoutine sysIdRoutine = new SysIdRoutine(
         new SysIdRoutine.Config(
-            Volts.of(0.8).per(Second),  // Ramp Rate of 0.1V/s
+            Volts.of(1.2).per(Second),  // Ramp Rate of 0.1V/s
             Volts.of(3.5),              // Dynamic Step Voltage of 0.4V
             Seconds.of(10),                         // Use default timeout (10 s)
             state -> SignalLogger.writeString("Turret_SysID_State", state.toString())

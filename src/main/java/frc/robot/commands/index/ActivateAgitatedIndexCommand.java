@@ -48,11 +48,11 @@ public class ActivateAgitatedIndexCommand extends Command {
         this.indexSubsystem = indexSubsystem;
 
         intervalOneDurationEntry = createEntry(loggingTable, "Interval 1 Duration", 0.5);
-        intervalOneSpeedEntry = createEntry(loggingTable, "Interval 1 Speed", 0.6);
-        intervalTwoDurationEntry = createEntry(loggingTable, "Interval 2 Duration", 0.04);
-        intervalTwoSpeedEntry = createEntry(loggingTable, "Interval 2 Speed", 0.00);
-        intervalThreeDurationEntry = createEntry(loggingTable, "Interval 3 Duration", 0.02);
-        intervalThreeSpeedEntry = createEntry(loggingTable, "Interval 3 Speed", -0.2);
+        intervalOneSpeedEntry = createEntry(loggingTable, "Interval 1 Speed", 0.4);
+        intervalTwoDurationEntry = createEntry(loggingTable, "Interval 2 Duration", 0.0);
+        intervalTwoSpeedEntry = createEntry(loggingTable, "Interval 2 Speed", 0.0);
+        intervalThreeDurationEntry = createEntry(loggingTable, "Interval 3 Duration", 0.0);
+        intervalThreeSpeedEntry = createEntry(loggingTable, "Interval 3 Speed", 0.0);
         intervalFourDurationEntry = createEntry(loggingTable, "Interval 4 Duration", 0.0);
         intervalFourSpeedEntry = createEntry(loggingTable, "Interval 4 Speed", 0.0);
 
