@@ -26,8 +26,7 @@ import frc.robot.commands.intake.DeployIntakeCommand;
 import frc.robot.commands.intake.RetractIntakeCommand;
 import frc.robot.commands.intake.SetIntakePivotAngleCommand;
 import frc.robot.commands.turret.AimTurretAtPoseCommand;
-import frc.robot.commands.turret.SetTurretToFieldRelativeAngleCommand;
-import frc.robot.commands.turret.SetTurretToRobotRelativeAngleCommand;
+import frc.robot.commands.turret.SetTurretToNonWrappedEncoderCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelSubsystem;
@@ -294,17 +293,14 @@ public class RobotContainer {
                         new SetFlywheelVelocityFromNetworkTables(m_flywheelSubsystem)),
                 robotState.isBlueAlliance);
 
-        m_flywheelSubsystem.setDefaultCommand(new SetFlywheelVelocityCommand(m_flywheelSubsystem, 10.0));
-        m_HoodSubsystem.setDefaultCommand(new SetHoodAngleCommand(m_HoodSubsystem, 74));
-        m_indexSubsystem.setDefaultCommand(new SetIndexSpeedsCommand(m_indexSubsystem, 0.0, 0.3));
-        m_TurretSubsystem.setDefaultCommand(Commands.startRun(
-                () -> {
-                    m_TurretSubsystem.grabConstantsFromNetworkTables();
-                    m_TurretSubsystem.resetPIDController();
-                },
-                () -> m_TurretSubsystem.setVoltage(m_TurretSubsystem
-                        .noWrapEncoderClosedLoopCalculate(TurretConstants.ENCODER_STARTUP_ANGLE_DEGREES)),
-                m_TurretSubsystem));
+        m_flywheelSubsystem.setDefaultCommand(new SetFlywheelVelocityCommand(m_flywheelSubsystem,
+                10.0));
+        m_HoodSubsystem.setDefaultCommand(new SetHoodAngleCommand(m_HoodSubsystem,
+                74));
+        m_indexSubsystem.setDefaultCommand(new SetIndexSpeedsCommand(m_indexSubsystem,
+                0.0, 0.3));
+        m_TurretSubsystem.setDefaultCommand(new SetTurretToNonWrappedEncoderCommand(m_TurretSubsystem,
+                TurretConstants.ENCODER_STARTUP_ANGLE_DEGREES));
 
         shootingInput.or(shootingWithTurretInput).whileTrue(prepareToShootAtHub);
         passingInput.whileTrue(prepareToPass);

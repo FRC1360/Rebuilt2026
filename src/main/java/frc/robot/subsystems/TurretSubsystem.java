@@ -35,13 +35,13 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 public class TurretSubsystem extends SubsystemBase {
 
     private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
-        0.01,
-        0.02,
-        0.002,
-        720.0,
-        2000.0,
-        0.24815,
-        0.0085,
+        0.16,
+        0.0,
+        0.001,
+        520.0,
+        3000.0,
+        0.0,
+        0.0,
         0.0,
         0.0
     );
