@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.flywheel.SetFlywheelVelocityCommand;
@@ -174,14 +175,22 @@ public class RobotContainer {
         /*
          * Triger Configuration For Inputs and Setpoints
          */
-        Trigger shootingInput = m_controller.rightBumper();
-        Trigger shootingWithTurretInput = m_controller.rightTrigger(0.8);
-        Trigger passingInput = m_controller.leftBumper();
+        Trigger backdriveIntakeInput = m_controller.povLeft();
+        Trigger backdriveIndexInput = m_controller.povUp();
+        Trigger backdriveShooterInput = m_controller.povRight();
+        Trigger backdrivingAnySubsystem = backdriveIntakeInput
+                .or(backdriveIndexInput)
+                .or(backdriveShooterInput);
+
+        Trigger shootingInput = m_controller.rightBumper().and(backdrivingAnySubsystem.negate());
+        Trigger shootingWithTurretInput = m_controller.rightTrigger(0.8).and(backdrivingAnySubsystem.negate());
+        Trigger passingInput = m_controller.leftBumper().and(backdrivingAnySubsystem.negate());
         Trigger intakePivotInput = m_controller.a();
-        Trigger intakeRollerInput = m_controller.leftTrigger(0.8);
+        Trigger intakeRollerInput = m_controller.leftTrigger(0.8).and(backdriveIndexInput.negate());
         Trigger intakeAgitateInput = m_controller.b();
 
         Trigger preparedAndReadyToShoot = (shootingInput.or(passingInput).or(shootingWithTurretInput))
+                .and(backdrivingAnySubsystem.negate())
                 .and(m_flywheelSubsystem.flywheelAtTarget)
                 .and(m_HoodSubsystem.hoodAtTarget)
                 .and(m_TurretSubsystem.turretAtTarget);
@@ -325,6 +334,22 @@ public class RobotContainer {
                 new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE),
                 new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
                 robotState.isBlueAlliance));
+
+        // Backdriving
+        Command backdriveIntakeWhileKeepingState = Commands.either(
+                new SetIntakePivotAngleCommand(m_intakeSubsystem, IntakeConstants.PIVOT_DEPLOYED_ANGLE, -0.5)
+                        .until(robotState.isIntakeCurrentlyDeployed.negate()),
+                new SetIntakePivotAngleCommand(m_intakeSubsystem, IntakeConstants.PIVOT_RETRACTED_ANGLE, -0.5)
+                        .until(robotState.isIntakeCurrentlyDeployed),
+                robotState.isIntakeCurrentlyDeployed).repeatedly();
+        backdriveIntakeInput.whileTrue(backdriveIntakeWhileKeepingState);
+
+        Command backdriveIndex = new SetIndexSpeedsCommand(m_indexSubsystem, -0.4, -1.0);
+        backdriveIndexInput.whileTrue(backdriveIndex);
+
+        Command backdriveShooter = new SetFlywheelVelocityCommand(m_flywheelSubsystem, -30.0);
+        backdriveShooterInput.whileTrue(backdriveShooter);
+
     }
 
     public Command getAutonomousCommand() {
