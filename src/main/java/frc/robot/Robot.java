@@ -30,6 +30,7 @@ public class Robot extends TimedRobot {
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run(); 
         RobotState.getInstance().logAllInputs();
+        RobotState.getInstance().logAllDistances();
         TriggerLogger.getInstance().updateAllPublishers();
     }
 

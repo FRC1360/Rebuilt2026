@@ -2,9 +2,12 @@ package frc.robot.util;
 
 import java.util.function.Supplier;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
@@ -27,6 +30,14 @@ public class RobotState {
     private final StructPublisher<Pose2d> turretOdomPosePublisher;
     private final DoublePublisher hoodFudgeFactorPublisher;
     private final DoublePublisher flywheelFudgeFactorPublisher;
+    private final DoublePublisher redHubToRobotCenterPublisher;
+    private final DoublePublisher blueHubToRobotCenterPublisher;
+    private final DoublePublisher redTagToRobotCenterPublisher;
+    private final DoublePublisher blueTagToRobotCenterPublisher;
+    private final DoublePublisher redHubToTurretCenterPublisher;
+    private final DoublePublisher blueHubToTurretCenterPublisher;
+    private final DoublePublisher redTagToTurretCenterPublisher;
+    private final DoublePublisher blueTagToTurretCenterPublisher;
 
     private Supplier<Pose2d> robotOdomPoseSupplier;
     private Supplier<Rotation2d> turretRotationSupplier;
@@ -84,6 +95,15 @@ public class RobotState {
         turretOdomPosePublisher = loggingTable.getStructTopic("Turret Odometry Pose", Pose2d.struct).publish();
         hoodFudgeFactorPublisher = loggingTable.getDoubleTopic("Current Hood Fudge Factor").publish();
         flywheelFudgeFactorPublisher = loggingTable.getDoubleTopic("Current Flywheel Fudge Factor").publish();
+
+        redHubToRobotCenterPublisher = loggingTable.getDoubleTopic("Distances/Red Hub To Robot Center").publish();
+        blueHubToRobotCenterPublisher = loggingTable.getDoubleTopic("Distances/Blue Hub To Robot Center").publish();
+        redTagToRobotCenterPublisher = loggingTable.getDoubleTopic("Distances/Red Tag To Robot Center").publish();
+        blueTagToRobotCenterPublisher = loggingTable.getDoubleTopic("Distances/Blue Tag To Robot Center").publish();
+        redHubToTurretCenterPublisher = loggingTable.getDoubleTopic("Distances/Red Hub To Turret Center").publish();
+        blueHubToTurretCenterPublisher = loggingTable.getDoubleTopic("Distances/Blue Hub To Turret Center").publish();
+        redTagToTurretCenterPublisher = loggingTable.getDoubleTopic("Distances/Red Tag To Turret Center").publish();
+        blueTagToTurretCenterPublisher = loggingTable.getDoubleTopic("Distances/Blue Tag To Turret Center").publish();
     }
 
     public static synchronized RobotState getInstance() {
@@ -107,6 +127,22 @@ public class RobotState {
         turretOdomPosePublisher.accept(this.getTurretOdomPose());
         hoodFudgeFactorPublisher.accept(this.hoodAngleFudgeFactor);
         flywheelFudgeFactorPublisher.accept(this.flywheelSpeedFudgeFactor);
+    }
+
+    public void logAllDistances() {
+        Translation2d robotCenter = this.getRobotOdomPose().getTranslation();
+        Translation2d turretCenter = this.getTurretOdomPose().getTranslation();
+        AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+
+        redHubToRobotCenterPublisher.accept(robotCenter.getDistance(FieldConstants.RED_ALLIANCE_HUB_POSE.getTranslation()));
+        blueHubToRobotCenterPublisher.accept(robotCenter.getDistance(FieldConstants.BLUE_ALLIANCE_HUB_POSE.getTranslation()));
+        redTagToRobotCenterPublisher.accept(robotCenter.getDistance(fieldLayout.getTagPose(10).get().toPose2d().getTranslation()));
+        blueTagToRobotCenterPublisher.accept(robotCenter.getDistance(fieldLayout.getTagPose(26).get().toPose2d().getTranslation()));
+
+        redHubToTurretCenterPublisher.accept(turretCenter.getDistance(FieldConstants.RED_ALLIANCE_HUB_POSE.getTranslation()));
+        blueHubToTurretCenterPublisher.accept(turretCenter.getDistance(FieldConstants.BLUE_ALLIANCE_HUB_POSE.getTranslation()));
+        redTagToTurretCenterPublisher.accept(turretCenter.getDistance(fieldLayout.getTagPose(10).get().toPose2d().getTranslation()));
+        blueTagToTurretCenterPublisher.accept(turretCenter.getDistance(fieldLayout.getTagPose(26).get().toPose2d().getTranslation()));
     }
 
     public final Trigger isIntakeCurrentlyDeployed = new Trigger(() -> this.currentIntakeState);
