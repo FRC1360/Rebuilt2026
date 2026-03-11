@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Center to MidCenter"
+            "pathName": "LCenter to Depot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Depot to MidCenter"
           }
         }
       ]

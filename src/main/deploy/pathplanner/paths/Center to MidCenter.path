@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "MidShoot"
     }
   ],
   "rotationTargets": [],
@@ -49,7 +49,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -0.6156305534243557
+    "rotation": -0.0971291731684888
   },
   "reversed": false,
   "folder": null,
