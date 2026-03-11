@@ -133,6 +133,8 @@ public class RobotState {
             () -> this.hoodAngleFudgeFactor += HoodConstants.FUDGE_INCREMENT_VALUE);
     public Command decrementHoodFudgeFactor = Commands.runOnce(
             () -> this.hoodAngleFudgeFactor -= HoodConstants.FUDGE_INCREMENT_VALUE);
+    public Command resetHoodFudgeFactor = Commands.runOnce(
+            () -> this.hoodAngleFudgeFactor = 0.0);
 
     public double getFlywheelVelocityFromGoalPose(Pose2d poseToSetAngleFrom) {
         // Get distance between turret position and goal position, plug that into the
@@ -146,6 +148,8 @@ public class RobotState {
             () -> this.flywheelSpeedFudgeFactor += FlywheelConstants.FUDGE_INCREMENT_VALUE);
     public Command decrementFlywheelFudgeFactor = Commands.runOnce(
             () -> this.flywheelSpeedFudgeFactor -= FlywheelConstants.FUDGE_INCREMENT_VALUE);
+    public Command resetFlywheelSpeedFudgeFactor = Commands.runOnce(
+            () -> this.flywheelSpeedFudgeFactor = 0.0);
 
     public Pose2d getRobotOdomPose() {
         return robotOdomPoseSupplier.get();

@@ -356,8 +356,11 @@ public class RobotContainer {
         /* Overall Fudge Factor */
         m_operatorController.rightBumper().whileTrue(robotState.incrementFlywheelFudgeFactor);
         m_operatorController.leftBumper().whileTrue(robotState.decrementFlywheelFudgeFactor);
+        m_operatorController.a().whileTrue(robotState.resetFlywheelSpeedFudgeFactor);
+
         m_operatorController.rightTrigger(0.8).whileTrue(robotState.incrementHoodFudgeFactor);
         m_operatorController.leftTrigger(0.8).whileTrue(robotState.decrementHoodFudgeFactor);
+        m_operatorController.y().whileTrue(robotState.resetHoodFudgeFactor);
     }
 
     public Command getAutonomousCommand() {
