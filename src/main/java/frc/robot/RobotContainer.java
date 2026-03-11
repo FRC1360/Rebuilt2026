@@ -7,6 +7,8 @@ package frc.robot;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -57,8 +59,10 @@ public class RobotContainer {
 
     private final SwerveTelemetry swerveLogger = new SwerveTelemetry(DriveCommands.MAX_DRIVE_TRANSLATIONAL_SPEED);
 
+    public SendableChooser<Command> autoChooser;
     private PathPlannerAuto leftSideBasicAuto;
     private PathPlannerAuto rightSideBasicAuto;
+    private PathPlannerAuto middleBasicAuto;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -68,7 +72,6 @@ public class RobotContainer {
                 () -> drivetrain.getState().Pose,
                 () -> m_TurretSubsystem.getCurrentRobotRelativeRotation());
 
-        configureNamedCommands();
         configureAllAutos();
 
         configureBindings();
@@ -76,10 +79,6 @@ public class RobotContainer {
 
         // Run warmup command for pathplanner as per CTRE example
         CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
-    }
-
-    private void configureNamedCommands() {
-
     }
 
     private void configureAllAutos() {
@@ -155,6 +154,20 @@ public class RobotContainer {
         leftSideBasicAuto.event("DEPLOY_INTAKE_STOP_ROLLERS_TRIGGER")
                 .onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> false));
         leftSideBasicAuto.event("EXECUTE_SHOT_ROUTINE_COMMAND").onTrue(runShotSequence);
+
+        middleBasicAuto = new PathPlannerAuto("Center Auto");
+        middleBasicAuto.event("DEPLOY_AND_RUN_INTAKE_TRIGGER")
+                .onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        middleBasicAuto.event("DEPLOY_INTAKE_STOP_ROLLERS_TRIGGER")
+                .onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> false));
+        middleBasicAuto.event("EXECUTE_SHOT_ROUTINE_COMMAND").onTrue(runShotSequence);
+
+        autoChooser = new SendableChooser<Command>();
+        autoChooser.setDefaultOption("Do Nothing", Commands.none());
+        autoChooser.addOption("Left Side Neutral Zone", leftSideBasicAuto);
+        autoChooser.addOption("Right Side Neutral Zone", rightSideBasicAuto);
+        autoChooser.addOption("Center Fire Preload", middleBasicAuto);
+        SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     private void configureBindings() {
@@ -174,6 +187,9 @@ public class RobotContainer {
                 .and(m_TurretSubsystem.turretAtTarget);
 
         triggerLogger.addTrigger(preparedAndReadyToShoot, "Ready To Shoot");
+        triggerLogger.addTrigger(m_TurretSubsystem.turretAtTarget, "Turret At Setpoint");
+        triggerLogger.addTrigger(m_HoodSubsystem.hoodAtTarget, "Hood At Setpoint");
+        triggerLogger.addTrigger(m_flywheelSubsystem.flywheelAtTarget, "Flywheel At Setpoint");
         triggerLogger.addTrigger(robotState.isBlueAlliance, "Is Blue Alliance");
 
         // Driving
@@ -312,6 +328,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return rightSideBasicAuto;
+        return autoChooser.getSelected();
     }
 }

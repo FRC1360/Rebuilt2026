@@ -133,10 +133,10 @@ public final class Constants {
                 new Translation3d(-((0.704850 / 2.0) - 0.094180), (0.704850 / 2.0) - 0.094180, 0.208540),
                 new Rotation3d(0, -Math.toRadians(10), Math.toRadians(134.136029)));
         public static final Transform3d BACK_RIGHT_BACK_SWERVECAM_ROBOT_RELATIVE_TRANSFORM = new Transform3d(
-                new Translation3d(-0.333, -0.240, 0.353590),
-                new Rotation3d(0, -Math.toRadians(10), Math.toRadians(180.0)));
+                new Translation3d(-0.288, -0.288, 0.241),
+                new Rotation3d(0, -Math.toRadians(27), Math.toRadians(180.0)));
         public static final Transform3d BACK_RIGHT_RIGHT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM = new Transform3d(
-                new Translation3d(-0.274, -0.258, 0.353590),
-                new Rotation3d(0, -Math.toRadians(10), Math.toRadians(-90.0)));
+                new Translation3d(-0.279, -0.309, 0.241),
+                new Rotation3d(0, -Math.toRadians(12), Math.toRadians(-90.0)));
     }
 }
