@@ -47,6 +47,7 @@ public class RobotContainer {
     private final TriggerLogger triggerLogger = TriggerLogger.getInstance();
 
     private final CommandXboxController m_controller = new CommandXboxController(0);
+    private final CommandXboxController m_operatorController = new CommandXboxController(1);
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
     private final IndexSubsystem m_indexSubsystem = new IndexSubsystem();
@@ -189,11 +190,13 @@ public class RobotContainer {
         Trigger intakeRollerInput = m_controller.leftTrigger(0.8).and(backdriveIndexInput.negate());
         Trigger intakeAgitateInput = m_controller.b();
 
-        Trigger preparedAndReadyToShoot = (shootingInput.or(passingInput).or(shootingWithTurretInput))
-                .and(backdrivingAnySubsystem.negate())
+        Trigger runIndexOverrideInput = m_controller.x();
+        Trigger automaticShootCondition = (shootingInput.or(passingInput).or(shootingWithTurretInput))
                 .and(m_flywheelSubsystem.flywheelAtTarget)
                 .and(m_HoodSubsystem.hoodAtTarget)
                 .and(m_TurretSubsystem.turretAtTarget);
+        Trigger preparedAndReadyToShoot = backdrivingAnySubsystem.negate()
+                .and(automaticShootCondition.or(runIndexOverrideInput));
 
         triggerLogger.addTrigger(preparedAndReadyToShoot, "Ready To Shoot");
         triggerLogger.addTrigger(m_TurretSubsystem.turretAtTarget, "Turret At Setpoint");
@@ -348,8 +351,13 @@ public class RobotContainer {
         backdriveIndexInput.whileTrue(backdriveIndex);
 
         Command backdriveShooter = new SetFlywheelVelocityCommand(m_flywheelSubsystem, -30.0);
-        backdriveShooterInput.whileTrue(backdriveShooter);
+        backdriveShooterInput.whileTrue(backdriveShooter.alongWith(backdriveIndex));
 
+        /* Overall Fudge Factor */
+        m_operatorController.rightBumper().whileTrue(robotState.incrementFlywheelFudgeFactor);
+        m_operatorController.leftBumper().whileTrue(robotState.decrementFlywheelFudgeFactor);
+        m_operatorController.rightTrigger(0.8).whileTrue(robotState.incrementHoodFudgeFactor);
+        m_operatorController.leftTrigger(0.8).whileTrue(robotState.decrementHoodFudgeFactor);
     }
 
     public Command getAutonomousCommand() {

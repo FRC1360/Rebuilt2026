@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
@@ -14,6 +15,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.FlywheelConstants;
+import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.TurretConstants;
 
@@ -22,6 +25,8 @@ public class RobotState {
     private final NetworkTable loggingTable;
     private final StructPublisher<Pose2d> robotPosePublisher;
     private final StructPublisher<Pose2d> turretOdomPosePublisher;
+    private final DoublePublisher hoodFudgeFactorPublisher;
+    private final DoublePublisher flywheelFudgeFactorPublisher;
 
     private Supplier<Pose2d> robotOdomPoseSupplier;
     private Supplier<Rotation2d> turretRotationSupplier;
@@ -32,6 +37,8 @@ public class RobotState {
     private InterpolatingDoubleTreeMap turretDistanceToHoodAngleMap;
     private InterpolatingDoubleTreeMap turretDistanceToFlywheelVelocityMap;
     private InterpolatingDoubleTreeMap turretDistanceToTimeOfFlightMap;
+    private double hoodAngleFudgeFactor;
+    private double flywheelSpeedFudgeFactor;
 
     private static RobotState instance = null;
 
@@ -69,9 +76,14 @@ public class RobotState {
 
         currentIntakeState = IntakeConstants.INTAKE_DEPLOYED_BY_DEFAULT;
 
+        flywheelSpeedFudgeFactor = FlywheelConstants.DEFAULT_FUDGE_FACTOR;
+        hoodAngleFudgeFactor = HoodConstants.DEFAULT_FUDGE_FACTOR;
+
         loggingTable = NetworkTableInstance.getDefault().getTable("RobotState");
         robotPosePublisher = loggingTable.getStructTopic("Robot Odometry Pose", Pose2d.struct).publish();
         turretOdomPosePublisher = loggingTable.getStructTopic("Turret Odometry Pose", Pose2d.struct).publish();
+        hoodFudgeFactorPublisher = loggingTable.getDoubleTopic("Current Hood Fudge Factor").publish();
+        flywheelFudgeFactorPublisher = loggingTable.getDoubleTopic("Current Flywheel Fudge Factor").publish();
     }
 
     public static synchronized RobotState getInstance() {
@@ -82,7 +94,8 @@ public class RobotState {
         return instance;
     }
 
-    public Trigger isBlueAlliance = new Trigger(() -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue);
+    public Trigger isBlueAlliance = new Trigger(
+            () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue);
 
     public void setAllSuppliers(Supplier<Pose2d> robotOdomPoseSupplier, Supplier<Rotation2d> turretRotationSupplier) {
         this.robotOdomPoseSupplier = robotOdomPoseSupplier;
@@ -92,6 +105,8 @@ public class RobotState {
     public void logAllInputs() {
         robotPosePublisher.accept(this.getRobotOdomPose());
         turretOdomPosePublisher.accept(this.getTurretOdomPose());
+        hoodFudgeFactorPublisher.accept(this.hoodAngleFudgeFactor);
+        flywheelFudgeFactorPublisher.accept(this.flywheelSpeedFudgeFactor);
     }
 
     public final Trigger isIntakeCurrentlyDeployed = new Trigger(() -> this.currentIntakeState);
@@ -110,15 +125,27 @@ public class RobotState {
         // Get distance between turret position and goal position, plug that into the
         // map
         return turretDistanceToHoodAngleMap.get(
-                poseToSetAngleFrom.getTranslation().getDistance(this.getTurretOdomPose().getTranslation()));
+                poseToSetAngleFrom.getTranslation().getDistance(this.getTurretOdomPose().getTranslation()))
+                + hoodAngleFudgeFactor;
     }
+
+    public Command incrementHoodFudgeFactor = Commands.runOnce(
+            () -> this.hoodAngleFudgeFactor += HoodConstants.FUDGE_INCREMENT_VALUE);
+    public Command decrementHoodFudgeFactor = Commands.runOnce(
+            () -> this.hoodAngleFudgeFactor -= HoodConstants.FUDGE_INCREMENT_VALUE);
 
     public double getFlywheelVelocityFromGoalPose(Pose2d poseToSetAngleFrom) {
         // Get distance between turret position and goal position, plug that into the
         // map
         return turretDistanceToFlywheelVelocityMap.get(
-                poseToSetAngleFrom.getTranslation().getDistance(this.getTurretOdomPose().getTranslation()));
+                poseToSetAngleFrom.getTranslation().getDistance(this.getTurretOdomPose().getTranslation()))
+                + flywheelSpeedFudgeFactor;
     }
+
+    public Command incrementFlywheelFudgeFactor = Commands.runOnce(
+            () -> this.flywheelSpeedFudgeFactor += FlywheelConstants.FUDGE_INCREMENT_VALUE);
+    public Command decrementFlywheelFudgeFactor = Commands.runOnce(
+            () -> this.flywheelSpeedFudgeFactor -= FlywheelConstants.FUDGE_INCREMENT_VALUE);
 
     public Pose2d getRobotOdomPose() {
         return robotOdomPoseSupplier.get();
