@@ -83,6 +83,9 @@ public final class Constants {
         public static final double NEGATIVE_THRESHOLD = -180 + (TOTAL_WRAP_AROUND_ANGLE_RANGE - 360) / 2;
         public static final double PID_TOLERANCE = 3;
 
+        // in +- degrees, ex: 15 degrees would accept 15 deg higher and lower
+        public static final double PASSING_PID_TOLERANCE = 7.5;
+
         public static final Transform2d ROBOT_TO_TURRET_CENTER = new Transform2d(
                 new Translation2d(-((0.705 / 2.0) - 0.268852), ((0.705 / 2.0) - 0.212725)),
                 Rotation2d.fromDegrees(285.0));

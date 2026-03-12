@@ -194,7 +194,8 @@ public class RobotContainer {
         Trigger automaticShootCondition = (shootingInput.or(passingInput).or(shootingWithTurretInput))
                 .and(m_flywheelSubsystem.flywheelAtTarget)
                 .and(m_HoodSubsystem.hoodAtTarget)
-                .and(m_TurretSubsystem.turretAtTarget);
+                .and((m_TurretSubsystem.turretAtTarget.and(shootingInput.or(shootingWithTurretInput)))
+                        .or(m_TurretSubsystem.turretAtPassingTarget.and(passingInput)));
         Trigger preparedAndReadyToShoot = backdrivingAnySubsystem.negate()
                 .and(automaticShootCondition.or(runIndexOverrideInput));
 
