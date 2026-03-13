@@ -351,8 +351,9 @@ public class RobotContainer {
         Command backdriveIndex = new SetIndexSpeedsCommand(m_indexSubsystem, -0.4, -1.0);
         backdriveIndexInput.whileTrue(backdriveIndex);
 
-        Command backdriveShooter = new SetFlywheelVelocityCommand(m_flywheelSubsystem, -30.0);
-        backdriveShooterInput.whileTrue(backdriveShooter.alongWith(backdriveIndex));
+        Command backdriveShooter = new SetFlywheelVelocityCommand(m_flywheelSubsystem, -30.0)
+                .alongWith(new SetIndexSpeedsCommand(m_indexSubsystem, -0.4, -1.0));
+        backdriveShooterInput.whileTrue(backdriveShooter);
 
         /* Overall Fudge Factor */
         m_operatorController.rightBumper().whileTrue(robotState.incrementFlywheelFudgeFactor);
