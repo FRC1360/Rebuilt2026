@@ -23,7 +23,7 @@ import frc.robot.util.RobotState;
 public class DriveCommands {
 
     public static final double MAX_DRIVE_TRANSLATIONAL_SPEED = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-    public static final double MAX_DRIVE_ANGULAR_SPEED = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
+    public static final double MAX_DRIVE_ANGULAR_SPEED = RotationsPerSecond.of(1.0).in(RadiansPerSecond);
 
     public static final double DEADBAND_AS_DECIMAL = 0.15;
 

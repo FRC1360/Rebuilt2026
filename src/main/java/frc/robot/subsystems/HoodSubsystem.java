@@ -31,7 +31,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 public class HoodSubsystem extends SubsystemBase {
 
     private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
-            0.06,
+            0.1,
             0.07,
             0.0,
             90.0,
