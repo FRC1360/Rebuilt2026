@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.479736728440723,
-        "y": 7.394713312935405
+        "x": 7.852086055458768,
+        "y": 7.677262403818235
       },
       "isLocked": false,
       "linkedName": "LStart"
     },
     {
       "anchor": {
-        "x": 0.46614542901121336,
-        "y": 5.980669213444643
+        "x": 7.68514268474158,
+        "y": 4.713924987296748
       },
       "prevControl": {
-        "x": 0.1011613944934669,
-        "y": 7.953228448122395
+        "x": 7.60638261287747,
+        "y": 6.907150206881533
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Depot"
+      "linkedName": "LCenter 2"
     }
   ],
   "rotationTargets": [],
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -90.0
   },
   "reversed": false,
   "folder": null,
