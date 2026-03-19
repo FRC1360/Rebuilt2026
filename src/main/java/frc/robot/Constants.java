@@ -115,7 +115,7 @@ public final class Constants {
         public static final int MAGAZINE_SENSOR_DIGITAL_CHANNEL = 1;
 
         public static final double HOPPER_SPEED = 0.5;
-        public static final double MAGAZINE_SPEED = 1.0;
+        public static final double MAGAZINE_SPEED = 0.6;
     }
 
     public static final class FlywheelConstants {

@@ -23,6 +23,8 @@ public class IndexSubsystem extends SubsystemBase {
     private final NetworkTable loggingTable = NetworkTableInstance.getDefault().getTable("Subsystems/" + getName());
     private final DoublePublisher magazineOutputCurrentPublisher = loggingTable.getDoubleTopic("Magazine Current")
             .publish();
+    private final DoublePublisher magazineMotorSpeedPublisher = loggingTable.getDoubleTopic("Magazine Speed RPM")
+            .publish();
 
     private final SparkFlex hopperMotor;
     private SparkFlexConfig hopperMotorConfig;
@@ -78,5 +80,6 @@ public class IndexSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         magazineOutputCurrentPublisher.accept(magazineMotor.getOutputCurrent());
+        magazineMotorSpeedPublisher.accept(magazineMotor.getEncoder().getVelocity());
     }
 }
