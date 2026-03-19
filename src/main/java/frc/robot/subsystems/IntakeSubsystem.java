@@ -8,7 +8,12 @@ import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.ResetMode;
-
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
 
 import com.revrobotics.spark.SparkFlex;
@@ -63,10 +68,13 @@ public class IntakeSubsystem extends SubsystemBase {
                 this.pivotFeedForward.setKv(constants.kV);
             });
 
-    private final SparkFlex rollerMotor = new SparkFlex(IntakeConstants.ROLLER_VORTEX_CAN_ID, MotorType.kBrushless);
+    private final TalonFX rollerMotor = new TalonFX(IntakeConstants.ROLLER_VORTEX_CAN_ID);
     private final SparkFlex pivotMotor = new SparkFlex(IntakeConstants.PIVOT_VORTEX_CAN_ID, MotorType.kBrushless);
 
-    private SparkFlexConfig rollerConfig = new SparkFlexConfig();
+    private final FeedbackConfigs rollerFeedbackConfigs;
+    private final MotorOutputConfigs rollerOutputConfigs;
+    private final CurrentLimitsConfigs rollerCurrentLimitsConfigs;
+
     private SparkFlexConfig pivotConfig = new SparkFlexConfig();
 
     public Trigger IntakePivotAtTarget;
@@ -75,16 +83,21 @@ public class IntakeSubsystem extends SubsystemBase {
     private double lastPivotVelocity = 0.0;
 
     public IntakeSubsystem() {
-        rollerMotor.clearFaults();
-        rollerConfig.inverted(IntakeConstants.ROLLER_VORTEX_INVERTED);
-        rollerConfig.idleMode(IdleMode.kCoast);
-        rollerConfig.smartCurrentLimit(
-                IntakeConstants.ROLLER_VORTEX_STALL_CURRENT_LIMIT,
-                IntakeConstants.ROLLER_VORTEX_FREE_CURRENT_LIMIT);
-        rollerMotor.configure(
-                rollerConfig,
-                ResetMode.kResetSafeParameters,
-                PersistMode.kPersistParameters);
+
+        rollerFeedbackConfigs = new FeedbackConfigs()
+                .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+        rollerOutputConfigs = new MotorOutputConfigs()
+                .withInverted(IntakeConstants.ROLLER_VORTEX_INVERTED)
+                .withNeutralMode(NeutralModeValue.Coast);
+
+        rollerCurrentLimitsConfigs = new CurrentLimitsConfigs()
+                .withStatorCurrentLimit(IntakeConstants.ROLLER_VORTEX_STATOR_CURRENT_LIMIT)
+                .withStatorCurrentLimitEnable(true);
+
+        rollerMotor.getConfigurator().apply(rollerFeedbackConfigs);
+        rollerMotor.getConfigurator().apply(rollerOutputConfigs);
+        rollerMotor.getConfigurator().apply(rollerCurrentLimitsConfigs);
 
         pivotMotor.clearFaults();
         pivotConfig.inverted(IntakeConstants.PIVOT_VORTEX_INVERTED);
@@ -99,13 +112,13 @@ public class IntakeSubsystem extends SubsystemBase {
         pivotMotor.configure(
                 pivotConfig,
                 ResetMode.kResetSafeParameters,
-                PersistMode.kPersistParameters
-        );
+                PersistMode.kPersistParameters);
         pivotMotor.getEncoder().setPosition(IntakeConstants.PIVOT_STARTUP_ANGLE);
 
         pivotProfiledPIDController.setTolerance(Constants.IntakeConstants.PIVOT_PID_TOLERANCE);
 
         IntakePivotAtTarget = new Trigger(() -> (pivotProfiledPIDController.atGoal()));
+
     }
 
     public void setRollerSpeed(double speed) {
