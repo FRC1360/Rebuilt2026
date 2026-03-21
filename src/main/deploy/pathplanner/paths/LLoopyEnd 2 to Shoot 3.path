@@ -3,69 +3,59 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.7584247084066895,
-        "y": 4.581315608494719
+        "x": 5.8034316591257085,
+        "y": 4.568570786076889
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.7056708938527,
-        "y": 6.95318661971831
+        "x": 5.826664169967879,
+        "y": 5.572020930966433
       },
       "isLocked": false,
-      "linkedName": "LCenter"
+      "linkedName": "LLoopyEnd 2"
     },
     {
       "anchor": {
-        "x": 4.527776280076291,
-        "y": 7.421899436986503
+        "x": 5.527324356294014,
+        "y": 7.320292051789907
       },
       "prevControl": {
-        "x": 6.319021520548906,
-        "y": 7.46752160981273
+        "x": 6.320275632042266,
+        "y": 7.111959503699385
       },
       "nextControl": {
-        "x": 3.1811467044454225,
-        "y": 7.387601415786385
+        "x": 4.908271209286971,
+        "y": 7.482936243764672
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.6170186417987087,
-        "y": 5.967550753741198
+        "x": 3.835471132924745,
+        "y": 7.426314563118036
       },
       "prevControl": {
-        "x": 2.6005330747505866,
-        "y": 7.232114372432511
+        "x": 4.841605184492371,
+        "y": 7.3739706664465965
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LShoot"
+      "linkedName": "LShoot 3"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.5644725913621261,
-      "rotationDegrees": 180.0
-    },
-    {
-      "waypointRelativePos": 1.3828514327242518,
-      "rotationDegrees": 180.0
+      "waypointRelativePos": 1.0022321428571423,
+      "rotationDegrees": 0.0
     }
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "DEPLOY_INTAKE_STOP_ROLLERS_TRIGGER",
-      "waypointRelativePos": 0.3357433078393884,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
       "name": "EXECUTE_SHOT_ROUTINE_COMMAND",
-      "waypointRelativePos": 1.9310020315487568,
+      "waypointRelativePos": 1.7916762939001831,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -80,13 +70,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -137.0
+    "rotation": -0.5536969444041512
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": -89.41744581455845
+    "velocity": 1.5,
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }

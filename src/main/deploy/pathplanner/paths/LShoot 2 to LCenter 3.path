@@ -3,42 +3,35 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.46614542901121336,
-        "y": 5.980669213444643
+        "x": 3.835471132924745,
+        "y": 7.426314563118036
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.3759272758949534,
-        "y": 5.644152178697182
+        "x": 6.7474092404058235,
+        "y": 7.426314563118036
       },
       "isLocked": false,
-      "linkedName": "Depot"
+      "linkedName": "L Shoot 2"
     },
     {
       "anchor": {
-        "x": 2.47,
-        "y": 4.016061702244718
+        "x": 6.471479893945667,
+        "y": 4.568570786076889
       },
       "prevControl": {
-        "x": 2.2834448538176897,
-        "y": 4.749709644586266
+        "x": 6.450713768036247,
+        "y": 6.690624057656314
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "MidShoot"
+      "linkedName": "LCenter 3"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "EXECUTE_SHOT_ROUTINE_COMMAND",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 3.0,
@@ -48,14 +41,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": -94.0
+    "velocity": 1.5,
+    "rotation": -90.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -0.5536969444041512
   },
   "useDefaultConstraints": true
 }

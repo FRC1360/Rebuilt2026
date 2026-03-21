@@ -13,19 +13,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LCenter 2 to LShoot 2"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
+            "pathName": "LCenter 2 to LLoopyEnd"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LShoot 2 to Depot"
+            "pathName": "LLoopyEnd to LShoot 2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LShoot 2 to LCenter 3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LCenter 3 to LLoopyEnd 2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LLoopyEnd 2 to Shoot 3"
           }
         }
       ]
