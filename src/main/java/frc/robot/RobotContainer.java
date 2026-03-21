@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.SetShooterFromCompensatedPoseCommand;
 import frc.robot.commands.flywheel.SetFlywheelVelocityCommand;
 import frc.robot.commands.flywheel.SetFlywheelVelocityFromNetworkTables;
 import frc.robot.commands.flywheel.SetFlywheelVelocityFromPoseCommand;
@@ -56,8 +57,8 @@ public class RobotContainer {
     private final TurretSubsystem m_TurretSubsystem = new TurretSubsystem();
 
     // Slow down speed when intaking and/or shooting
-    private static final double SLOW_DRIVE_TRANSLATIONAL_MULTIPLIER = 1.0;
-    private static final double SLOW_DRIVE_ANGULAR_MULTIPLIER = 1.0;
+    private static final double SLOW_DRIVE_TRANSLATIONAL_MULTIPLIER = 0.5;
+    private static final double SLOW_DRIVE_ANGULAR_MULTIPLIER = 0.5;
 
     private final SwerveTelemetry swerveLogger = new SwerveTelemetry(DriveCommands.MAX_DRIVE_TRANSLATIONAL_SPEED);
 
@@ -243,7 +244,7 @@ public class RobotContainer {
                 robotState.isBlueAlliance);
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
-        intakeRollerInput.and(shootingInput.negate()).whileTrue(joystickDriveAtSlowSpeed);
+        intakeRollerInput.or(shootingWithTurretInput).whileTrue(joystickDriveAtSlowSpeed);
         shootingInput.whileTrue(joystickDriveWhileFacingHub);
         // passingInput.whileTrue(joystickDriveWhilePassing);
 
@@ -332,12 +333,14 @@ public class RobotContainer {
         m_TurretSubsystem.setDefaultCommand(new SetTurretToNonWrappedEncoderCommand(m_TurretSubsystem,
                 TurretConstants.ENCODER_STARTUP_ANGLE_DEGREES));
 
-        shootingInput.or(shootingWithTurretInput).whileTrue(prepareToShootAtHub);
+        shootingInput.whileTrue(prepareToShootAtHub);
         passingInput.whileTrue(prepareToPass);
         preparedAndReadyToShoot.whileTrue(new ActivateAgitatedIndexCommand(m_indexSubsystem));
         shootingWithTurretInput.whileTrue(Commands.either(
-                new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE),
-                new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
+                new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem, m_flywheelSubsystem,
+                        FieldConstants.BLUE_ALLIANCE_HUB_POSE),
+                new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem, m_flywheelSubsystem,
+                        FieldConstants.RED_ALLIANCE_HUB_POSE),
                 robotState.isBlueAlliance));
 
         // Backdriving

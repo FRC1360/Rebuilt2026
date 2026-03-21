@@ -148,4 +148,20 @@ public final class Constants {
                 new Translation3d(-0.279, -0.309, 0.241),
                 new Rotation3d(0, -Math.toRadians(12), Math.toRadians(-90.0)));
     }
+
+    public static final class ShootingConstants {
+        /*
+         * Units: m/s
+         * Function: Used in the following:
+         * - Initial time guess for the newton recursion
+         * - Approximation in the derivative function for change in distance
+         * with respect to change in time -> which gets used in the error function
+         */
+        public static final double HORIZONTAL_BALL_SPEED = 3.0;
+
+        /*
+         * Maximum amount of iterations for the newton recursion
+         */
+        public static final int MAX_ITERATION_COUNT = 5;
+    }
 }

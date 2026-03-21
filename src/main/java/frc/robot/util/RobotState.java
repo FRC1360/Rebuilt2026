@@ -2,6 +2,8 @@ package frc.robot.util;
 
 import java.util.function.Supplier;
 
+import org.photonvision.PhotonUtils;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.IntakeConstants;
+import frc.robot.Constants.ShootingConstants;
 import frc.robot.Constants.TurretConstants;
 
 public class RobotState {
@@ -88,7 +91,12 @@ public class RobotState {
         turretDistanceToFlywheelVelocityMap.put(5.033, 65.0);
 
         turretDistanceToTimeOfFlightMap = new InterpolatingDoubleTreeMap();
-        turretDistanceToTimeOfFlightMap.put(0.0, 0.0);
+        turretDistanceToTimeOfFlightMap.put(6.0, 0.9);
+        turretDistanceToTimeOfFlightMap.put(5.0, 0.8);
+        turretDistanceToTimeOfFlightMap.put(4.0, 0.7);
+        turretDistanceToTimeOfFlightMap.put(3.0, 0.7);
+        turretDistanceToTimeOfFlightMap.put(2.0, 0.8);
+        turretDistanceToTimeOfFlightMap.put(1.0, 0.8);
 
         currentIntakeState = IntakeConstants.INTAKE_DEPLOYED_BY_DEFAULT;
 
@@ -259,5 +267,59 @@ public class RobotState {
                 currentSpeeds.vxMetersPerSecond,
                 currentSpeeds.vyMetersPerSecond)
                 .rotateBy(getRobotOdomPose().getRotation());
+    }
+
+    public ShootOnTheMoveOutputPoses calculateParametersForShootOnTheMove(Translation2d goalTranslationOnField) {
+
+        ShootOnTheMoveOutputPoses outputData = new ShootOnTheMoveOutputPoses();
+
+        Translation2d turretTranslationOnField = this.getTurretOdomPose().getTranslation();
+        Translation2d turretVelocityOnFieldAsTranslation = this.getFieldRelativeRobotVelocityVector();
+
+        double displacement_x, displacement_y, distance_derived_from_current_time;
+
+        double turret_velocity_x, turret_velocity_y;
+        turret_velocity_x = turretVelocityOnFieldAsTranslation.getX();
+        turret_velocity_y = turretVelocityOnFieldAsTranslation.getY();
+
+        Translation2d projectileVelocityOnFieldAsTranslation;
+        projectileVelocityOnFieldAsTranslation = new Translation2d(
+                ShootingConstants.HORIZONTAL_BALL_SPEED,
+                PhotonUtils.getYawToPose(new Pose2d(turretTranslationOnField, new Rotation2d()),
+                        new Pose2d(goalTranslationOnField, new Rotation2d())));
+
+        double current_time_guess, next_time_guess;
+
+        double error, error_derivative;
+
+        // Time = Distance / Speed
+        current_time_guess = goalTranslationOnField.getDistance(turretTranslationOnField) /
+                projectileVelocityOnFieldAsTranslation.plus(turretVelocityOnFieldAsTranslation)
+                        .getDistance(new Translation2d(0, 0));
+
+        for (int iteration = 0; iteration < ShootingConstants.MAX_ITERATION_COUNT; iteration++) {
+            displacement_x = goalTranslationOnField.getX() - turretTranslationOnField.getX()
+                    + (turretVelocityOnFieldAsTranslation.getX() * current_time_guess);
+            displacement_y = goalTranslationOnField.getY() - turretTranslationOnField.getY()
+                    + (turretVelocityOnFieldAsTranslation.getY() * current_time_guess);
+            distance_derived_from_current_time = Math
+                    .sqrt((displacement_x * displacement_x) + (displacement_y * displacement_y));
+
+            error = current_time_guess - turretDistanceToTimeOfFlightMap.get(distance_derived_from_current_time);
+            error_derivative = 1 + (((displacement_x * turret_velocity_x) + (displacement_y * turret_velocity_y))
+                    / (distance_derived_from_current_time * ShootingConstants.HORIZONTAL_BALL_SPEED));
+
+            next_time_guess = current_time_guess - (error / error_derivative);
+
+            outputData.setIteratedTranslationWithIndex(iteration, goalTranslationOnField
+                    .minus(turretVelocityOnFieldAsTranslation.times(current_time_guess)));
+
+            current_time_guess = next_time_guess;
+        }
+
+        outputData.setGoalTranslation(goalTranslationOnField
+                .minus(turretVelocityOnFieldAsTranslation.times(current_time_guess)));
+
+        return outputData;
     }
 }
