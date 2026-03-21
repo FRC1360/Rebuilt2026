@@ -7,11 +7,13 @@ package frc.robot;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.IntakeConstants;
@@ -55,6 +57,9 @@ public class RobotContainer {
     private final FlywheelSubsystem m_flywheelSubsystem = new FlywheelSubsystem();
     private final HoodSubsystem m_HoodSubsystem = new HoodSubsystem();
     private final TurretSubsystem m_TurretSubsystem = new TurretSubsystem();
+    private final Timer turretTimer = new Timer();
+    private final Timer hoodTimer = new Timer();
+    private final Timer flywheelTimer = new Timer();
 
     // Slow down speed when intaking and/or shooting
     private static final double SLOW_DRIVE_TRANSLATIONAL_MULTIPLIER = 0.5;
@@ -83,6 +88,10 @@ public class RobotContainer {
 
         // Run warmup command for pathplanner as per CTRE example
         CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+
+        SmartDashboard.putNumber("turret time to pose", turretTimer.get());
+        SmartDashboard.putNumber("hood time to pose", hoodTimer.get());
+        SmartDashboard.putNumber("flywheel time to pose", flywheelTimer.get());
     }
 
     private void configureAllAutos() {
@@ -341,7 +350,32 @@ public class RobotContainer {
                         FieldConstants.BLUE_ALLIANCE_HUB_POSE),
                 new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem, m_flywheelSubsystem,
                         FieldConstants.RED_ALLIANCE_HUB_POSE),
-                robotState.isBlueAlliance));
+                robotState.isBlueAlliance)
+                .alongWith(
+                    new RunCommand(() -> {
+                        turretTimer.start();
+                        if (m_TurretSubsystem.turretAtTarget.getAsBoolean() == true) {
+                            turretTimer.stop();
+                        }
+                    })
+                )
+                .alongWith(
+                    new RunCommand(() -> {
+                        hoodTimer.start();
+                        if (m_HoodSubsystem.hoodAtTarget.getAsBoolean() == true) {
+                            hoodTimer.stop();
+                        }
+                    })
+                )
+                .alongWith(
+                    new RunCommand(() -> {
+                        flywheelTimer.start();
+                        if (m_flywheelSubsystem.flywheelAtTarget.getAsBoolean() == true) {
+                            flywheelTimer.stop();
+                        }
+                    })
+                )
+                );
 
         // Backdriving
         Command backdriveIntakeWhileKeepingState = Commands.either(
