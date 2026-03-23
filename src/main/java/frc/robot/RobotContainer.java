@@ -4,9 +4,19 @@
 
 package frc.robot;
 
+import java.io.IOException;
+
+import org.json.simple.parser.ParseException;
+
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.FileVersionException;
+
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -38,12 +48,14 @@ import frc.robot.subsystems.IndexSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.util.FieldConstants;
+import frc.robot.util.FieldZoneManager;
 import frc.robot.util.RobotState;
 import frc.robot.util.TriggerLogger;
 
 public class RobotContainer {
 
     private final RobotState robotState = RobotState.getInstance();
+    private final FieldZoneManager m_fieldZoneManager = FieldZoneManager.getInstance();
     private final TriggerLogger triggerLogger = TriggerLogger.getInstance();
 
     private final CommandXboxController m_controller = new CommandXboxController(0);
@@ -65,6 +77,11 @@ public class RobotContainer {
     private PathPlannerAuto leftSideBasicAuto;
     private PathPlannerAuto rightSideBasicAuto;
     private PathPlannerAuto middleBasicAuto;
+    private PathPlannerPath exitLeft;
+    private PathPlannerPath enterLeft;
+    private PathPlannerPath exitRight;
+    private PathPlannerPath enterRight;
+    private PathConstraints pathConstraints;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -84,6 +101,26 @@ public class RobotContainer {
     }
 
     private void configureAllAutos() {
+
+        try {
+            enterLeft = PathPlannerPath.fromPathFile("Enter Alliance Left");
+            enterRight = PathPlannerPath.fromPathFile("Enter Alliance Right");
+            exitLeft = PathPlannerPath.fromPathFile("Exit Alliance Left");
+            exitRight = PathPlannerPath.fromPathFile("Exit Alliance Right");
+        } catch (FileVersionException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        pathConstraints = new PathConstraints(
+            3.0,
+            3.0,
+            Units.degreesToRadians(540), 
+            Units.degreesToRadians(720)
+        );
 
         Trigger shooterAtSetpoints = m_flywheelSubsystem.flywheelAtTarget.and(m_HoodSubsystem.hoodAtTarget);
         Command runShotSequence = Commands.either(
@@ -189,6 +226,7 @@ public class RobotContainer {
         Trigger intakePivotInput = m_controller.a();
         Trigger intakeRollerInput = m_controller.leftTrigger(0.8).and(backdriveIndexInput.negate());
         Trigger intakeAgitateInput = m_controller.b();
+        Trigger trenchRun = m_controller.y();
 
         Trigger runIndexOverrideInput = m_controller.x();
         Trigger automaticShootCondition = (shootingInput.or(passingInput).or(shootingWithTurretInput))
@@ -240,6 +278,21 @@ public class RobotContainer {
                                 Rotation2d.fromDegrees(90.0)),
                         () -> robotState.getTurretOdomPose().getY() > FieldConstants.RED_ALLIANCE_HUB_POSE.getY()),
                 robotState.isBlueAlliance);
+        
+        Command trenchRunCommand = Commands.either(
+            Commands.either(
+                AutoBuilder.pathfindThenFollowPath(exitRight, pathConstraints),
+                AutoBuilder.pathfindThenFollowPath(enterRight, pathConstraints),
+                m_fieldZoneManager.inAlliance
+            ),
+            Commands.either(
+                AutoBuilder.pathfindThenFollowPath(exitLeft, pathConstraints),
+                AutoBuilder.pathfindThenFollowPath(enterLeft, pathConstraints),
+                m_fieldZoneManager.inAlliance
+            ),
+            m_fieldZoneManager.inHumanPlayer
+        );
+        trenchRun.whileTrue(trenchRunCommand);
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
         intakeRollerInput.and(shootingInput.negate()).whileTrue(joystickDriveAtSlowSpeed);
