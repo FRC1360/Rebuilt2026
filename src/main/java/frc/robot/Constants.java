@@ -46,9 +46,10 @@ public final class Constants {
     public static final class IntakeConstants {
         // Roller Constants
         public static final int ROLLER_VORTEX_CAN_ID = 31;
-        public static final int ROLLER_VORTEX_STALL_CURRENT_LIMIT = 80;
-        public static final int ROLLER_VORTEX_FREE_CURRENT_LIMIT = 80;
-        public static final boolean ROLLER_VORTEX_INVERTED = true;
+       // public static final int ROLLER_VORTEX_STALL_CURRENT_LIMIT = 80;
+        public static final int ROLLER_VORTEX_STATOR_CURRENT_LIMIT = 80;
+        //CHANGED THIS BTW
+        public static final InvertedValue ROLLER_VORTEX_INVERTED = InvertedValue.CounterClockwise_Positive;
 
         public static final double ROLLER_ACTIVATED_SPEED = 0.5;
 
@@ -56,6 +57,7 @@ public final class Constants {
         public static final int PIVOT_VORTEX_CAN_ID = 30;
         public static final int PIVOT_VORTEX_STALL_CURRENT_LIMIT = 40;
         public static final int PIVOT_VORTEX_FREE_CURRENT_LIMIT = 40;
+        
         public static final boolean PIVOT_VORTEX_INVERTED = true;
 
         // Position units: degrees, Velocity units: degrees/sec
@@ -115,7 +117,7 @@ public final class Constants {
         public static final int MAGAZINE_SENSOR_DIGITAL_CHANNEL = 1;
 
         public static final double HOPPER_SPEED = 0.5;
-        public static final double MAGAZINE_SPEED = 0.6;
+        public static final double MAGAZINE_SPEED = 0.9;
     }
 
     public static final class FlywheelConstants {

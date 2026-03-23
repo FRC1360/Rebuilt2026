@@ -266,10 +266,10 @@ public class RobotContainer {
                 robotState.isIntakeCurrentlyDeployed).repeatedly();
 
         Command agitateIntake = Commands.repeatingSequence(
-                new SetIntakePivotAngleCommand(m_intakeSubsystem, 45.0, 0.05)
-                        .withTimeout(0.75),
-                new SetIntakePivotAngleCommand(m_intakeSubsystem, 5.0, 0.05)
-                        .withTimeout(0.75));
+                new SetIntakePivotAngleCommand(m_intakeSubsystem, 55.0, 0.1)
+                        .withTimeout(0.5),
+                new SetIntakePivotAngleCommand(m_intakeSubsystem, 5.0, 0.1)
+                        .withTimeout(0.5));
 
         m_intakeSubsystem.setDefaultCommand(setIntakePivotBasedOnState);
         intakePivotInput.onTrue(robotState.toggleIntakeState);
