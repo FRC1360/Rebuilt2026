@@ -35,7 +35,7 @@ public class IntakeSubsystem extends SubsystemBase {
             0.4,
             0.0,
             0.0,
-            180.0,
+            270.0,
             360.0,
             0.15,
             0.017,
