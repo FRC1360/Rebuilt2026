@@ -282,9 +282,14 @@ public class RobotState {
         turret_velocity_x = turretVelocityOnFieldAsTranslation.getX();
         turret_velocity_y = turretVelocityOnFieldAsTranslation.getY();
 
+        // Use Speed = Distance / Time
+        double initial_distance_to_target = goalTranslationOnField.getDistance(turretTranslationOnField);
+        double horizontal_projectile_velocity = initial_distance_to_target
+                / turretDistanceToTimeOfFlightMap.get(initial_distance_to_target);
+                
         Translation2d projectileVelocityOnFieldAsTranslation;
         projectileVelocityOnFieldAsTranslation = new Translation2d(
-                ShootingConstants.HORIZONTAL_BALL_SPEED,
+                horizontal_projectile_velocity,
                 PhotonUtils.getYawToPose(new Pose2d(turretTranslationOnField, new Rotation2d()),
                         new Pose2d(goalTranslationOnField, new Rotation2d())));
 
@@ -307,7 +312,7 @@ public class RobotState {
 
             error = current_time_guess - turretDistanceToTimeOfFlightMap.get(distance_derived_from_current_time);
             error_derivative = 1 + (((displacement_x * turret_velocity_x) + (displacement_y * turret_velocity_y))
-                    / (distance_derived_from_current_time * ShootingConstants.HORIZONTAL_BALL_SPEED));
+                    / (distance_derived_from_current_time * horizontal_projectile_velocity));
 
             next_time_guess = current_time_guess - (error / error_derivative);
 

@@ -107,6 +107,14 @@ public class SetShooterFromCompensatedPoseCommand extends Command {
 
         turretSubsystem.setVoltage(
                 turretSubsystem.closedLoopCalculate(targetRobotRelativeTurretRotation));
+        hoodSubsystem.setHoodMotorVoltage(
+                hoodSubsystem.closedLoopCalculate(
+                        robotState.getHoodAngleFromGoalPose(
+                                new Pose2d(compensatedGoalTranslation, new Rotation2d()))));
+        flywheelSubsystem.setFlywheelVoltage(
+                flywheelSubsystem.closedLoopCalculate(
+                        robotState.getFlywheelVelocityFromGoalPose(
+                                new Pose2d(compensatedGoalTranslation, new Rotation2d()))));
 
         nonCompensatedGoalPosePublisher.accept(nonCompensatedGoalPose);
         compensatedGoalPosePublisher.accept(new Pose2d(compensatedGoalTranslation, new Rotation2d()));
