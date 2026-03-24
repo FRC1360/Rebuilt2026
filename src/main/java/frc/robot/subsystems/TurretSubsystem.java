@@ -39,7 +39,7 @@ public class TurretSubsystem extends SubsystemBase {
             520.0,
             3000.0,
             0.0,
-            0.0,
+            0.008,
             0.0,
             0.0);
     private final VoltageOut turretVoltageRequest = new VoltageOut(0.0);
@@ -100,7 +100,7 @@ public class TurretSubsystem extends SubsystemBase {
 
         m_profiledpidController.setTolerance(Constants.TurretConstants.PID_TOLERANCE);
 
-        turretAtTarget = new Trigger(() -> (m_profiledpidController.atGoal()));
+        turretAtTarget = new Trigger(() -> (m_profiledpidController.atSetpoint()));
         turretAtPassingTarget = new Trigger(
                 () -> (Math.abs(getCurrentEncoderAngle()
                         - m_profiledpidController.getGoal().position) < TurretConstants.PASSING_PID_TOLERANCE));

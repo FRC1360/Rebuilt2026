@@ -29,17 +29,18 @@ public final class Constants {
 
     public static final class HoodConstants {
         public static final int KRAKEN_CAN_ID = 41;
-        public static final int KRAKEN_STATOR_CURRENT_LIMIT = 30;
+        public static final int KRAKEN_STATOR_CURRENT_LIMIT = 80;
+        public static final int KRAKEN_SUPPLY_CURRENT_LIMIT = 30;
         public static final InvertedValue KRAKEN_INVERTED_VALUE = InvertedValue.Clockwise_Positive;
 
         public static final double STARTUP_ANGLE_DEGREES = 75.0;
         public static final double MECHANISM_CONVERSION_FACTOR = ((164.0 / 12.0) * (60.0 / 18.0)) / 360.0;
-        public static final double PID_TOLERANCE = 1.0;
+        public static final double PID_TOLERANCE = 2.0;
 
         public static final double MIN_ANGLE = 57.0;
         public static final double MAX_ANGLE = 74.0;
 
-        public static final double DEFAULT_FUDGE_FACTOR = 1.5;
+        public static final double DEFAULT_FUDGE_FACTOR = 3.5;
         public static final double FUDGE_INCREMENT_VALUE = 0.5;
     }
 

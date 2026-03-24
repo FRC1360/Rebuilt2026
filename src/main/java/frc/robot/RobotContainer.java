@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.IntakeConstants;
-import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.SetShooterFromCompensatedPoseCommand;
 import frc.robot.commands.flywheel.SetFlywheelVelocityCommand;
@@ -32,7 +31,6 @@ import frc.robot.commands.intake.DeployIntakeCommand;
 import frc.robot.commands.intake.RetractIntakeCommand;
 import frc.robot.commands.intake.SetIntakePivotAngleCommand;
 import frc.robot.commands.turret.AimTurretAtPoseCommand;
-import frc.robot.commands.turret.SetTurretToNonWrappedEncoderCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelSubsystem;
@@ -339,8 +337,15 @@ public class RobotContainer {
                 74));
         m_indexSubsystem.setDefaultCommand(new SetIndexSpeedsCommand(m_indexSubsystem,
                 0.0, 0.3));
-        m_TurretSubsystem.setDefaultCommand(new SetTurretToNonWrappedEncoderCommand(m_TurretSubsystem,
-                TurretConstants.ENCODER_STARTUP_ANGLE_DEGREES));
+        // m_TurretSubsystem.setDefaultCommand(new
+        // SetTurretToNonWrappedEncoderCommand(m_TurretSubsystem,
+        // TurretConstants.ENCODER_STARTUP_ANGLE_DEGREES));
+        m_TurretSubsystem.setDefaultCommand(Commands.either(
+                new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE)
+                        .until(robotState.isBlueAlliance.negate()),
+                new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE)
+                        .until(robotState.isBlueAlliance),
+                robotState.isBlueAlliance));
 
         shootingInput.whileTrue(prepareToShootAtHub);
         passingInput.whileTrue(prepareToPass);
@@ -352,30 +357,26 @@ public class RobotContainer {
                         FieldConstants.RED_ALLIANCE_HUB_POSE),
                 robotState.isBlueAlliance)
                 .alongWith(
-                    new RunCommand(() -> {
-                        turretTimer.start();
-                        if (m_TurretSubsystem.turretAtTarget.getAsBoolean() == true) {
-                            turretTimer.stop();
-                        }
-                    })
-                )
+                        new RunCommand(() -> {
+                            turretTimer.start();
+                            if (m_TurretSubsystem.turretAtTarget.getAsBoolean() == true) {
+                                turretTimer.stop();
+                            }
+                        }))
                 .alongWith(
-                    new RunCommand(() -> {
-                        hoodTimer.start();
-                        if (m_HoodSubsystem.hoodAtTarget.getAsBoolean() == true) {
-                            hoodTimer.stop();
-                        }
-                    })
-                )
+                        new RunCommand(() -> {
+                            hoodTimer.start();
+                            if (m_HoodSubsystem.hoodAtTarget.getAsBoolean() == true) {
+                                hoodTimer.stop();
+                            }
+                        }))
                 .alongWith(
-                    new RunCommand(() -> {
-                        flywheelTimer.start();
-                        if (m_flywheelSubsystem.flywheelAtTarget.getAsBoolean() == true) {
-                            flywheelTimer.stop();
-                        }
-                    })
-                )
-                );
+                        new RunCommand(() -> {
+                            flywheelTimer.start();
+                            if (m_flywheelSubsystem.flywheelAtTarget.getAsBoolean() == true) {
+                                flywheelTimer.stop();
+                            }
+                        })));
 
         // Backdriving
         Command backdriveIntakeWhileKeepingState = Commands.either(

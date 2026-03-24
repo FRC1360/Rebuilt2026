@@ -31,14 +31,14 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 public class HoodSubsystem extends SubsystemBase {
 
     private final ClosedLoopConstants defaultPIDConstants = new ClosedLoopConstants(
-            0.1,
-            0.07,
+            0.26,
             0.0,
-            90.0,
-            360.0,
-            0.13988,
-            0.0092414,
-            0.0023902,
+            0.0,
+            180.0,
+            1200.0,
+            0.0,
+            0.009,
+            0.0,
             0.0);
 
     private ProfiledPIDController hoodProfiledPIDController = new ProfiledPIDController(
@@ -82,7 +82,9 @@ public class HoodSubsystem extends SubsystemBase {
 
         motorCurrentLimitsConfigs = new CurrentLimitsConfigs()
                 .withStatorCurrentLimit(HoodConstants.KRAKEN_STATOR_CURRENT_LIMIT)
-                .withStatorCurrentLimitEnable(true);
+                .withStatorCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(HoodConstants.KRAKEN_SUPPLY_CURRENT_LIMIT)
+                .withSupplyCurrentLimitEnable(true);
 
         hoodMotor.getConfigurator().apply(motorFeedbackConfigs);
         hoodMotor.getConfigurator().apply(motorOutputConfigs);
@@ -91,7 +93,7 @@ public class HoodSubsystem extends SubsystemBase {
 
         hoodProfiledPIDController.setTolerance(Constants.HoodConstants.PID_TOLERANCE);
 
-        hoodAtTarget = new Trigger(() -> (hoodProfiledPIDController.atGoal()));
+        hoodAtTarget = new Trigger(() -> (hoodProfiledPIDController.atSetpoint()));
     }
 
     @Override
@@ -121,9 +123,12 @@ public class HoodSubsystem extends SubsystemBase {
     public double closedLoopCalculate(double target) {
         if (target < HoodConstants.MIN_ANGLE) target = HoodConstants.MIN_ANGLE;
         else if (target > HoodConstants.MAX_ANGLE) target = HoodConstants.MAX_ANGLE;
+
+        double calculatedOutput = hoodProfiledPIDController.calculate(getCurrentAngle(), target)
+                + hoodFFController.calculate(hoodProfiledPIDController.getSetpoint().velocity);
         
-        return hoodProfiledPIDController.calculate(getCurrentAngle(), target)
-                + hoodFFController.calculate(hoodProfiledPIDController.getSetpoint().velocity); // double check pid input
+        pidLogger.logControlLoopOutput(calculatedOutput);
+        return calculatedOutput;
     }
 
     public void resetPIDController() {

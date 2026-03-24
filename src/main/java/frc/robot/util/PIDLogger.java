@@ -87,7 +87,7 @@ public class PIDLogger {
         pidControllerErrorPublisher.set(pidControllerError);
     }
 
-    public void logVoltageOutputs(double outputVoltage) {
+    public void logControlLoopOutput(double outputVoltage) {
         controlLoopOutputPublisher.set(outputVoltage);
     }
 
