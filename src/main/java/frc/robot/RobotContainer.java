@@ -284,14 +284,14 @@ public class RobotContainer {
                 AutoBuilder.pathfindThenFollowPath(exitRight, pathConstraints),
                 AutoBuilder.pathfindThenFollowPath(enterRight, pathConstraints),
                 m_fieldZoneManager.inAlliance
-            ),
+            ).repeatedly(),
             Commands.either(
                 AutoBuilder.pathfindThenFollowPath(exitLeft, pathConstraints),
                 AutoBuilder.pathfindThenFollowPath(enterLeft, pathConstraints),
                 m_fieldZoneManager.inAlliance
-            ),
+            ).repeatedly(),
             m_fieldZoneManager.inHumanPlayer
-        );
+        ).repeatedly();
         trenchRun.whileTrue(trenchRunCommand);
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
