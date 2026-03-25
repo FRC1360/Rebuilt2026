@@ -60,8 +60,8 @@ public class RobotContainer {
     private final Timer flywheelTimer = new Timer();
 
     // Slow down speed when intaking and/or shooting
-    private static final double SLOW_DRIVE_TRANSLATIONAL_MULTIPLIER = 0.5;
-    private static final double SLOW_DRIVE_ANGULAR_MULTIPLIER = 0.5;
+    private static final double SLOW_DRIVE_TRANSLATIONAL_MULTIPLIER = 0.3;
+    private static final double SLOW_DRIVE_ANGULAR_MULTIPLIER = 0.3;
 
     private final SwerveTelemetry swerveLogger = new SwerveTelemetry(DriveCommands.MAX_DRIVE_TRANSLATIONAL_SPEED);
 
@@ -194,16 +194,19 @@ public class RobotContainer {
 
         Trigger shootingInput = m_controller.rightBumper().and(backdrivingAnySubsystem.negate());
         Trigger shootingWithTurretInput = m_controller.rightTrigger(0.8).and(backdrivingAnySubsystem.negate());
+        Trigger shootingThroughNetworkTablesInput = m_controller.povDown().and(backdrivingAnySubsystem.negate());
         Trigger passingInput = m_controller.leftBumper().and(backdrivingAnySubsystem.negate());
         Trigger intakePivotInput = m_controller.a();
         Trigger intakeRollerInput = m_controller.leftTrigger(0.8).and(backdriveIndexInput.negate());
         Trigger intakeAgitateInput = m_controller.b();
 
         Trigger runIndexOverrideInput = m_controller.x();
-        Trigger automaticShootCondition = (shootingInput.or(passingInput).or(shootingWithTurretInput))
+        Trigger automaticShootCondition = (shootingInput.or(passingInput).or(shootingWithTurretInput)
+                .or(shootingThroughNetworkTablesInput))
                 .and(m_flywheelSubsystem.flywheelAtTarget)
                 .and(m_HoodSubsystem.hoodAtTarget)
-                .and((m_TurretSubsystem.turretAtTarget.and(shootingInput.or(shootingWithTurretInput)))
+                .and((m_TurretSubsystem.turretAtTarget
+                        .and(shootingInput.or(shootingWithTurretInput).or(shootingThroughNetworkTablesInput)))
                         .or(m_TurretSubsystem.turretAtPassingTarget.and(passingInput)));
         Trigger preparedAndReadyToShoot = backdrivingAnySubsystem.negate()
                 .and(automaticShootCondition.or(runIndexOverrideInput));
@@ -377,6 +380,10 @@ public class RobotContainer {
                                 flywheelTimer.stop();
                             }
                         })));
+        shootingThroughNetworkTablesInput.whileTrue(Commands.parallel(
+                new SetHoodAngleFromNetworkTables(m_HoodSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
+                new SetFlywheelVelocityFromNetworkTables(m_flywheelSubsystem),
+                new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE)));
 
         // Backdriving
         Command backdriveIntakeWhileKeepingState = Commands.either(
