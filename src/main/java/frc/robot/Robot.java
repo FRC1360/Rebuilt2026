@@ -5,9 +5,14 @@
 package frc.robot;
 
 import com.ctre.phoenix6.HootAutoReplay;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.pathfinding.LocalADStar;
+import com.pathplanner.lib.pathfinding.Pathfinding;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.util.LocalADStarAK;
 import frc.robot.util.RobotState;
 import frc.robot.util.TriggerLogger;
 
@@ -32,6 +37,12 @@ public class Robot extends TimedRobot {
         RobotState.getInstance().logAllInputs();
         RobotState.getInstance().logAllDistances();
         TriggerLogger.getInstance().updateAllPublishers();
+    }
+
+    @Override
+    public void robotInit() {
+        Pathfinding.setPathfinder(new LocalADStarAK());
+        PathfindingCommand.warmupCommand().schedule();
     }
 
     @Override
