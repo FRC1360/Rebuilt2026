@@ -56,7 +56,7 @@ import frc.robot.util.TriggerLogger;
 public class RobotContainer {
 
     private final RobotState robotState = RobotState.getInstance();
-    private final FieldZoneManager m_fieldZoneManager = FieldZoneManager.getInstance();
+    // private final FieldZoneManager m_fieldZoneManager = FieldZoneManager.getInstance();
     private final TriggerLogger triggerLogger = TriggerLogger.getInstance();
 
     private final CommandXboxController m_controller = new CommandXboxController(0);
@@ -291,20 +291,20 @@ public class RobotContainer {
                         () -> robotState.getTurretOdomPose().getY() > FieldConstants.RED_ALLIANCE_HUB_POSE.getY()),
                 robotState.isBlueAlliance);
         
-        Command trenchRunCommand = Commands.either(
-            Commands.either(
-                AutoBuilder.pathfindThenFollowPath(exitRight, pathConstraints),
-                AutoBuilder.pathfindThenFollowPath(enterRight, pathConstraints),
-                m_fieldZoneManager.inAlliance
-            ).repeatedly(),
-            Commands.either(
-                AutoBuilder.pathfindThenFollowPath(exitLeft, pathConstraints),
-                AutoBuilder.pathfindThenFollowPath(enterLeft, pathConstraints),
-                m_fieldZoneManager.inAlliance
-            ).repeatedly(),
-            m_fieldZoneManager.inHumanPlayer
-        ).repeatedly();
-        trenchRun.whileTrue(trenchRunCommand);
+        // Command trenchRunCommand = Commands.either(
+        //     Commands.either(
+        //         AutoBuilder.pathfindThenFollowPath(exitRight, pathConstraints),
+        //         AutoBuilder.pathfindThenFollowPath(enterRight, pathConstraints),
+        //         m_fieldZoneManager.inAlliance
+        //     ).repeatedly(),
+        //     Commands.either(
+        //         AutoBuilder.pathfindThenFollowPath(exitLeft, pathConstraints),
+        //         AutoBuilder.pathfindThenFollowPath(enterLeft, pathConstraints),
+        //         m_fieldZoneManager.inAlliance
+        //     ).repeatedly(),
+        //     m_fieldZoneManager.inHumanPlayer
+        // ).repeatedly();
+        // trenchRun.whileTrue(trenchRunCommand);
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
         intakeRollerInput.or(shootingWithTurretInput).whileTrue(joystickDriveAtSlowSpeed);

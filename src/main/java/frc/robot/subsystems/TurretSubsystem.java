@@ -100,7 +100,9 @@ public class TurretSubsystem extends SubsystemBase {
 
         m_profiledpidController.setTolerance(Constants.TurretConstants.PID_TOLERANCE);
 
-        turretAtTarget = new Trigger(() -> (m_profiledpidController.atSetpoint()));
+        turretAtTarget = new Trigger(
+                () -> (Math.abs(getCurrentEncoderAngle()
+                        - m_profiledpidController.getGoal().position) < TurretConstants.PID_TOLERANCE));
         turretAtPassingTarget = new Trigger(
                 () -> (Math.abs(getCurrentEncoderAngle()
                         - m_profiledpidController.getGoal().position) < TurretConstants.PASSING_PID_TOLERANCE));

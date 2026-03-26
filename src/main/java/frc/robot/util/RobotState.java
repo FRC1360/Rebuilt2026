@@ -99,9 +99,9 @@ public class RobotState {
         // turretDistanceToFlywheelVelocityMap.put(4.085, 60.0);
         // turretDistanceToFlywheelVelocityMap.put(5.033, 65.0);
         turretDistanceToFlywheelVelocityMap.put(1.53, 43.0);
-        turretDistanceToFlywheelVelocityMap.put(2.063, 44.0);
-        turretDistanceToFlywheelVelocityMap.put(2.501, 46.0);
-        turretDistanceToFlywheelVelocityMap.put(3.049, 50.0);
+        turretDistanceToFlywheelVelocityMap.put(2.063, 45.0);
+        turretDistanceToFlywheelVelocityMap.put(2.501, 47.0);
+        turretDistanceToFlywheelVelocityMap.put(3.049, 51.0);
         turretDistanceToFlywheelVelocityMap.put(3.551, 53.0);
         turretDistanceToFlywheelVelocityMap.put(4.012, 56.0);
         turretDistanceToFlywheelVelocityMap.put(4.47, 58.0);

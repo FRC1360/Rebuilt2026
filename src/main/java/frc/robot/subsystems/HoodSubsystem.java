@@ -93,7 +93,8 @@ public class HoodSubsystem extends SubsystemBase {
 
         hoodProfiledPIDController.setTolerance(Constants.HoodConstants.PID_TOLERANCE);
 
-        hoodAtTarget = new Trigger(() -> (hoodProfiledPIDController.atSetpoint()));
+        hoodAtTarget = new Trigger(() -> Math.abs(
+                    getCurrentAngle() - hoodProfiledPIDController.getGoal().position) < Constants.HoodConstants.PID_TOLERANCE);
     }
 
     @Override
@@ -121,12 +122,14 @@ public class HoodSubsystem extends SubsystemBase {
     }
 
     public double closedLoopCalculate(double target) {
-        if (target < HoodConstants.MIN_ANGLE) target = HoodConstants.MIN_ANGLE;
-        else if (target > HoodConstants.MAX_ANGLE) target = HoodConstants.MAX_ANGLE;
+        if (target < HoodConstants.MIN_ANGLE)
+            target = HoodConstants.MIN_ANGLE;
+        else if (target > HoodConstants.MAX_ANGLE)
+            target = HoodConstants.MAX_ANGLE;
 
         double calculatedOutput = hoodProfiledPIDController.calculate(getCurrentAngle(), target)
                 + hoodFFController.calculate(hoodProfiledPIDController.getSetpoint().velocity);
-        
+
         pidLogger.logControlLoopOutput(calculatedOutput);
         return calculatedOutput;
     }

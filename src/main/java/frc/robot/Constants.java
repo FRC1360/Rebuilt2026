@@ -40,7 +40,7 @@ public final class Constants {
         public static final double MIN_ANGLE = 57.0;
         public static final double MAX_ANGLE = 74.0;
 
-        public static final double DEFAULT_FUDGE_FACTOR = 0.0;
+        public static final double DEFAULT_FUDGE_FACTOR = -1.0;
         public static final double FUDGE_INCREMENT_VALUE = 0.5;
     }
 
@@ -67,7 +67,7 @@ public final class Constants {
 
         public static final double PIVOT_STARTUP_ANGLE = 121.3;
         public static final double PIVOT_RETRACTED_ANGLE = 120.0;
-        public static final double PIVOT_DEPLOYED_ANGLE = -7.0;
+        public static final double PIVOT_DEPLOYED_ANGLE = 6.0;
         public static final double PIVOT_PID_TOLERANCE = 2.0;
 
         // Used in RobotState to manage toggling functionality
