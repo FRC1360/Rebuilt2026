@@ -111,8 +111,8 @@ public final class Constants {
         public static final boolean HOPPER_VORTEX_INVERTED = false;
 
         public static final int MAGAZINE_VORTEX_CAN_ID = 33;
-        public static final int MAGAZINE_VORTEX_STALL_CURRENT_LIMIT = 55;
-        public static final int MAGAZINE_VORTEX_FREE_CURRENT_LIMIT = 55;
+        public static final int MAGAZINE_VORTEX_STALL_CURRENT_LIMIT = 45;
+        public static final int MAGAZINE_VORTEX_FREE_CURRENT_LIMIT = 45;
         public static final boolean MAGAZINE_VORTEX_INVERTED = false;
 
         public static final int MAGAZINE_SENSOR_DIGITAL_CHANNEL = 1;

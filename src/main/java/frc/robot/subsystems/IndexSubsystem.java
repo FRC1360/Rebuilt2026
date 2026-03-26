@@ -25,6 +25,10 @@ public class IndexSubsystem extends SubsystemBase {
             .publish();
     private final DoublePublisher magazineMotorSpeedPublisher = loggingTable.getDoubleTopic("Magazine Speed RPM")
             .publish();
+    private final DoublePublisher hopperOutputCurrentPublisher = loggingTable.getDoubleTopic("Hopper Current")
+            .publish();
+    private final DoublePublisher hopperMotorSpeedPublisher = loggingTable.getDoubleTopic("Hopper Speed RPM")
+            .publish();
 
     private final SparkFlex hopperMotor;
     private SparkFlexConfig hopperMotorConfig;
@@ -81,5 +85,7 @@ public class IndexSubsystem extends SubsystemBase {
     public void periodic() {
         magazineOutputCurrentPublisher.accept(magazineMotor.getOutputCurrent());
         magazineMotorSpeedPublisher.accept(magazineMotor.getEncoder().getVelocity());
+        hopperOutputCurrentPublisher.accept(hopperMotor.getOutputCurrent());
+        hopperMotorSpeedPublisher.accept(hopperMotor.getEncoder().getVelocity());
     }
 }
