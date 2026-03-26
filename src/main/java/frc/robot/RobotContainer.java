@@ -249,11 +249,11 @@ public class RobotContainer {
         Trigger preparedAndReadyToShoot = backdrivingAnySubsystem.negate()
                 .and(automaticShootCondition.or(runIndexOverrideInput));
 
-        triggerLogger.addTrigger(preparedAndReadyToShoot, "Ready To Shoot");
-        triggerLogger.addTrigger(m_TurretSubsystem.turretAtTarget, "Turret At Setpoint");
-        triggerLogger.addTrigger(m_HoodSubsystem.hoodAtTarget, "Hood At Setpoint");
-        triggerLogger.addTrigger(m_flywheelSubsystem.flywheelAtTarget, "Flywheel At Setpoint");
-        triggerLogger.addTrigger(robotState.isBlueAlliance, "Is Blue Alliance");
+        triggerLogger.addTrigger(preparedAndReadyToShoot, "RobotContainer/Ready To Shoot");
+        triggerLogger.addTrigger(m_TurretSubsystem.turretAtTarget, "RobotContainer/Turret At Setpoint");
+        triggerLogger.addTrigger(m_HoodSubsystem.hoodAtTarget, "RobotContainer/Hood At Setpoint");
+        triggerLogger.addTrigger(m_flywheelSubsystem.flywheelAtTarget, "RobotContainer/Flywheel At Setpoint");
+        triggerLogger.addTrigger(robotState.isBlueAlliance, "RobotContainer/Is Blue Alliance");
 
         // Driving
         Command joystickDriveAtNormalSpeed = DriveCommands.joystickDriveCommand(
