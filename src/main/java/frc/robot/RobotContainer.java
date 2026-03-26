@@ -114,8 +114,8 @@ public class RobotContainer {
         try {
             enterLeft = PathPlannerPath.fromPathFile("Enter Alliance Left");
             enterRight = PathPlannerPath.fromPathFile("Enter Alliance Right");
-            exitLeft = PathPlannerPath.fromPathFile("Exit Alliance Left");
-            exitRight = PathPlannerPath.fromPathFile("Exit Alliance Right");
+            exitLeft = PathPlannerPath.fromPathFile("Leave Alliance Left");
+            exitRight = PathPlannerPath.fromPathFile("Leave Alliance Right");
         } catch (FileVersionException e) {
             e.printStackTrace();
         } catch (IOException e) {

@@ -15,8 +15,8 @@ public class FieldZoneManager {
 
     // Alliance areas (only the y coordinates because the alliance zones cover the
     // entire widths (x) of the field)
-    private double[] blueAllianceZoneDimensions = { 0.0, Inches.of(182.11).in(Meters) };
-    private double[] redAllianceZoneDimensions = { Inches.of(469.11).in(Meters), Inches.of(651.22).in(Meters) };
+    private double[] redAllianceZoneDimensions = { 0.0, Inches.of(182.11).in(Meters) };
+    private double[] blueAllianceZoneDimensions = { Inches.of(469.11).in(Meters), Inches.of(651.22).in(Meters) };
 
     // Middle zone (only the y coordinates in order to determine if the robot is in
     // the middle before determining if it's in depot or human player)
@@ -24,8 +24,8 @@ public class FieldZoneManager {
 
     // Human player and depot zones (taken from the prespective of the blue
     // alliance, only holds x coordinates)
-    private double[] blueAllianceDepotZoneDimensions = { Inches.of(158.84).in(Meters), Inches.of(317.69).in(Meters) };
-    private double[] blueAllianceHumanPlayerZoneDimensions = { 0.0, Inches.of(158.84).in(Meters) };
+    private double[] blueAllianceHumanPlayerZoneDimensions = { Inches.of(158.84).in(Meters), Inches.of(317.69).in(Meters) };
+    private double[] blueAllianceDepotZoneDimensions = { 0.0, Inches.of(158.84).in(Meters) };
 
     // Trench Y coordinates (the range of the trench's y positions, contains two
     // possible ranges)
@@ -73,16 +73,16 @@ public class FieldZoneManager {
         Pose2d estimatedTurretPose = robotState.getTurretOdomPose();
 
         if (DriverStation.getAlliance().get() == Alliance.Red) {
-            if (estimatedTurretPose.getY() > redAllianceZoneDimensions[0]
-                    && estimatedTurretPose.getY() < redAllianceZoneDimensions[1]) {
+            if (estimatedTurretPose.getX() > redAllianceZoneDimensions[0]
+                    && estimatedTurretPose.getX() < redAllianceZoneDimensions[1]) {
                 return true;
 
             }
             return false;
 
         } else {
-            if (estimatedTurretPose.getY() > blueAllianceZoneDimensions[0]
-                    && estimatedTurretPose.getY() < blueAllianceZoneDimensions[1]) {
+            if (estimatedTurretPose.getX() > blueAllianceZoneDimensions[0]
+                    && estimatedTurretPose.getX() < blueAllianceZoneDimensions[1]) {
                 return true;
 
             }
@@ -95,16 +95,16 @@ public class FieldZoneManager {
         Pose2d estimatedTurretPose = robotState.getTurretOdomPose();
 
         if (DriverStation.getAlliance().get() == Alliance.Red) {
-            if (estimatedTurretPose.getY() > redAllianceZoneDimensions[0]
-                    && estimatedTurretPose.getY() < redAllianceZoneDimensions[1]) {
+            if (estimatedTurretPose.getX() > redAllianceZoneDimensions[0]
+                    && estimatedTurretPose.getX() < redAllianceZoneDimensions[1]) {
                 return false;
 
             }
             return true;
 
         } else {
-            if (estimatedTurretPose.getY() > blueAllianceZoneDimensions[0]
-                    && estimatedTurretPose.getY() < blueAllianceZoneDimensions[1]) {
+            if (estimatedTurretPose.getX() > blueAllianceZoneDimensions[0]
+                    && estimatedTurretPose.getX() < blueAllianceZoneDimensions[1]) {
                 return false;
 
             }
@@ -118,16 +118,16 @@ public class FieldZoneManager {
         Pose2d estimatedTurretPose = robotState.getTurretOdomPose();
 
         // if the robot is within the y coordinates of the middle zone
-        if (estimatedTurretPose.getY() > middleZoneDimensions[0]
-                && estimatedTurretPose.getY() < middleZoneDimensions[1]) {
+        if (estimatedTurretPose.getX() > middleZoneDimensions[0]
+                && estimatedTurretPose.getX() < middleZoneDimensions[1]) {
             if (DriverStation.getAlliance().get() == Alliance.Blue) {
 
                 // Checks if the robot is in the depot zone plus the buffered area.
-                if (estimatedTurretPose.getX() > blueAllianceDepotZoneDimensions[0] - bufferZone / 2
-                        && estimatedTurretPose.getX() < blueAllianceDepotZoneDimensions[1]) {
+                if (estimatedTurretPose.getY() > blueAllianceDepotZoneDimensions[0] - bufferZone / 2
+                        && estimatedTurretPose.getY() < blueAllianceDepotZoneDimensions[1]) {
                     // Checks if the robot is in the core depot zone (without the buffered area).
-                    if (estimatedTurretPose.getX() > blueAllianceDepotZoneDimensions[0] + bufferZone / 2
-                            && estimatedTurretPose.getX() < blueAllianceDepotZoneDimensions[1]) {
+                    if (estimatedTurretPose.getY() > blueAllianceDepotZoneDimensions[0] + bufferZone / 2
+                            && estimatedTurretPose.getY() < blueAllianceDepotZoneDimensions[1]) {
                         lastInDepot = true;
                         return true;
 
@@ -145,10 +145,10 @@ public class FieldZoneManager {
                 return false;
 
             } else {
-                if (estimatedTurretPose.getX() > blueAllianceHumanPlayerZoneDimensions[0]
-                        && estimatedTurretPose.getX() < blueAllianceHumanPlayerZoneDimensions[1] + bufferZone / 2) {
-                    if (estimatedTurretPose.getX() > blueAllianceHumanPlayerZoneDimensions[0]
-                            && estimatedTurretPose.getX() < blueAllianceHumanPlayerZoneDimensions[1] - bufferZone / 2) {
+                if (estimatedTurretPose.getY() > blueAllianceHumanPlayerZoneDimensions[0]
+                        && estimatedTurretPose.getY() < blueAllianceHumanPlayerZoneDimensions[1] + bufferZone / 2) {
+                    if (estimatedTurretPose.getY() > blueAllianceHumanPlayerZoneDimensions[0]
+                            && estimatedTurretPose.getY() < blueAllianceHumanPlayerZoneDimensions[1] - bufferZone / 2) {
                         lastInDepot = true;
                         return true;
                     }
@@ -184,12 +184,12 @@ public class FieldZoneManager {
 
         // iterates through the two possible x ranges that the trench can be located in
         for (int i = 0; i < 2; i++) {
-            if (estimatedTurretPose.getX() > trenchesXPositions[i][0]
-                    && estimatedTurretPose.getX() < trenchesXPositions[i][1]) {
+            if (estimatedTurretPose.getY() > trenchesXPositions[i][0]
+                    && estimatedTurretPose.getY() < trenchesXPositions[i][1]) {
                 // iterates through the two possible y ranges that the trench can be located in
                 for (int j = 0; j < 2; j++) {
-                    if (estimatedTurretPose.getY() > trenchesYPositions[i][0]
-                            && estimatedTurretPose.getY() < trenchesYPositions[i][1]) {
+                    if (estimatedTurretPose.getX() > trenchesYPositions[i][0]
+                            && estimatedTurretPose.getX() < trenchesYPositions[i][1]) {
                         // basically if the robot satisfies both conditions.
                         return true;
                     }
