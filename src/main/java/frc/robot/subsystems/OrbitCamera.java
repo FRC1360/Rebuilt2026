@@ -42,8 +42,8 @@ public class OrbitCamera {
   StructPublisher<Transform3d> robotToCameraOffset;
   StructPublisher<Pose3d> robotPoseTransformedByCameraOffset;
   private Matrix<N3, N1> curStdDevs;
-  private Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(2, 2, 2);
-  private Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+  private Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 999999);
+  private Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(3.5, 3.5, 999999);
 
   /* Simulation Stuff */
   private PhotonCameraSim photonCameraSim;
