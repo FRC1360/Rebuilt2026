@@ -25,17 +25,21 @@ public class FieldZoneManager {
     private double[][] trenchesYPositions = { { 0.0, Inches.of(49.94).in(Meters) },
             { Inches.of(267.75).in(Meters), Inches.of(317.69).in(Meters) } };
 
-    private double bufferZone = 2; // Temp place holder value for the middle buffer zone
+    private double centerAxisBuffer = 2; 
+    private double middleZoneBuffer = 1; 
 
     private static FieldZoneManager instance = null;
 
     private boolean lastInDepot = false; // this helps the logic with the buffer zone
     private boolean lastInHumanPlayer = false; // this helps the logic with the buffer zone
+    private boolean lastInAllianceOrEnemy = false;
+    private boolean lastInMiddle = false;
 
     public Trigger inTrench;
 
     public Trigger inAlliance;
     public Trigger inEnemy;
+    public Trigger inMiddle;
 
     public Trigger inDepot;
     public Trigger inHumanPlayer;
@@ -48,6 +52,7 @@ public class FieldZoneManager {
         inAlliance = new Trigger(() -> isRobotInAlliance());
         inEnemy = new Trigger(() -> isRobotInEnemy());
         inDepot = new Trigger(() -> isRobotInDepot());
+        inMiddle = new Trigger(() -> isRobotInMiddle());
         inHumanPlayer = new Trigger(() -> isRobotInHumanPlayer());
 
         triggerLogger.addTrigger(inTrench, "FieldZoneManager/inTrench");
@@ -55,6 +60,7 @@ public class FieldZoneManager {
         triggerLogger.addTrigger(inEnemy, "FieldZoneManager/inEnemy");
         triggerLogger.addTrigger(inDepot, "FieldZoneManager/inDepot");
         triggerLogger.addTrigger(inHumanPlayer, "FieldZoneManager/inHumanPlayer");
+        triggerLogger.addTrigger(inMiddle, "FieldZoneManager/inMiddle");
 
 
     }
@@ -63,17 +69,37 @@ public class FieldZoneManager {
         Pose2d estimatedTurretPose = robotState.getTurretOdomPose();
 
         if (!RobotState.getInstance().isBlueAlliance.getAsBoolean()) {
-            if (estimatedTurretPose.getX() > redTrenchCenterX) {
-                return true;
+            if (estimatedTurretPose.getX() > redTrenchCenterX - middleZoneBuffer / 2) {
+                if (estimatedTurretPose.getX() > redTrenchCenterX + middleZoneBuffer / 2) {
+                    lastInAllianceOrEnemy = true;
+                    return true;
 
+                }
+
+                if (lastInAllianceOrEnemy){
+                    return true;
+                }
+                
+                return false;
             }
+            lastInAllianceOrEnemy = false;
             return false;
 
         } else {
-            if (estimatedTurretPose.getX() < blueTrenchCenterX) {
-                return true;
+             if (estimatedTurretPose.getX() < blueTrenchCenterX + middleZoneBuffer / 2) {
+                if(estimatedTurretPose.getX() < blueTrenchCenterX - middleZoneBuffer / 2){
+                    lastInAllianceOrEnemy = true;
+                    return true;
+                }
 
+                if (lastInAllianceOrEnemy){
+                    return true;
+                }
+
+                return false;
             }
+
+            lastInAllianceOrEnemy = false;
             return false;
 
         }
@@ -83,20 +109,60 @@ public class FieldZoneManager {
         Pose2d estimatedTurretPose = robotState.getTurretOdomPose();
 
         if (!RobotState.getInstance().isBlueAlliance.getAsBoolean()) {
-            if (estimatedTurretPose.getX() < blueTrenchCenterX) {
-                return true;
+            if (estimatedTurretPose.getX() < blueTrenchCenterX + middleZoneBuffer / 2) {
+                if(estimatedTurretPose.getX() < blueTrenchCenterX - middleZoneBuffer / 2){
+                    lastInAllianceOrEnemy = true;
+                    return true;
 
+                }
+
+                if (lastInAllianceOrEnemy){
+                    return true;
+                }
+                
+                return false;
             }
+            lastInAllianceOrEnemy = false;
             return false;
 
         } else {
-            if (estimatedTurretPose.getX() > redTrenchCenterX) {
-                return true;
+            if (estimatedTurretPose.getX() > redTrenchCenterX - middleZoneBuffer / 2) {
+                if (estimatedTurretPose.getX() > redTrenchCenterX +  middleZoneBuffer / 2) {
+                    lastInAllianceOrEnemy = true;
+                    return true;
+                }
 
+                if (lastInAllianceOrEnemy){
+                    return true;
+                }
+
+                return false;
             }
+
+            lastInAllianceOrEnemy = false;
             return false;
 
         }
+
+    }
+
+    public boolean isRobotInMiddle(){
+        Pose2d estimatedTurretPose = robotState.getTurretOdomPose();
+
+        if(estimatedTurretPose.getX() > blueTrenchCenterX - middleZoneBuffer / 2 && estimatedTurretPose.getX() < redTrenchCenterX + middleZoneBuffer / 2){
+            if(estimatedTurretPose.getX() > blueTrenchCenterX + middleZoneBuffer / 2 && estimatedTurretPose.getX() < redTrenchCenterX - middleZoneBuffer / 2){
+                lastInMiddle = true;
+                return true;
+            }
+
+            if (lastInMiddle){
+                return true;
+            }
+
+            return false;
+        }
+        lastInMiddle = false;
+        return false;
 
     }
 
@@ -106,10 +172,10 @@ public class FieldZoneManager {
         // if the robot is within the y coordinates of the middle zone
      
         if (RobotState.getInstance().isBlueAlliance.getAsBoolean()) {
-                // Checks if the robot is in the depot zone plus the buffered area.
-            if (estimatedTurretPose.getY() < trenchCenterY + bufferZone / 2) {
-                    // Checks if the robot is in the core depot zone (without the buffered area).
-                if (estimatedTurretPose.getY() < trenchCenterY - bufferZone / 2) {
+            // Checks if the robot is in the depot zone plus the buffered area.
+            if (estimatedTurretPose.getY() > trenchCenterY - centerAxisBuffer / 2) {
+                // Checks if the robot is in the core depot zone (without the buffered area).
+                if (estimatedTurretPose.getY() > trenchCenterY + centerAxisBuffer / 2) {
                     lastInDepot = true;
                     return true;
 
@@ -127,8 +193,8 @@ public class FieldZoneManager {
             return false;
 
         } else {
-            if (estimatedTurretPose.getY() > trenchCenterY - bufferZone / 2) {
-                if (estimatedTurretPose.getY() > trenchCenterY + bufferZone / 2) {
+            if (estimatedTurretPose.getY() < trenchCenterY + centerAxisBuffer / 2) {
+                if (estimatedTurretPose.getY() < trenchCenterY - centerAxisBuffer / 2) {
                     lastInDepot = true;
                     return true;
                 }
@@ -153,10 +219,8 @@ public class FieldZoneManager {
         // if the robot is within the y coordinates of the middle zone
      
         if (RobotState.getInstance().isBlueAlliance.getAsBoolean()) {
-                // Checks if the robot is in the depot zone plus the buffered area.
-            if (estimatedTurretPose.getY() > trenchCenterY - bufferZone / 2) {
-                    // Checks if the robot is in the core depot zone (without the buffered area).
-                if (estimatedTurretPose.getY() > trenchCenterY + bufferZone / 2) {
+             if (estimatedTurretPose.getY() < trenchCenterY + centerAxisBuffer / 2) {
+                if (estimatedTurretPose.getY() < trenchCenterY - centerAxisBuffer / 2) {
                     lastInHumanPlayer = true;
                     return true;
 
@@ -174,8 +238,8 @@ public class FieldZoneManager {
             return false;
 
         } else {
-            if (estimatedTurretPose.getY() < trenchCenterY + bufferZone / 2) {
-                if (estimatedTurretPose.getY() < trenchCenterY - bufferZone / 2) {
+            if (estimatedTurretPose.getY() > trenchCenterY - centerAxisBuffer / 2) {
+                if (estimatedTurretPose.getY() > trenchCenterY + centerAxisBuffer / 2) {
                     lastInHumanPlayer = true;
                     return true;
                 }
