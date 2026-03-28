@@ -35,6 +35,8 @@ public class RobotState {
     private final StructPublisher<Pose2d> turretOdomPosePublisher;
     private final StructPublisher<Translation2d> robotVelocityOnFieldPublisher;
     private final StructPublisher<Translation3d> robotVelocityAsVisionTargetPublisher;
+    private final StructPublisher<Translation2d> turretRotationalVelocityOnFieldPublisher;
+    private final StructPublisher<Translation3d> turretRotationalVelocityAsVisionTargetPublisher;
     private final DoublePublisher hoodFudgeFactorPublisher;
     private final DoublePublisher flywheelFudgeFactorPublisher;
     private final DoublePublisher redHubToRobotCenterPublisher;
@@ -129,10 +131,14 @@ public class RobotState {
         turretOdomPosePublisher = loggingTable.getStructTopic("Turret Odometry Pose", Pose2d.struct).publish();
         hoodFudgeFactorPublisher = loggingTable.getDoubleTopic("Current Hood Fudge Factor").publish();
         flywheelFudgeFactorPublisher = loggingTable.getDoubleTopic("Current Flywheel Fudge Factor").publish();
-        robotVelocityOnFieldPublisher = loggingTable.getStructTopic("Robot Velocity Vector", Translation2d.struct)
-                .publish();
+        robotVelocityOnFieldPublisher = loggingTable
+                .getStructTopic("Robot Velocity Vector", Translation2d.struct).publish();
         robotVelocityAsVisionTargetPublisher = loggingTable
                 .getStructTopic("Robot Velocity Vector Offset By Robot", Translation3d.struct).publish();
+        turretRotationalVelocityOnFieldPublisher = loggingTable
+                .getStructTopic("Turret Rotational Velocity Vector", Translation2d.struct).publish();
+        turretRotationalVelocityAsVisionTargetPublisher = loggingTable
+                .getStructTopic("Turret Rotational Velocity Vector Offset By Robot", Translation3d.struct).publish();
 
         redHubToRobotCenterPublisher = loggingTable.getDoubleTopic("Distances/Red Hub To Robot Center").publish();
         blueHubToRobotCenterPublisher = loggingTable.getDoubleTopic("Distances/Blue Hub To Robot Center").publish();
@@ -173,6 +179,13 @@ public class RobotState {
         robotVelocityAsVisionTargetPublisher.accept(
                 new Translation3d(
                         currentRobotVelocity.plus(getRobotOdomPose().getTranslation()))
+                        .plus(new Translation3d(0.0, 0.0, 0.5)));
+
+        Translation2d currentTurretTangentVelocity = getFieldRelativeTurretRotationalVelocityVector();
+        turretRotationalVelocityOnFieldPublisher.accept(currentTurretTangentVelocity);
+        turretRotationalVelocityAsVisionTargetPublisher.accept(
+                new Translation3d(
+                        currentTurretTangentVelocity.plus(getTurretOdomPose().getTranslation()))
                         .plus(new Translation3d(0.0, 0.0, 0.5)));
     }
 
@@ -290,12 +303,27 @@ public class RobotState {
                 .rotateBy(getRobotOdomPose().getRotation());
     }
 
+    public Translation2d getFieldRelativeTurretRotationalVelocityVector() {
+        double currentRobotAngularVelocity = robotChassisSpeedsSupplier.get().omegaRadiansPerSecond;
+
+        // Turret position - robot position, resulting vector has magnitude of radius
+        Translation2d turretToRobotCenterOnField = getTurretOdomPose().getTranslation()
+                .minus(getRobotOdomPose().getTranslation());
+        // Multiply by angular velocity in radians / sec to get resultant translational
+        // velocity
+        Translation2d tangentTurretVector = turretToRobotCenterOnField.rotateBy(Rotation2d.kCCW_90deg)
+                .times(currentRobotAngularVelocity);
+
+        return tangentTurretVector;
+    }
+
     public ShootOnTheMoveOutputPoses calculateParametersForShootOnTheMove(Translation2d goalTranslationOnField) {
 
         ShootOnTheMoveOutputPoses outputData = new ShootOnTheMoveOutputPoses();
 
         Translation2d turretTranslationOnField = this.getTurretOdomPose().getTranslation();
-        Translation2d turretVelocityOnFieldAsTranslation = this.getFieldRelativeRobotVelocityVector();
+        Translation2d turretVelocityOnFieldAsTranslation = this.getFieldRelativeRobotVelocityVector()
+                .plus(this.getFieldRelativeTurretRotationalVelocityVector());
 
         double displacement_x, displacement_y, distance_derived_from_current_time;
 
@@ -307,7 +335,7 @@ public class RobotState {
         double initial_distance_to_target = goalTranslationOnField.getDistance(turretTranslationOnField);
         double horizontal_projectile_velocity = initial_distance_to_target
                 / turretDistanceToTimeOfFlightMap.get(initial_distance_to_target);
-                
+
         Translation2d projectileVelocityOnFieldAsTranslation;
         projectileVelocityOnFieldAsTranslation = new Translation2d(
                 horizontal_projectile_velocity,
