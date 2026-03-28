@@ -11,6 +11,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -26,6 +27,7 @@ public class DriveCommands {
     public static final double MAX_DRIVE_ANGULAR_SPEED = RotationsPerSecond.of(1.0).in(RadiansPerSecond);
 
     public static final double DEADBAND_AS_DECIMAL = 0.15;
+    public static final double CURVE_EXPONENT = 2.5;
 
     public static final double AUTO_AIM_TOLERANCE_DEGREES = 3;
 
@@ -42,26 +44,41 @@ public class DriveCommands {
         return (factor * Math.pow(input, 3)) + ((1.0 - factor) * input);
     }
 
+    private static Translation2d modifyJoystickForDrive(double inputX, double inputY) {
+        Translation2d inputVector = new Translation2d(inputX, inputY);
+        double inputMagnitude = inputVector.getNorm();
+        Rotation2d inputAngle = inputVector.getAngle();
+
+        double outputMagnitude = 0.0;
+        if (inputMagnitude > DEADBAND_AS_DECIMAL)
+            outputMagnitude = Math.pow(inputMagnitude - DEADBAND_AS_DECIMAL, CURVE_EXPONENT) /
+                    Math.pow(1.0 - DEADBAND_AS_DECIMAL, CURVE_EXPONENT);
+
+        return new Translation2d(outputMagnitude, inputAngle);
+    }
+
     public static Command joystickDriveCommand(
             CommandSwerveDrivetrain drivetrain,
             CommandXboxController controller,
             double translationalScalar,
             double angularScalar) {
         return drivetrain.applyRequest(
-                () -> teleopFieldCentricDriveRequest
-                        .withDeadband(
-                                MAX_DRIVE_TRANSLATIONAL_SPEED * DEADBAND_AS_DECIMAL * translationalScalar)
-                        .withRotationalDeadband(
-                                MAX_DRIVE_ANGULAR_SPEED * DEADBAND_AS_DECIMAL * angularScalar)
-                        .withVelocityX(
-                                modifyJoystickCurve(-controller.getLeftY()) * MAX_DRIVE_TRANSLATIONAL_SPEED
-                                        * translationalScalar)
-                        .withVelocityY(
-                                modifyJoystickCurve(-controller.getLeftX()) * MAX_DRIVE_TRANSLATIONAL_SPEED
-                                        * translationalScalar)
-                        .withRotationalRate(
-                                modifyJoystickCurve(-controller.getRightX()) * MAX_DRIVE_ANGULAR_SPEED
-                                        * angularScalar));
+                () -> {
+                    Translation2d modifiedDriveInput = modifyJoystickForDrive(
+                            -controller.getLeftY(),
+                            -controller.getLeftX());
+                    Translation2d modifiedTurnInput = modifyJoystickForDrive(
+                            -controller.getRightX(),
+                            0.0);
+
+                    return teleopFieldCentricDriveRequest
+                            .withVelocityX(
+                                    modifiedDriveInput.getX() * MAX_DRIVE_TRANSLATIONAL_SPEED * translationalScalar)
+                            .withVelocityY(
+                                    modifiedDriveInput.getY() * MAX_DRIVE_TRANSLATIONAL_SPEED * translationalScalar)
+                            .withRotationalRate(
+                                    modifiedTurnInput.getX() * MAX_DRIVE_ANGULAR_SPEED * angularScalar);
+                });
     }
 
     public static Command joystickDriveFacingAngleCommand(
