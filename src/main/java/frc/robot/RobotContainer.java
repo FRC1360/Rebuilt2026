@@ -56,7 +56,7 @@ import frc.robot.util.TriggerLogger;
 public class RobotContainer {
 
     private final RobotState robotState = RobotState.getInstance();
-    // private final FieldZoneManager m_fieldZoneManager = FieldZoneManager.getInstance();
+    private final FieldZoneManager m_fieldZoneManager = FieldZoneManager.getInstance();
     private final TriggerLogger triggerLogger = TriggerLogger.getInstance();
 
     private final CommandXboxController m_controller = new CommandXboxController(0);
@@ -125,10 +125,11 @@ public class RobotContainer {
         }
 
         pathConstraints = new PathConstraints(
-                3.0,
-                3.0,
-                Units.degreesToRadians(540),
-                Units.degreesToRadians(720));
+            3.0,
+            3.0,
+            Units.degreesToRadians(540), 
+            Units.degreesToRadians(720)
+        );
 
         Trigger shooterAtSetpoints = m_flywheelSubsystem.flywheelAtTarget.and(m_HoodSubsystem.hoodAtTarget);
         Command runShotSequence = Commands.either(
@@ -228,12 +229,9 @@ public class RobotContainer {
                 .or(backdriveIndexInput)
                 .or(backdriveShooterInput);
 
-        Trigger seedDrivetrainInput = m_controller.povDown();
-
         Trigger shootingInput = m_controller.rightBumper().and(backdrivingAnySubsystem.negate());
         Trigger shootingWithTurretInput = m_controller.rightTrigger(0.8).and(backdrivingAnySubsystem.negate());
-        // Trigger shootingThroughNetworkTablesInput =
-        // m_controller.povDown().and(backdrivingAnySubsystem.negate());
+        Trigger shootingThroughNetworkTablesInput = m_controller.povDown().and(backdrivingAnySubsystem.negate());
         Trigger passingInput = m_controller.leftBumper().and(backdrivingAnySubsystem.negate());
         Trigger intakePivotInput = m_controller.a();
         Trigger intakeRollerInput = m_controller.leftTrigger(0.8).and(backdriveIndexInput.negate());
@@ -241,11 +239,12 @@ public class RobotContainer {
         Trigger trenchRun = m_controller.y();
 
         Trigger runIndexOverrideInput = m_controller.x();
-        Trigger automaticShootCondition = (shootingInput.or(passingInput).or(shootingWithTurretInput))
+        Trigger automaticShootCondition = (shootingInput.or(passingInput).or(shootingWithTurretInput)
+                .or(shootingThroughNetworkTablesInput))
                 .and(m_flywheelSubsystem.flywheelAtTarget)
                 .and(m_HoodSubsystem.hoodAtTarget)
                 .and((m_TurretSubsystem.turretAtTarget
-                        .and(shootingInput.or(shootingWithTurretInput)))
+                        .and(shootingInput.or(shootingWithTurretInput).or(shootingThroughNetworkTablesInput)))
                         .or(m_TurretSubsystem.turretAtPassingTarget.and(passingInput)));
         Trigger preparedAndReadyToShoot = backdrivingAnySubsystem.negate()
                 .and(automaticShootCondition.or(runIndexOverrideInput));
@@ -291,23 +290,25 @@ public class RobotContainer {
                                 Rotation2d.fromDegrees(90.0)),
                         () -> robotState.getTurretOdomPose().getY() > FieldConstants.RED_ALLIANCE_HUB_POSE.getY()),
                 robotState.isBlueAlliance);
-
-        // Command trenchRunCommand = Commands.either(
-        //         Commands.either(
-        //                 AutoBuilder.pathfindThenFollowPath(exitRight, pathConstraints),
-        //                 AutoBuilder.pathfindThenFollowPath(enterRight, pathConstraints),
-        //                 m_fieldZoneManager.inAlliance).repeatedly(),
-        //         Commands.either(
-        //                 AutoBuilder.pathfindThenFollowPath(exitLeft, pathConstraints),
-        //                 AutoBuilder.pathfindThenFollowPath(enterLeft, pathConstraints),
-        //                 m_fieldZoneManager.inAlliance).repeatedly(),
-        //         m_fieldZoneManager.inHumanPlayer).repeatedly();
-        // trenchRun.whileTrue(trenchRunCommand);
+        
+        Command trenchRunCommand = Commands.either(
+            Commands.either(
+                AutoBuilder.pathfindThenFollowPath(exitRight, pathConstraints),
+                AutoBuilder.pathfindThenFollowPath(enterRight, pathConstraints),
+                m_fieldZoneManager.inAlliance
+            ).repeatedly(),
+            Commands.either(
+                AutoBuilder.pathfindThenFollowPath(exitLeft, pathConstraints),
+                AutoBuilder.pathfindThenFollowPath(enterLeft, pathConstraints),
+                m_fieldZoneManager.inAlliance
+            ).repeatedly(),
+            m_fieldZoneManager.inHumanPlayer
+        ).repeatedly();
+        trenchRun.whileTrue(trenchRunCommand);
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
         intakeRollerInput.or(shootingWithTurretInput).whileTrue(joystickDriveAtSlowSpeed);
         shootingInput.whileTrue(joystickDriveWhileFacingHub);
-        seedDrivetrainInput.onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));
         // passingInput.whileTrue(joystickDriveWhilePassing);
 
         // Intaking
@@ -343,16 +344,36 @@ public class RobotContainer {
                 robotState.isBlueAlliance);
         Command prepareToPass = Commands.either(
                 Commands.either(
-                        new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
-                                m_flywheelSubsystem, FieldConstants.BLUE_HUMAN_SIDE_PASS_POSE),
-                        new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
-                                m_flywheelSubsystem, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE),
+                        Commands.parallel(
+                                new SetHoodAngleFromPose(m_HoodSubsystem,
+                                        FieldConstants.BLUE_HUMAN_SIDE_PASS_POSE),
+                                new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
+                                        FieldConstants.BLUE_HUMAN_SIDE_PASS_POSE),
+                                new AimTurretAtPoseCommand(m_TurretSubsystem,
+                                        FieldConstants.BLUE_HUMAN_SIDE_PASS_POSE)),
+                        Commands.parallel(
+                                new SetHoodAngleFromPose(m_HoodSubsystem,
+                                        FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE),
+                                new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
+                                        FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE),
+                                new AimTurretAtPoseCommand(m_TurretSubsystem,
+                                        FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE)),
                         () -> robotState.getTurretOdomPose().getY() < FieldConstants.BLUE_ALLIANCE_HUB_POSE.getY()),
                 Commands.either(
-                        new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
-                                m_flywheelSubsystem, FieldConstants.RED_HUMAN_SIDE_PASS_POSE),
-                        new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
-                                m_flywheelSubsystem, FieldConstants.RED_DEPOT_SIDE_PASS_POSE),
+                        Commands.parallel(
+                                new SetHoodAngleFromPose(m_HoodSubsystem,
+                                        FieldConstants.RED_HUMAN_SIDE_PASS_POSE),
+                                new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
+                                        FieldConstants.RED_HUMAN_SIDE_PASS_POSE),
+                                new AimTurretAtPoseCommand(m_TurretSubsystem,
+                                        FieldConstants.RED_HUMAN_SIDE_PASS_POSE)),
+                        Commands.parallel(
+                                new SetHoodAngleFromPose(m_HoodSubsystem,
+                                        FieldConstants.RED_DEPOT_SIDE_PASS_POSE),
+                                new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
+                                        FieldConstants.RED_DEPOT_SIDE_PASS_POSE),
+                                new AimTurretAtPoseCommand(m_TurretSubsystem,
+                                        FieldConstants.RED_DEPOT_SIDE_PASS_POSE)),
                         () -> robotState.getTurretOdomPose().getY() > FieldConstants.RED_ALLIANCE_HUB_POSE.getY()),
                 robotState.isBlueAlliance);
         Command shootFromNetworkTables = Commands.either(
@@ -412,12 +433,10 @@ public class RobotContainer {
                                 flywheelTimer.stop();
                             }
                         })));
-        // shootingThroughNetworkTablesInput.whileTrue(Commands.parallel(
-        // new SetHoodAngleFromNetworkTables(m_HoodSubsystem,
-        // FieldConstants.RED_ALLIANCE_HUB_POSE),
-        // new SetFlywheelVelocityFromNetworkTables(m_flywheelSubsystem),
-        // new AimTurretAtPoseCommand(m_TurretSubsystem,
-        // FieldConstants.RED_ALLIANCE_HUB_POSE)));
+        shootingThroughNetworkTablesInput.whileTrue(Commands.parallel(
+                new SetHoodAngleFromNetworkTables(m_HoodSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
+                new SetFlywheelVelocityFromNetworkTables(m_flywheelSubsystem),
+                new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE)));
 
         // Backdriving
         Command backdriveIntakeWhileKeepingState = Commands.either(
