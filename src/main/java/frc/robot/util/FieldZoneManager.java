@@ -26,13 +26,14 @@ public class FieldZoneManager {
             { Inches.of(267.75).in(Meters), Inches.of(317.69).in(Meters) } };
 
     private double centerAxisBuffer = 2; 
-    private double middleZoneBuffer = 1; 
+    private double middleZoneBuffer = 2; 
 
     private static FieldZoneManager instance = null;
 
     private boolean lastInDepot = false; // this helps the logic with the buffer zone
     private boolean lastInHumanPlayer = false; // this helps the logic with the buffer zone
-    private boolean lastInAllianceOrEnemy = false;
+    private boolean lastInEnemy = false;
+    private boolean lastInAlliance = false;
     private boolean lastInMiddle = false;
 
     public Trigger inTrench;
@@ -71,35 +72,35 @@ public class FieldZoneManager {
         if (!RobotState.getInstance().isBlueAlliance.getAsBoolean()) {
             if (estimatedTurretPose.getX() > redTrenchCenterX - middleZoneBuffer / 2) {
                 if (estimatedTurretPose.getX() > redTrenchCenterX + middleZoneBuffer / 2) {
-                    lastInAllianceOrEnemy = true;
+                    lastInAlliance = true;
                     return true;
 
                 }
 
-                if (lastInAllianceOrEnemy){
+                if (lastInAlliance){
                     return true;
                 }
                 
                 return false;
             }
-            lastInAllianceOrEnemy = false;
+            lastInAlliance = false;
             return false;
 
         } else {
              if (estimatedTurretPose.getX() < blueTrenchCenterX + middleZoneBuffer / 2) {
                 if(estimatedTurretPose.getX() < blueTrenchCenterX - middleZoneBuffer / 2){
-                    lastInAllianceOrEnemy = true;
+                    lastInAlliance = true;
                     return true;
                 }
 
-                if (lastInAllianceOrEnemy){
+                if (lastInAlliance){
                     return true;
                 }
 
                 return false;
             }
 
-            lastInAllianceOrEnemy = false;
+            lastInAlliance = false;
             return false;
 
         }
@@ -111,35 +112,41 @@ public class FieldZoneManager {
         if (!RobotState.getInstance().isBlueAlliance.getAsBoolean()) {
             if (estimatedTurretPose.getX() < blueTrenchCenterX + middleZoneBuffer / 2) {
                 if(estimatedTurretPose.getX() < blueTrenchCenterX - middleZoneBuffer / 2){
-                    lastInAllianceOrEnemy = true;
+                    lastInEnemy = true;
                     return true;
 
                 }
 
-                if (lastInAllianceOrEnemy){
+                 if (lastInEnemy ){
                     return true;
+
                 }
                 
                 return false;
             }
-            lastInAllianceOrEnemy = false;
+
+            lastInEnemy = false;
             return false;
+            
+
+        
+            
 
         } else {
             if (estimatedTurretPose.getX() > redTrenchCenterX - middleZoneBuffer / 2) {
                 if (estimatedTurretPose.getX() > redTrenchCenterX +  middleZoneBuffer / 2) {
-                    lastInAllianceOrEnemy = true;
+                    lastInEnemy = true;
                     return true;
                 }
 
-                if (lastInAllianceOrEnemy){
+                if (lastInEnemy){
                     return true;
                 }
 
                 return false;
             }
 
-            lastInAllianceOrEnemy = false;
+            lastInEnemy = false;
             return false;
 
         }
