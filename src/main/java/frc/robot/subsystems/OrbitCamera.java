@@ -42,8 +42,9 @@ public class OrbitCamera {
   StructPublisher<Transform3d> robotToCameraOffset;
   StructPublisher<Pose3d> robotPoseTransformedByCameraOffset;
   private Matrix<N3, N1> curStdDevs;
-  private Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 999999);
-  private Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(3.5, 3.5, 999999);
+  private Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(2, 2, 2);
+  private Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+  private double AMBIGUITY_CUTOFF_THRESHOLD = 0.2;
 
   /* Simulation Stuff */
   private PhotonCameraSim photonCameraSim;
@@ -110,10 +111,14 @@ public class OrbitCamera {
       var estStdDevs = kSingleTagStdDevs;
       int numTags = 0;
       double avgDist = 0;
+      boolean isPoseAmbiguous = false;
 
       // Precalculation - see how many tags we found, and calculate an average-distance metric
       for (var tgt : targets) {
         var tagPose = photonPoseEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
+        if (tgt.getPoseAmbiguity() > AMBIGUITY_CUTOFF_THRESHOLD) {
+            isPoseAmbiguous = true;
+        }
         if (tagPose.isEmpty()) continue;
         numTags++;
         avgDist +=
@@ -133,7 +138,7 @@ public class OrbitCamera {
         // Decrease std devs if multiple targets are visible
         if (numTags > 1) estStdDevs = kMultiTagStdDevs;
         // Increase std devs based on (average) distance
-        if (numTags == 1 && avgDist > 4)
+        if ((numTags == 1 && avgDist > 4) || (isPoseAmbiguous))
           estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
         else {
             estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));

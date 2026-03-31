@@ -67,7 +67,7 @@ public final class Constants {
 
         public static final double PIVOT_STARTUP_ANGLE = 121.3;
         public static final double PIVOT_RETRACTED_ANGLE = 120.0;
-        public static final double PIVOT_DEPLOYED_ANGLE = 2.0;
+        public static final double PIVOT_DEPLOYED_ANGLE = 9;
         public static final double PIVOT_PID_TOLERANCE = 2.0;
 
         // Used in RobotState to manage toggling functionality
@@ -108,7 +108,7 @@ public final class Constants {
         public static final int HOPPER_VORTEX_CAN_ID = 32;
         public static final int HOPPER_VORTEX_STALL_CURRENT_LIMIT = 80;
         public static final int HOPPER_VORTEX_FREE_CURRENT_LIMIT = 80;
-        public static final boolean HOPPER_VORTEX_INVERTED = false;
+        public static final boolean HOPPER_VORTEX_INVERTED = true;
 
         public static final int MAGAZINE_VORTEX_CAN_ID = 33;
         public static final int MAGAZINE_VORTEX_STALL_CURRENT_LIMIT = 45;
@@ -117,7 +117,7 @@ public final class Constants {
 
         public static final int MAGAZINE_SENSOR_DIGITAL_CHANNEL = 1;
 
-        public static final double HOPPER_SPEED = 0.5;
+        public static final double HOPPER_SPEED = 0.9;
         public static final double MAGAZINE_SPEED = 0.9;
     }
 

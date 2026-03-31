@@ -73,12 +73,20 @@ public class IndexSubsystem extends SubsystemBase {
         hopperMotor.set(speed);
     }
 
+    public double getHopperCurrent() {
+        return hopperMotor.getOutputCurrent();
+    }
+
     public void setMagazineVoltage(double volts) {
         magazineMotor.setVoltage(volts);
     }
 
     public void setMagazineSpeed(double speed) {
         magazineMotor.set(speed);
+    }
+
+    public double getMagazineCurrent() {
+        return magazineMotor.getOutputCurrent();
     }
 
     @Override

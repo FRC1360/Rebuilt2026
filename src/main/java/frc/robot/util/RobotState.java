@@ -48,6 +48,8 @@ public class RobotState {
     private final DoublePublisher redTagToTurretCenterPublisher;
     private final DoublePublisher blueTagToTurretCenterPublisher;
 
+    private final AprilTagFieldLayout fieldLayout;
+
     private Supplier<Pose2d> robotOdomPoseSupplier;
     private Supplier<ChassisSpeeds> robotChassisSpeedsSupplier;
     private Supplier<Rotation2d> turretRotationSupplier;
@@ -64,6 +66,8 @@ public class RobotState {
     private static RobotState instance = null;
 
     private RobotState() {
+        fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+
         turretDistanceToHoodAngleMap = new InterpolatingDoubleTreeMap();
         // turretDistanceToHoodAngleMap.put(1.423, 74.0);
         // turretDistanceToHoodAngleMap.put(2.511, 71.0);
@@ -192,7 +196,6 @@ public class RobotState {
     public void logAllDistances() {
         Translation2d robotCenter = this.getRobotOdomPose().getTranslation();
         Translation2d turretCenter = this.getTurretOdomPose().getTranslation();
-        AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
         redHubToRobotCenterPublisher
                 .accept(robotCenter.getDistance(FieldConstants.RED_ALLIANCE_HUB_POSE.getTranslation()));
