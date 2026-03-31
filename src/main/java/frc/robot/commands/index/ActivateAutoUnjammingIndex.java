@@ -20,10 +20,12 @@ public class ActivateAutoUnjammingIndex extends Command {
 
     private final IndexSubsystem indexSubsystem;
     private Timer timer;
+    private Timer cooldownTimer;
 
-    public static final double DEFAULT_HOPPER_UNJAM_THRESHOLD_CURRENT = 30.0;
+    public static final double DEFAULT_HOPPER_UNJAM_THRESHOLD_CURRENT = 40.0;
 
     private double activatedSpeed;
+    private double unjamCooldown;
     private double unjamThreshold;
     private double unjamSpeed;
     private double unjamDuration;
@@ -32,24 +34,27 @@ public class ActivateAutoUnjammingIndex extends Command {
     private final NetworkTable loggingTable = NetworkTableInstance.getDefault().getTable("Commands/" + getName());
     private DoublePublisher averagedCurrentPublisher;
     private DoubleEntry activatedSpeedEntry;
+    private DoubleEntry unjamCooldownEntry;
     private DoubleEntry unjamThresholdEntry;
     private DoubleEntry unjamSpeedEntry;
     private DoubleEntry unjamDurationEntry;
 
     private double averagedHopperCurrent;
-    private LinearFilter hopperCurrentFilter = LinearFilter.movingAverage(3);
+    private LinearFilter hopperCurrentFilter = LinearFilter.movingAverage(5);
 
     /** Creates a new ActivateMagazineCommand. */
     public ActivateAutoUnjammingIndex(IndexSubsystem indexSubsystem) {
         this.timer = new Timer();
+        this.cooldownTimer = new Timer();
         this.indexSubsystem = indexSubsystem;
 
-        averagedCurrentPublisher = loggingTable.getDoubleTopic("Average Hopper Speed").publish();
+        averagedCurrentPublisher = loggingTable.getDoubleTopic("Average Hopper Current Amps").publish();
         activatedSpeedEntry = createEntry(loggingTable, "Fire Speed", IndexConstants.HOPPER_SPEED);
         unjamThresholdEntry = createEntry(loggingTable, "Unjam Threshold Current",
                 DEFAULT_HOPPER_UNJAM_THRESHOLD_CURRENT);
         unjamSpeedEntry = createEntry(loggingTable, "Unjam Speed", -0.5);
-        unjamDurationEntry = createEntry(loggingTable, "Unjam Duration", 0.25);
+        unjamDurationEntry = createEntry(loggingTable, "Unjam Duration Seconds", 0.25);
+        unjamCooldownEntry = createEntry(loggingTable, "Unjam Cooldown Seconds", 0.5);
 
         unjamThreshold = DEFAULT_HOPPER_UNJAM_THRESHOLD_CURRENT;
 
@@ -62,6 +67,7 @@ public class ActivateAutoUnjammingIndex extends Command {
         isUnjamRoutineRunning = false;
 
         activatedSpeed = activatedSpeedEntry.get();
+        unjamCooldown = unjamCooldownEntry.get();
         unjamSpeed = unjamSpeedEntry.get();
         unjamDuration = unjamDurationEntry.get();
         unjamThreshold = unjamThresholdEntry.get();
@@ -70,19 +76,23 @@ public class ActivateAutoUnjammingIndex extends Command {
 
         timer.reset();
         timer.stop();
+        cooldownTimer.reset();
+        cooldownTimer.start();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
         indexSubsystem.setMagazineSpeed(Constants.IndexConstants.MAGAZINE_SPEED);
-        if (!isUnjamRoutineRunning) indexSubsystem.setHopperSpeed(activatedSpeed);
-        else indexSubsystem.setHopperSpeed(unjamSpeed);
+        if (!isUnjamRoutineRunning)
+            indexSubsystem.setHopperSpeed(activatedSpeed);
+        else
+            indexSubsystem.setHopperSpeed(unjamSpeed);
 
         averagedHopperCurrent = hopperCurrentFilter.calculate(indexSubsystem.getHopperCurrent());
         averagedCurrentPublisher.accept(averagedHopperCurrent);
 
-        if (averagedHopperCurrent > unjamThreshold && !isUnjamRoutineRunning) {
+        if (averagedHopperCurrent > unjamThreshold && !isUnjamRoutineRunning && cooldownTimer.get() > unjamCooldown) {
             isUnjamRoutineRunning = true;
             timer.reset();
             timer.start();
@@ -92,6 +102,8 @@ public class ActivateAutoUnjammingIndex extends Command {
             isUnjamRoutineRunning = false;
             timer.reset();
             timer.stop();
+            cooldownTimer.reset();
+            cooldownTimer.start();
         }
     }
 

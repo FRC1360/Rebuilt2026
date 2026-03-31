@@ -36,6 +36,7 @@ import frc.robot.commands.hood.SetHoodAngleCommand;
 import frc.robot.commands.hood.SetHoodAngleFromNetworkTables;
 import frc.robot.commands.hood.SetHoodAngleFromPose;
 import frc.robot.commands.index.ActivateAgitatedIndexCommand;
+import frc.robot.commands.index.ActivateAutoUnjammingIndex;
 import frc.robot.commands.index.SetIndexSpeedsCommand;
 import frc.robot.commands.intake.DeployIntakeCommand;
 import frc.robot.commands.intake.RetractIntakeCommand;
@@ -405,7 +406,7 @@ public class RobotContainer {
 
         shootingInput.whileTrue(prepareToShootAtHub);
         passingInput.whileTrue(prepareToPass);
-        preparedAndReadyToShoot.whileTrue(new ActivateAgitatedIndexCommand(m_indexSubsystem));
+        preparedAndReadyToShoot.whileTrue(new ActivateAutoUnjammingIndex(m_indexSubsystem));
         shootingWithTurretInput.whileTrue(Commands.either(
                 new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem, m_flywheelSubsystem,
                         FieldConstants.BLUE_ALLIANCE_HUB_POSE),
