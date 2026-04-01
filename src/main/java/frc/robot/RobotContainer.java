@@ -308,7 +308,7 @@ public class RobotContainer {
         trenchRun.whileTrue(trenchRunCommand);
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
-        intakeRollerInput.or(shootingWithTurretInput).whileTrue(joystickDriveAtSlowSpeed);
+        shootingWithTurretInput.whileTrue(joystickDriveAtSlowSpeed);
         shootingInput.whileTrue(joystickDriveWhileFacingHub);
         // passingInput.whileTrue(joystickDriveWhilePassing);
 
@@ -345,36 +345,16 @@ public class RobotContainer {
                 robotState.isBlueAlliance);
         Command prepareToPass = Commands.either(
                 Commands.either(
-                        Commands.parallel(
-                                new SetHoodAngleFromPose(m_HoodSubsystem,
-                                        FieldConstants.BLUE_HUMAN_SIDE_PASS_POSE),
-                                new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                        FieldConstants.BLUE_HUMAN_SIDE_PASS_POSE),
-                                new AimTurretAtPoseCommand(m_TurretSubsystem,
-                                        FieldConstants.BLUE_HUMAN_SIDE_PASS_POSE)),
-                        Commands.parallel(
-                                new SetHoodAngleFromPose(m_HoodSubsystem,
-                                        FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE),
-                                new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                        FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE),
-                                new AimTurretAtPoseCommand(m_TurretSubsystem,
-                                        FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE)),
+                        new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
+                                m_flywheelSubsystem, FieldConstants.BLUE_HUMAN_SIDE_PASS_POSE),
+                        new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
+                                m_flywheelSubsystem, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE),
                         () -> robotState.getTurretOdomPose().getY() < FieldConstants.BLUE_ALLIANCE_HUB_POSE.getY()),
                 Commands.either(
-                        Commands.parallel(
-                                new SetHoodAngleFromPose(m_HoodSubsystem,
-                                        FieldConstants.RED_HUMAN_SIDE_PASS_POSE),
-                                new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                        FieldConstants.RED_HUMAN_SIDE_PASS_POSE),
-                                new AimTurretAtPoseCommand(m_TurretSubsystem,
-                                        FieldConstants.RED_HUMAN_SIDE_PASS_POSE)),
-                        Commands.parallel(
-                                new SetHoodAngleFromPose(m_HoodSubsystem,
-                                        FieldConstants.RED_DEPOT_SIDE_PASS_POSE),
-                                new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                        FieldConstants.RED_DEPOT_SIDE_PASS_POSE),
-                                new AimTurretAtPoseCommand(m_TurretSubsystem,
-                                        FieldConstants.RED_DEPOT_SIDE_PASS_POSE)),
+                        new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
+                                m_flywheelSubsystem, FieldConstants.RED_HUMAN_SIDE_PASS_POSE),
+                        new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
+                                m_flywheelSubsystem, FieldConstants.RED_DEPOT_SIDE_PASS_POSE),
                         () -> robotState.getTurretOdomPose().getY() > FieldConstants.RED_ALLIANCE_HUB_POSE.getY()),
                 robotState.isBlueAlliance);
         Command shootFromNetworkTables = Commands.either(
