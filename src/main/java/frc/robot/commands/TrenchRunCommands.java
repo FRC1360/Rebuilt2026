@@ -147,7 +147,7 @@ public class TrenchRunCommands {
             /* Define rotation target */
             RotationTarget rotationTargetAtEntry = new RotationTarget(rotationTargetPosition, snappedRotation);
 
-            /* Create path */            
+            /* Create path */
             PathPlannerPath path = new PathPlannerPath(
                     PathPlannerPath.waypointsFromPoses(poseList),
                     List.of(rotationTargetAtEntry),
@@ -159,7 +159,12 @@ public class TrenchRunCommands {
                     new GoalEndState(3.0, snappedRotation),
                     false);
 
-            trajectoryPublisher.accept(path.getPathPoses().toArray(Pose2d[]::new));
+            if (RobotState.getInstance().isBlueAlliance.getAsBoolean())
+                trajectoryPublisher.accept(path.getPathPoses().toArray(Pose2d[]::new));
+            else
+                trajectoryPublisher.accept(path.getPathPoses().stream()
+                        .map(pose -> FlippingUtil.flipFieldPose(pose))
+                        .collect(Collectors.toList()).toArray(Pose2d[]::new));
             return AutoBuilder.followPath(path);
         }, Set.of(drivetrain));
     }
