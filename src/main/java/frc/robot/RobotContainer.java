@@ -258,7 +258,7 @@ public class RobotContainer {
                         () -> robotState.getTurretOdomPose().getY() > FieldConstants.RED_ALLIANCE_HUB_POSE.getY()),
                 robotState.isBlueAlliance);
 
-        trenchRun.whileTrue(TrenchRunCommands.goToAllianceFromNeutralHumanCommand(drivetrain));
+        trenchRun.whileTrue(TrenchRunCommands.autoTrenchRunCommand(drivetrain));
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
         shootingWithTurretInput.whileTrue(joystickDriveAtSlowSpeed);
