@@ -14,6 +14,7 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.RotationTarget;
+import com.pathplanner.lib.path.Waypoint;
 import com.pathplanner.lib.util.FlippingUtil;
 
 import edu.wpi.first.math.MathUtil;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.util.FieldConstants;
+import frc.robot.util.FieldZoneManager;
 import frc.robot.util.RobotState;
 
 public class TrenchRunCommands {
@@ -35,7 +37,83 @@ public class TrenchRunCommands {
     private static final StructArrayPublisher<Pose2d> trajectoryPublisher = loggingTable
             .getStructArrayTopic("Goal Pose Iterations", Pose2d.struct).publish();
 
-    private static final double INTRO_WAYPOINT_VELOCITY_ACCOUNTING_THRESHOLD = 0.01;
+    private static List<Pose2d> neutral_to_blue_human = List.of(
+            new Pose2d(FieldConstants.BLUE_HUMAN_TRENCH_NEUTRAL_ENTRY,
+                    Rotation2d.k180deg),
+            new Pose2d(FieldConstants.BLUE_HUMAN_TRENCH_ALLIANCE_ENTRY,
+                    Rotation2d.k180deg));
+    private static List<Pose2d> neutral_to_blue_depot = List.of(
+            new Pose2d(FieldConstants.BLUE_DEPOT_TRENCH_NEUTRAL_ENTRY,
+                    Rotation2d.k180deg),
+            new Pose2d(FieldConstants.BLUE_DEPOT_TRENCH_ALLIANCE_ENTRY,
+                    Rotation2d.k180deg));
+    private static List<Pose2d> blue_to_neutral_human = List.of(
+            new Pose2d(FieldConstants.BLUE_HUMAN_TRENCH_ALLIANCE_ENTRY,
+                    Rotation2d.kZero),
+            new Pose2d(FieldConstants.BLUE_HUMAN_TRENCH_NEUTRAL_ENTRY,
+                    Rotation2d.kZero));
+    private static List<Pose2d> blue_to_neutral_depot = List.of(
+            new Pose2d(FieldConstants.BLUE_DEPOT_TRENCH_ALLIANCE_ENTRY,
+                    Rotation2d.kZero),
+            new Pose2d(FieldConstants.BLUE_DEPOT_TRENCH_NEUTRAL_ENTRY,
+                    Rotation2d.kZero));
+
+    private static List<Pose2d> returnBluePosesBasedOnRobotPose() {
+        /* Initialize Util Classes */
+        RobotState robotState = RobotState.getInstance();
+        FieldZoneManager fieldZoneManager = FieldZoneManager.getInstance();
+
+        /* Data from FZM */
+        boolean inHuman = fieldZoneManager.isRobotInHumanPlayer();
+        boolean inDepot = fieldZoneManager.isRobotInDepot();
+        boolean inBlue = fieldZoneManager.isRobotInAlliance();
+        boolean inNeutral = fieldZoneManager.isRobotInMiddle();
+
+        /* Obtain robot positions in blue relative */
+        Pose2d blueRelativeRobotPose = robotState.getRobotOdomPose();
+        if (!robotState.isBlueAlliance.getAsBoolean())
+            blueRelativeRobotPose = FlippingUtil.flipFieldPose(blueRelativeRobotPose);
+        double robotRotationDegrees = MathUtil.inputModulus(
+                blueRelativeRobotPose.getRotation().getDegrees(),
+                -180, 180);
+
+        /* Determine whether to compensate for intake going through trench */
+        boolean offsetPathInPositiveX = false;
+        boolean offsetPathInNegativeX = false;
+        if (robotRotationDegrees <= -45 && robotRotationDegrees >= -135)
+            offsetPathInPositiveX = true;
+        else if (robotRotationDegrees >= 45 && robotRotationDegrees <= 135)
+            offsetPathInNegativeX = true;
+
+        /* Define output list based on FZM input */
+        List<Pose2d> outputList = new ArrayList<>();
+        if (inBlue && inHuman)
+            outputList = blue_to_neutral_human;
+        else if (inBlue && inDepot)
+            outputList = blue_to_neutral_depot;
+        else if (inNeutral && inHuman)
+            outputList = neutral_to_blue_human;
+        else if (inNeutral && inDepot)
+            outputList = neutral_to_blue_depot;
+
+        /* Implement Translational Compensation */
+        if (offsetPathInPositiveX)
+            outputList.forEach(pose -> new Pose2d(
+                    pose.getTranslation().plus(FieldConstants.TRENCH_INTAKE_OFFSET),
+                    pose.getRotation()));
+        else if (offsetPathInNegativeX)
+            outputList.forEach(pose -> new Pose2d(
+                    pose.getTranslation().minus(FieldConstants.TRENCH_INTAKE_OFFSET),
+                    pose.getRotation()));
+
+        /* Find field relative heading towards entry pose + add to list */
+        Rotation2d startingWaypointHeading = PhotonUtils.getYawToPose(
+                new Pose2d(blueRelativeRobotPose.getTranslation(), new Rotation2d()),
+                outputList.get(0));
+        outputList.add(0, new Pose2d(blueRelativeRobotPose.getTranslation(), startingWaypointHeading));
+
+        return outputList;
+    }
 
     public static Command goToAllianceFromNeutralHumanCommand(CommandSwerveDrivetrain drivetrain) {
 
