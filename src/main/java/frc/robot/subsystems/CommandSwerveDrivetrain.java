@@ -58,7 +58,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
 
     /* Swerve request to apply when following a path via PathPlanner */
-    private final SwerveRequest.ApplyRobotSpeeds m_pathPlannerApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
+    public final SwerveRequest.ApplyRobotSpeeds m_pathPlannerApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
     private final OrbitCamera backLeftSwerveCamera = new OrbitCamera(
             DrivetrainConstants.BACK_LEFT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM,

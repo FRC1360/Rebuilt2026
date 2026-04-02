@@ -4,20 +4,10 @@
 
 package frc.robot;
 
-import java.io.IOException;
-
-import org.json.simple.parser.ParseException;
-
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.FileVersionException;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.SetShooterFromCompensatedPoseCommand;
+import frc.robot.commands.TrenchRunCommands;
 import frc.robot.commands.flywheel.SetFlywheelVelocityCommand;
 import frc.robot.commands.flywheel.SetFlywheelVelocityFromNetworkTables;
 import frc.robot.commands.flywheel.SetFlywheelVelocityFromPoseCommand;
@@ -82,11 +73,6 @@ public class RobotContainer {
     private PathPlannerAuto leftSideBasicAuto;
     private PathPlannerAuto rightSideBasicAuto;
     private PathPlannerAuto middleBasicAuto;
-    private PathPlannerPath exitLeft;
-    private PathPlannerPath enterLeft;
-    private PathPlannerPath exitRight;
-    private PathPlannerPath enterRight;
-    private PathConstraints pathConstraints;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -111,26 +97,6 @@ public class RobotContainer {
     }
 
     private void configureAllAutos() {
-
-        try {
-            enterLeft = PathPlannerPath.fromPathFile("Enter Alliance Left");
-            enterRight = PathPlannerPath.fromPathFile("Enter Alliance Right");
-            exitLeft = PathPlannerPath.fromPathFile("Leave Alliance Left");
-            exitRight = PathPlannerPath.fromPathFile("Leave Alliance Right");
-        } catch (FileVersionException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        pathConstraints = new PathConstraints(
-            3.0,
-            3.0,
-            Units.degreesToRadians(540), 
-            Units.degreesToRadians(720)
-        );
 
         Trigger shooterAtSetpoints = m_flywheelSubsystem.flywheelAtTarget.and(m_HoodSubsystem.hoodAtTarget);
         Command runShotSequence = Commands.either(
@@ -291,21 +257,8 @@ public class RobotContainer {
                                 Rotation2d.fromDegrees(90.0)),
                         () -> robotState.getTurretOdomPose().getY() > FieldConstants.RED_ALLIANCE_HUB_POSE.getY()),
                 robotState.isBlueAlliance);
-        
-        Command trenchRunCommand = Commands.either(
-            Commands.either(
-                AutoBuilder.pathfindThenFollowPath(exitRight, pathConstraints),
-                AutoBuilder.pathfindThenFollowPath(enterRight, pathConstraints),
-                m_fieldZoneManager.inAlliance
-            ).repeatedly(),
-            Commands.either(
-                AutoBuilder.pathfindThenFollowPath(exitLeft, pathConstraints),
-                AutoBuilder.pathfindThenFollowPath(enterLeft, pathConstraints),
-                m_fieldZoneManager.inAlliance
-            ).repeatedly(),
-            m_fieldZoneManager.inHumanPlayer
-        ).repeatedly();
-        trenchRun.whileTrue(trenchRunCommand);
+
+        trenchRun.whileTrue(TrenchRunCommands.goToAllianceFromNeutralHumanCommand(drivetrain));
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
         shootingWithTurretInput.whileTrue(joystickDriveAtSlowSpeed);
