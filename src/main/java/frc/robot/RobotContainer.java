@@ -74,7 +74,7 @@ public class RobotContainer {
 
     // Slow down speed when intaking and/or shooting
     private static final double SLOW_DRIVE_TRANSLATIONAL_MULTIPLIER = 0.3;
-    private static final double SLOW_DRIVE_ANGULAR_MULTIPLIER = 0.3;
+    private static final double SLOW_DRIVE_ANGULAR_MULTIPLIER = 0.8;
 
     private final SwerveTelemetry swerveLogger = new SwerveTelemetry(DriveCommands.MAX_DRIVE_TRANSLATIONAL_SPEED);
 
