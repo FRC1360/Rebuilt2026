@@ -4,53 +4,51 @@
     {
       "anchor": {
         "x": 4.462,
-        "y": 7.55
+        "y": 0.45
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.999982779491094,
-        "y": 7.540189077173413
+        "x": 7.851612152749567,
+        "y": 0.322746497366708
       },
       "isLocked": false,
-      "linkedName": "LStart"
+      "linkedName": "RSTART"
     },
     {
       "anchor": {
-        "x": 7.7584247084066895,
-        "y": 6.605019485401995
+        "x": 7.755,
+        "y": 3.088
       },
       "prevControl": {
-        "x": 7.769884187940141,
-        "y": 7.575818341035798
-      },
-      "nextControl": {
-        "x": 7.750191972806581,
-        "y": 5.907576789510768
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 7.7584247084066895,
-        "y": 4.581315608494719
-      },
-      "prevControl": {
-        "x": 7.7422206022593905,
-        "y": 5.250468795848005
+        "x": 7.814933596325104,
+        "y": 0.995981038002995
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LCenter"
+      "linkedName": "RC1"
     }
   ],
   "rotationTargets": [],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.6348631007393716,
+      "maxWaypointRelativePos": 1.0,
+      "constraints": {
+        "maxVelocity": 2.0,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
       "name": "DEPLOY_AND_RUN_INTAKE_TRIGGER",
-      "waypointRelativePos": 0.08516073135755252,
+      "waypointRelativePos": 0.051618819316081345,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -64,14 +62,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": -89.41744581455845
+    "velocity": 2.0,
+    "rotation": 90.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "R Autos",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }

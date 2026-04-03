@@ -7,31 +7,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LStart to LCenter 2"
+            "pathName": "LSTART-LC1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LCenter2 to LShoot 2"
+            "pathName": "LC1-LS1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LShoot 2 to LCenter 3"
+            "pathName": "LS1-LC2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LCenter 3 to LLoopyEnd 2"
+            "pathName": "LC2-LTransition1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LLoopyEnd 2 to Shoot 3"
+            "pathName": "LTransition1-LS2"
           }
         }
       ]

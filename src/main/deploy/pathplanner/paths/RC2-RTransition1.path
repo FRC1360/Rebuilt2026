@@ -3,42 +3,35 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.46614542901121336,
-        "y": 5.980669213444643
+        "x": 6.759962267092136,
+        "y": 3.306
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.3759272758949534,
-        "y": 5.644152178697182
+        "x": 6.661167709417288,
+        "y": 3.8078444354595735
       },
       "isLocked": false,
-      "linkedName": "Depot"
+      "linkedName": "RC2"
     },
     {
       "anchor": {
-        "x": 2.47,
-        "y": 4.016061702244718
+        "x": 5.803,
+        "y": 3.431429213923111
       },
       "prevControl": {
-        "x": 2.2834448538176897,
-        "y": 4.749709644586266
+        "x": 5.6494945584885405,
+        "y": 3.855506440403709
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "MidShoot"
+      "linkedName": "RTransition1"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "EXECUTE_SHOT_ROUTINE_COMMAND",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 3.0,
@@ -48,14 +41,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": -94.0
+    "velocity": 2.0,
+    "rotation": 90.001
   },
   "reversed": false,
-  "folder": null,
+  "folder": "R Autos",
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": 180.0
+    "velocity": 2.0,
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }

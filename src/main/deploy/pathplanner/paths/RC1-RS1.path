@@ -4,28 +4,28 @@
     {
       "anchor": {
         "x": 7.75476571669601,
-        "y": 4.912394045261151
+        "y": 3.087605954738849
       },
       "prevControl": null,
       "nextControl": {
         "x": 7.744633124266432,
-        "y": 3.941675607027582
+        "y": 4.058324392972418
       },
       "isLocked": false,
-      "linkedName": "LCenter 2"
+      "linkedName": "RC1"
     },
     {
       "anchor": {
         "x": 6.013809419014084,
-        "y": 5.611301670701291
+        "y": 2.388698329298709
       },
       "prevControl": {
         "x": 6.894469481070287,
-        "y": 5.173692006721864
+        "y": 2.826307993278136
       },
       "nextControl": {
         "x": 5.486633151779187,
-        "y": 5.873261351970304
+        "y": 2.126738648029696
       },
       "isLocked": false,
       "linkedName": null
@@ -33,15 +33,15 @@
     {
       "anchor": {
         "x": 3.523121698943662,
-        "y": 5.883876448796948
+        "y": 2.116123551203052
       },
       "prevControl": {
         "x": 4.029912155223004,
-        "y": 5.441259077904928
+        "y": 2.558740922095072
       },
       "nextControl": {
         "x": 3.1767624734936746,
-        "y": 6.186377428942415
+        "y": 1.813622571057585
       },
       "isLocked": false,
       "linkedName": null
@@ -49,15 +49,15 @@
     {
       "anchor": {
         "x": 3.523121698943662,
-        "y": 7.208913952464789
+        "y": 0.791086047535211
       },
       "prevControl": {
         "x": 2.8393689311638894,
-        "y": 6.7186546027359855
+        "y": 1.2813453972640145
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "L Shoot 2"
+      "linkedName": "RS1"
     }
   ],
   "rotationTargets": [],
@@ -95,13 +95,13 @@
   },
   "goalEndState": {
     "velocity": 2.0,
-    "rotation": -89.87148952056765
+    "rotation": 89.87148952056765
   },
   "reversed": false,
-  "folder": null,
+  "folder": "R Autos",
   "idealStartingState": {
     "velocity": 2.0,
-    "rotation": -90.0
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }

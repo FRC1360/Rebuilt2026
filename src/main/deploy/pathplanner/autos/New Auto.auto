@@ -3,7 +3,38 @@
   "command": {
     "type": "sequential",
     "data": {
-      "commands": []
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RSTART-RC1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RC1-RS1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RS1-RC2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RC2-RTransition1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RTransition1-RS2"
+          }
+        }
+      ]
     }
   },
   "resetOdom": true,

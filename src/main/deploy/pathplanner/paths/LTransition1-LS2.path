@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.4122856405841797,
-        "y": 4.016061702244718
+        "x": 5.803,
+        "y": 4.568570786076889
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.9465789078018285,
-        "y": 4.016061702244718
+        "x": 6.260929713762192,
+        "y": 5.8336566424686795
       },
       "isLocked": false,
-      "linkedName": "Center"
+      "linkedName": "LTransition1"
     },
     {
       "anchor": {
-        "x": 2.47,
-        "y": 4.016061702244718
+        "x": 3.495176652362089,
+        "y": 5.7434274592869725
       },
       "prevControl": {
-        "x": 3.163685161745186,
-        "y": 4.016061702244718
+        "x": 4.581575520833333,
+        "y": 5.637919830178991
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "MidShoot"
+      "linkedName": "LS2"
     }
   ],
   "rotationTargets": [],
@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "EXECUTE_SHOT_ROUTINE_COMMAND",
-      "waypointRelativePos": 0.5413330544933075,
+      "waypointRelativePos": 0.9,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -49,13 +49,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -94.0
+    "rotation": -89.9272056785018
   },
   "reversed": false,
-  "folder": null,
+  "folder": "L Autos",
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": 0.0
+    "velocity": 2.0,
+    "rotation": -90.001
   },
   "useDefaultConstraints": true
 }

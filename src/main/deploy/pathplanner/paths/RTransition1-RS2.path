@@ -3,35 +3,42 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.759962267092136,
-        "y": 4.693698925322769
+        "x": 5.803,
+        "y": 3.431429213923111
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.661167709417288,
-        "y": 4.1918544898631955
+        "x": 6.260929713762192,
+        "y": 2.1663433575313205
       },
       "isLocked": false,
-      "linkedName": "LCenter 3"
+      "linkedName": "RTransition1"
     },
     {
       "anchor": {
-        "x": 5.803,
-        "y": 4.568570786076889
+        "x": 3.495176652362089,
+        "y": 2.2565725407130275
       },
       "prevControl": {
-        "x": 5.6494945584885405,
-        "y": 4.144493559596291
+        "x": 4.581575520833333,
+        "y": 2.362080169821009
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LLoopyEnd 2"
+      "linkedName": "RS2"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "EXECUTE_SHOT_ROUTINE_COMMAND",
+      "waypointRelativePos": 0.9,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 3.0,
@@ -41,14 +48,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 2.0,
-    "rotation": -90.001
+    "velocity": 0,
+    "rotation": 89.9272056785018
   },
   "reversed": false,
-  "folder": null,
+  "folder": "R Autos",
   "idealStartingState": {
     "velocity": 2.0,
-    "rotation": -90.0
+    "rotation": 90.001
   },
   "useDefaultConstraints": true
 }

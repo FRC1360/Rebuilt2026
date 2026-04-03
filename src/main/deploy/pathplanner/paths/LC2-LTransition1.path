@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.462,
-        "y": 7.55
+        "x": 6.759962267092136,
+        "y": 4.694
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.479736728440723,
-        "y": 7.394713312935405
+        "x": 6.661167709417288,
+        "y": 4.1921555645404265
       },
       "isLocked": false,
-      "linkedName": "LStart"
+      "linkedName": "LC2"
     },
     {
       "anchor": {
-        "x": 0.46614542901121336,
-        "y": 5.980669213444643
+        "x": 5.803,
+        "y": 4.568570786076889
       },
       "prevControl": {
-        "x": 0.1011613944934669,
-        "y": 7.953228448122395
+        "x": 5.6494945584885405,
+        "y": 4.144493559596291
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Depot"
+      "linkedName": "LTransition1"
     }
   ],
   "rotationTargets": [],
@@ -41,13 +41,13 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 180.0
+    "velocity": 2.0,
+    "rotation": -90.001
   },
   "reversed": false,
-  "folder": null,
+  "folder": "L Autos",
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 2.0,
     "rotation": -90.0
   },
   "useDefaultConstraints": true

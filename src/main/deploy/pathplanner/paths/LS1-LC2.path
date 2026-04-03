@@ -12,7 +12,7 @@
         "y": 8.257782347248641
       },
       "isLocked": false,
-      "linkedName": "L Shoot 2"
+      "linkedName": "LS1"
     },
     {
       "anchor": {
@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LCenter 3"
+      "linkedName": "LC2"
     }
   ],
   "rotationTargets": [],
@@ -45,7 +45,7 @@
     "rotation": -90.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "L Autos",
   "idealStartingState": {
     "velocity": 2.0,
     "rotation": -89.87148952056765
