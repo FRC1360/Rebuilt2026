@@ -3,59 +3,38 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.8034316591257085,
+        "x": 5.803,
         "y": 4.568570786076889
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.826664169967879,
-        "y": 5.572020930966433
+        "x": 6.260929713762192,
+        "y": 5.8336566424686795
       },
       "isLocked": false,
       "linkedName": "LLoopyEnd 2"
     },
     {
       "anchor": {
-        "x": 5.527324356294014,
-        "y": 7.320292051789907
+        "x": 3.495176652362089,
+        "y": 5.7434274592869725
       },
       "prevControl": {
-        "x": 6.320275632042266,
-        "y": 7.111959503699385
-      },
-      "nextControl": {
-        "x": 4.908271209286971,
-        "y": 7.482936243764672
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 3.835471132924745,
-        "y": 7.426314563118036
-      },
-      "prevControl": {
-        "x": 4.841605184492371,
-        "y": 7.3739706664465965
+        "x": 4.581575520833333,
+        "y": 5.637919830178991
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "LShoot 3"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 1.0022321428571423,
-      "rotationDegrees": 0.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
       "name": "EXECUTE_SHOT_ROUTINE_COMMAND",
-      "waypointRelativePos": 1.7916762939001831,
+      "waypointRelativePos": 0.9,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -70,13 +49,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -0.5536969444041512
+    "rotation": -89.9272056785018
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
-    "velocity": 1.5,
-    "rotation": 90.0
+    "velocity": 2.0,
+    "rotation": -90.001
   },
   "useDefaultConstraints": true
 }

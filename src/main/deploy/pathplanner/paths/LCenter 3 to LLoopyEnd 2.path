@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.471479893945667,
-        "y": 4.568570786076889
+        "x": 6.759962267092136,
+        "y": 4.693698925322769
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.455434751899645,
-        "y": 4.068828298973058
+        "x": 6.661167709417288,
+        "y": 4.1918544898631955
       },
       "isLocked": false,
       "linkedName": "LCenter 3"
     },
     {
       "anchor": {
-        "x": 5.8034316591257085,
+        "x": 5.803,
         "y": 4.568570786076889
       },
       "prevControl": {
-        "x": 5.829249813390315,
-        "y": 4.069237808084879
+        "x": 5.6494945584885405,
+        "y": 4.144493559596291
       },
       "nextControl": null,
       "isLocked": false,
@@ -41,13 +41,13 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 1.5,
-    "rotation": 90.001
+    "velocity": 2.0,
+    "rotation": -90.001
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
-    "velocity": 1.5,
+    "velocity": 2.0,
     "rotation": -90.0
   },
   "useDefaultConstraints": true

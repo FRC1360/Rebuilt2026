@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.835471132924745,
-        "y": 7.426314563118036
+        "x": 3.523121698943662,
+        "y": 7.208913952464789
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.7474092404058235,
-        "y": 7.426314563118036
+        "x": 4.985952888939126,
+        "y": 8.257782347248641
       },
       "isLocked": false,
       "linkedName": "L Shoot 2"
     },
     {
       "anchor": {
-        "x": 6.471479893945667,
-        "y": 4.568570786076889
+        "x": 6.759962267092136,
+        "y": 4.694
       },
       "prevControl": {
-        "x": 6.450713768036247,
-        "y": 6.690624057656314
+        "x": 7.426542097637911,
+        "y": 6.695046764964789
       },
       "nextControl": null,
       "isLocked": false,
@@ -41,14 +41,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 1.5,
+    "velocity": 2.0,
     "rotation": -90.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": -0.5536969444041512
+    "velocity": 2.0,
+    "rotation": -89.87148952056765
   },
   "useDefaultConstraints": true
 }

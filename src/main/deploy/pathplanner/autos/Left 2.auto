@@ -13,13 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LCenter 2 to LLoopyEnd"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "LLoopyEnd to LShoot 2"
+            "pathName": "LCenter2 to LShoot 2"
           }
         },
         {
