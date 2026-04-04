@@ -60,6 +60,9 @@ public class RobotState {
     private InterpolatingDoubleTreeMap turretDistanceToHoodAngleMap;
     private InterpolatingDoubleTreeMap turretDistanceToFlywheelVelocityMap;
     private InterpolatingDoubleTreeMap turretDistanceToTimeOfFlightMap;
+    private InterpolatingDoubleTreeMap turretDistanceToHoodAnglePassingMap;
+    private InterpolatingDoubleTreeMap turretDistanceToFlywheelVelocityPassingMap;
+    private InterpolatingDoubleTreeMap turretDistanceToTimeOfFlightPassingMap;
     private double hoodAngleFudgeFactor;
     private double flywheelSpeedFudgeFactor;
 
@@ -115,6 +118,7 @@ public class RobotState {
         turretDistanceToFlywheelVelocityMap.put(5.052, 63.0);
         turretDistanceToFlywheelVelocityMap.put(5.50, 65.0);
         turretDistanceToFlywheelVelocityMap.put(7.0, 73.567);
+        turretDistanceToFlywheelVelocityMap.put(10.0, 91.0);
 
         turretDistanceToTimeOfFlightMap = new InterpolatingDoubleTreeMap();
         turretDistanceToTimeOfFlightMap.put(1.53, 0.955);
@@ -127,6 +131,21 @@ public class RobotState {
         turretDistanceToTimeOfFlightMap.put(5.052, 1.240);
         turretDistanceToTimeOfFlightMap.put(5.50, 1.280);
         turretDistanceToTimeOfFlightMap.put(7.0, 1.385);
+        turretDistanceToTimeOfFlightMap.put(10.0, 1.66);
+
+        turretDistanceToHoodAnglePassingMap = new InterpolatingDoubleTreeMap();
+        turretDistanceToHoodAnglePassingMap.put(4.6, 57.0);
+        turretDistanceToHoodAnglePassingMap.put(8.5, 57.0);
+        turretDistanceToHoodAnglePassingMap.put(12.0, 57.0);
+
+        turretDistanceToFlywheelVelocityPassingMap = new InterpolatingDoubleTreeMap();
+        turretDistanceToFlywheelVelocityPassingMap.put(4.6, 50.0);
+        turretDistanceToFlywheelVelocityPassingMap.put(8.5, 75.0);
+        turretDistanceToFlywheelVelocityPassingMap.put(12.0, 105.0);
+
+        turretDistanceToTimeOfFlightPassingMap = new InterpolatingDoubleTreeMap();
+        turretDistanceToTimeOfFlightPassingMap.put(4.6, 0.75);
+        turretDistanceToTimeOfFlightPassingMap.put(8.5, 0.928);
 
         currentIntakeState = IntakeConstants.INTAKE_DEPLOYED_BY_DEFAULT;
 
@@ -238,6 +257,13 @@ public class RobotState {
                 poseToSetAngleFrom.getTranslation().getDistance(this.getTurretOdomPose().getTranslation()))
                 + hoodAngleFudgeFactor;
     }
+    public double getHoodAngleFromPassingGoalPose(Pose2d poseToSetAngleFrom) {
+        // Get distance between turret position and goal position, plug that into the
+        // map
+        return turretDistanceToHoodAnglePassingMap.get(
+                poseToSetAngleFrom.getTranslation().getDistance(this.getTurretOdomPose().getTranslation()))
+                + hoodAngleFudgeFactor;
+    }
 
     public Command incrementHoodFudgeFactor = Commands.runOnce(
             () -> this.hoodAngleFudgeFactor += HoodConstants.FUDGE_INCREMENT_VALUE);
@@ -250,6 +276,13 @@ public class RobotState {
         // Get distance between turret position and goal position, plug that into the
         // map
         return turretDistanceToFlywheelVelocityMap.get(
+                poseToSetAngleFrom.getTranslation().getDistance(this.getTurretOdomPose().getTranslation()))
+                + flywheelSpeedFudgeFactor;
+    }
+    public double getFlywheelVelocityFromPassingGoalPose(Pose2d poseToSetAngleFrom) {
+        // Get distance between turret position and goal position, plug that into the
+        // map
+        return turretDistanceToFlywheelVelocityPassingMap.get(
                 poseToSetAngleFrom.getTranslation().getDistance(this.getTurretOdomPose().getTranslation()))
                 + flywheelSpeedFudgeFactor;
     }
@@ -366,6 +399,65 @@ public class RobotState {
                     .sqrt((displacement_x * displacement_x) + (displacement_y * displacement_y));
 
             error = current_time_guess - turretDistanceToTimeOfFlightMap.get(distance_derived_from_current_time);
+            error_derivative = 1 + (((displacement_x * turret_velocity_x) + (displacement_y * turret_velocity_y))
+                    / (distance_derived_from_current_time * horizontal_projectile_velocity));
+
+            next_time_guess = current_time_guess - (error / error_derivative);
+
+            outputData.setIteratedTranslationWithIndex(iteration, goalTranslationOnField
+                    .minus(turretVelocityOnFieldAsTranslation.times(current_time_guess)));
+
+            current_time_guess = next_time_guess;
+        }
+
+        outputData.setGoalTranslation(goalTranslationOnField
+                .minus(turretVelocityOnFieldAsTranslation.times(current_time_guess)));
+
+        return outputData;
+    }
+    public ShootOnTheMoveOutputPoses calculateParametersForPassOnTheMove(Translation2d goalTranslationOnField) {
+
+        ShootOnTheMoveOutputPoses outputData = new ShootOnTheMoveOutputPoses();
+
+        Translation2d turretTranslationOnField = this.getTurretOdomPose().getTranslation();
+        Translation2d turretVelocityOnFieldAsTranslation = this.getFieldRelativeRobotVelocityVector()
+                .plus(this.getFieldRelativeTurretRotationalVelocityVector());
+
+        double displacement_x, displacement_y, distance_derived_from_current_time;
+
+        double turret_velocity_x, turret_velocity_y;
+        turret_velocity_x = turretVelocityOnFieldAsTranslation.getX();
+        turret_velocity_y = turretVelocityOnFieldAsTranslation.getY();
+
+        // Use Speed = Distance / Time
+        double initial_distance_to_target = goalTranslationOnField.getDistance(turretTranslationOnField);
+        double horizontal_projectile_velocity = initial_distance_to_target
+                / turretDistanceToTimeOfFlightPassingMap.get(initial_distance_to_target);
+
+        Translation2d projectileVelocityOnFieldAsTranslation;
+        projectileVelocityOnFieldAsTranslation = new Translation2d(
+                horizontal_projectile_velocity,
+                PhotonUtils.getYawToPose(new Pose2d(turretTranslationOnField, new Rotation2d()),
+                        new Pose2d(goalTranslationOnField, new Rotation2d())));
+
+        double current_time_guess, next_time_guess;
+
+        double error, error_derivative;
+
+        // Time = Distance / Speed
+        current_time_guess = goalTranslationOnField.getDistance(turretTranslationOnField) /
+                projectileVelocityOnFieldAsTranslation.plus(turretVelocityOnFieldAsTranslation)
+                        .getDistance(new Translation2d(0, 0));
+
+        for (int iteration = 0; iteration < ShootingConstants.MAX_ITERATION_COUNT; iteration++) {
+            displacement_x = goalTranslationOnField.getX() - turretTranslationOnField.getX()
+                    + (turretVelocityOnFieldAsTranslation.getX() * current_time_guess);
+            displacement_y = goalTranslationOnField.getY() - turretTranslationOnField.getY()
+                    + (turretVelocityOnFieldAsTranslation.getY() * current_time_guess);
+            distance_derived_from_current_time = Math
+                    .sqrt((displacement_x * displacement_x) + (displacement_y * displacement_y));
+
+            error = current_time_guess - turretDistanceToTimeOfFlightPassingMap.get(distance_derived_from_current_time);
             error_derivative = 1 + (((displacement_x * turret_velocity_x) + (displacement_y * turret_velocity_y))
                     / (distance_derived_from_current_time * horizontal_projectile_velocity));
 

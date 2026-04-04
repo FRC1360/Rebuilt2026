@@ -52,7 +52,7 @@ public final class Constants {
         //CHANGED THIS BTW
         public static final InvertedValue ROLLER_VORTEX_INVERTED = InvertedValue.CounterClockwise_Positive;
 
-        public static final double ROLLER_ACTIVATED_SPEED = 0.5;
+        public static final double ROLLER_ACTIVATED_SPEED = 0.7;
 
         // Pivot Constants
         public static final int PIVOT_VORTEX_CAN_ID = 30;

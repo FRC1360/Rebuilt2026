@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.SetShooterFromCompensatedPoseCommand;
+import frc.robot.commands.SetShooterFromPassingCompensatedPoseCommand;
 import frc.robot.commands.flywheel.SetFlywheelVelocityCommand;
 import frc.robot.commands.flywheel.SetFlywheelVelocityFromNetworkTables;
 import frc.robot.commands.flywheel.SetFlywheelVelocityFromPoseCommand;
@@ -123,6 +124,8 @@ public class RobotContainer {
             e.printStackTrace();
         }
 
+        leftSideTurretedAuto1 = new PathPlannerAuto("L1");
+
         pathConstraints = new PathConstraints(
                 3.0,
                 3.0,
@@ -199,11 +202,11 @@ public class RobotContainer {
                 new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem, m_flywheelSubsystem,
                         FieldConstants.RED_ALLIANCE_HUB_POSE),
                 robotState.isBlueAlliance)
-                .alongWith(Commands.none().until(shooterAtSetpoints))
+                .alongWith(Commands.none().until(shooterAtSetpoints)
+                        .andThen(new ActivateAutoUnjammingIndex(m_indexSubsystem)))
                 .until(leftSideTurretedAuto1.event("STOP_TURRETED_SHOOTING"));
 
         /* Configure stuff for right side */
-        leftSideTurretedAuto1 = new PathPlannerAuto("L1");
         leftSideTurretedAuto1.event("DEPLOY_INTAKE_RUN_ROLLERS").onTrue(
                 new DeployIntakeCommand(m_intakeSubsystem, () -> true));
         leftSideTurretedAuto1.event("DEPLOY_INTAKE_STOP_ROLLERS").onTrue(
@@ -340,15 +343,15 @@ public class RobotContainer {
                 robotState.isBlueAlliance);
         Command prepareToPass = Commands.either(
                 Commands.either(
-                        new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
+                        new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
                                 m_flywheelSubsystem, FieldConstants.BLUE_HUMAN_SIDE_PASS_POSE),
-                        new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
+                        new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
                                 m_flywheelSubsystem, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE),
                         () -> robotState.getTurretOdomPose().getY() < FieldConstants.BLUE_ALLIANCE_HUB_POSE.getY()),
                 Commands.either(
-                        new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
+                        new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
                                 m_flywheelSubsystem, FieldConstants.RED_HUMAN_SIDE_PASS_POSE),
-                        new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
+                        new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
                                 m_flywheelSubsystem, FieldConstants.RED_DEPOT_SIDE_PASS_POSE),
                         () -> robotState.getTurretOdomPose().getY() > FieldConstants.RED_ALLIANCE_HUB_POSE.getY()),
                 robotState.isBlueAlliance);
@@ -410,9 +413,9 @@ public class RobotContainer {
                             }
                         })));
         shootingThroughNetworkTablesInput.whileTrue(Commands.parallel(
-                new SetHoodAngleFromNetworkTables(m_HoodSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
+                new SetHoodAngleFromNetworkTables(m_HoodSubsystem, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE),
                 new SetFlywheelVelocityFromNetworkTables(m_flywheelSubsystem),
-                new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE)));
+                new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE)));
 
         // Backdriving
         Command backdriveIntakeWhileKeepingState = Commands.either(

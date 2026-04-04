@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.748803591712667,
-        "y": 4.388214291892184
+        "x": 7.76770168076783,
+        "y": 4.098353651395481
       },
       "isLocked": false,
       "linkedName": "LC1"
     },
     {
       "anchor": {
-        "x": 6.078746469703638,
-        "y": 4.932056099618544
+        "x": 6.673895105531296,
+        "y": 5.029623476164484
       },
       "prevControl": {
-        "x": 6.713493925510749,
-        "y": 4.363468956681541
+        "x": 6.673895105531296,
+        "y": 4.177452324477886
       },
       "nextControl": null,
       "isLocked": false,
@@ -32,12 +32,6 @@
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
-    {
-      "name": "DEPLOY_INTAKE_STOP_ROLLERS",
-      "waypointRelativePos": 0.2735021424349882,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
     {
       "name": "PREPARE_TO_SHOOT",
       "waypointRelativePos": 0.45055777186761226,
@@ -55,7 +49,7 @@
   },
   "goalEndState": {
     "velocity": 4.0,
-    "rotation": -30.984073557042926
+    "rotation": -179.7768983677714
   },
   "reversed": false,
   "folder": "L1",

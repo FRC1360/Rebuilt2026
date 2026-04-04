@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.908571926349765,
-        "y": 5.330242856880869
+        "x": 3.0061649381368265,
+        "y": 5.545884222616448
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.3200436262513062,
-        "y": 5.418554774947971
+        "x": 1.4935852779294032,
+        "y": 5.576202636008007
       },
       "isLocked": false,
       "linkedName": "LBE2"
@@ -20,27 +20,22 @@
         "y": 7.579919628447769
       },
       "prevControl": {
-        "x": 1.9692403621136636,
-        "y": 7.579919628447769
+        "x": 1.463167132916885,
+        "y": 7.500125375269845
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "LS1"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.15688634072580648,
-      "rotationDegrees": 152.32382454141967
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.11310073937153402,
-      "maxWaypointRelativePos": 0.6785608747044916,
+      "minWaypointRelativePos": 0.3454861111111108,
+      "maxWaypointRelativePos": 0.762309766548463,
       "constraints": {
-        "maxVelocity": 0.45,
+        "maxVelocity": 0.35,
         "maxAcceleration": 4.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -53,13 +48,13 @@
   "eventMarkers": [
     {
       "name": "EXECUTE_TURRETED_SHOOTING",
-      "waypointRelativePos": 0.16626957742316786,
+      "waypointRelativePos": 0.3959072104018912,
       "endWaypointRelativePos": null,
       "command": null
     },
     {
       "name": "STOP_TURRETED_SHOOTING",
-      "waypointRelativePos": 0.6541906767139476,
+      "waypointRelativePos": 0.798038563829787,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -80,7 +75,7 @@
   "folder": "L1",
   "idealStartingState": {
     "velocity": 2.0,
-    "rotation": -27.88667227718826
+    "rotation": -178.26823036832621
   },
   "useDefaultConstraints": true
 }
