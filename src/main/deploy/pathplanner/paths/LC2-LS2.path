@@ -16,22 +16,26 @@
     },
     {
       "anchor": {
-        "x": 2.975559620745305,
-        "y": 5.5515515423268775
+        "x": 2.659098890101892,
+        "y": 5.717871406477439
       },
       "prevControl": {
-        "x": 4.414025867444252,
-        "y": 5.90450351195716
+        "x": 4.097565136800845,
+        "y": 6.070823376107722
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LS2"
     }
   ],
   "rotationTargets": [
     {
       "waypointRelativePos": 0.5,
       "rotationDegrees": 27.580883283444827
+    },
+    {
+      "waypointRelativePos": 0.7519219995019919,
+      "rotationDegrees": 29.521722282820544
     }
   ],
   "constraintZones": [],
@@ -47,7 +51,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 36.1889401293415
+    "rotation": -172.6809232178353
   },
   "reversed": false,
   "folder": null,

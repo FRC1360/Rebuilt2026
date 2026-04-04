@@ -79,9 +79,7 @@ public class RobotContainer {
     private final SwerveTelemetry swerveLogger = new SwerveTelemetry(DriveCommands.MAX_DRIVE_TRANSLATIONAL_SPEED);
 
     public SendableChooser<Command> autoChooser;
-    private PathPlannerAuto leftSideBasicAuto;
-    private PathPlannerAuto rightSideBasicAuto;
-    private PathPlannerAuto middleBasicAuto;
+    private PathPlannerAuto leftSideTurretedAuto1;
     private PathPlannerPath exitLeft;
     private PathPlannerPath enterLeft;
     private PathPlannerPath exitRight;
@@ -126,14 +124,16 @@ public class RobotContainer {
         }
 
         pathConstraints = new PathConstraints(
-            3.0,
-            3.0,
-            Units.degreesToRadians(540), 
-            Units.degreesToRadians(720)
-        );
+                3.0,
+                3.0,
+                Units.degreesToRadians(540),
+                Units.degreesToRadians(720));
 
-        Trigger shooterAtSetpoints = m_flywheelSubsystem.flywheelAtTarget.and(m_HoodSubsystem.hoodAtTarget);
-        Command runShotSequence = Commands.either(
+        Trigger shooterAtSetpoints = m_flywheelSubsystem.flywheelAtTarget
+                .and(m_HoodSubsystem.hoodAtTarget)
+                .and(m_TurretSubsystem.turretAtTarget);
+
+        Command runStaticShotSequence = Commands.either(
                 Commands.sequence(
                         new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
                                 FieldConstants.BLUE_ALLIANCE_HUB_POSE)
@@ -187,35 +187,33 @@ public class RobotContainer {
                                 .alongWith(new RetractIntakeCommand(m_intakeSubsystem))
                                 .withTimeout(3.0)),
                 robotState.isBlueAlliance);
+        Command prepareTurretedShot = Commands.either(
+                new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem, m_flywheelSubsystem,
+                        FieldConstants.BLUE_ALLIANCE_HUB_POSE),
+                new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem, m_flywheelSubsystem,
+                        FieldConstants.RED_ALLIANCE_HUB_POSE),
+                robotState.isBlueAlliance);
+        Command executeTurretedShot = Commands.either(
+                new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem, m_flywheelSubsystem,
+                        FieldConstants.BLUE_ALLIANCE_HUB_POSE),
+                new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem, m_flywheelSubsystem,
+                        FieldConstants.RED_ALLIANCE_HUB_POSE),
+                robotState.isBlueAlliance)
+                .alongWith(Commands.none().until(shooterAtSetpoints))
+                .until(leftSideTurretedAuto1.event("STOP_TURRETED_SHOOTING"));
 
         /* Configure stuff for right side */
-        rightSideBasicAuto = new PathPlannerAuto("Right Auto");
-        rightSideBasicAuto.event("DEPLOY_AND_RUN_INTAKE_TRIGGER")
-                .onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> true));
-        rightSideBasicAuto.event("DEPLOY_INTAKE_STOP_ROLLERS_TRIGGER")
-                .onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> false));
-        rightSideBasicAuto.event("EXECUTE_SHOT_ROUTINE_COMMAND").onTrue(runShotSequence);
-
-        /* Configure stuff for left side */
-        leftSideBasicAuto = new PathPlannerAuto("Left Auto");
-        leftSideBasicAuto.event("DEPLOY_AND_RUN_INTAKE_TRIGGER")
-                .onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> true));
-        leftSideBasicAuto.event("DEPLOY_INTAKE_STOP_ROLLERS_TRIGGER")
-                .onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> false));
-        leftSideBasicAuto.event("EXECUTE_SHOT_ROUTINE_COMMAND").onTrue(runShotSequence);
-
-        middleBasicAuto = new PathPlannerAuto("Center Auto");
-        middleBasicAuto.event("DEPLOY_AND_RUN_INTAKE_TRIGGER")
-                .onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> true));
-        middleBasicAuto.event("DEPLOY_INTAKE_STOP_ROLLERS_TRIGGER")
-                .onTrue(new DeployIntakeCommand(m_intakeSubsystem, () -> false));
-        middleBasicAuto.event("EXECUTE_SHOT_ROUTINE_COMMAND").onTrue(runShotSequence);
+        leftSideTurretedAuto1 = new PathPlannerAuto("L1");
+        leftSideTurretedAuto1.event("DEPLOY_INTAKE_RUN_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        leftSideTurretedAuto1.event("DEPLOY_INTAKE_STOP_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> false));
+        leftSideTurretedAuto1.event("PREPARE_TO_SHOOT").onTrue(prepareTurretedShot);
+        leftSideTurretedAuto1.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
 
         autoChooser = new SendableChooser<Command>();
         autoChooser.setDefaultOption("Do Nothing", Commands.none());
-        autoChooser.addOption("Left Side Neutral Zone", leftSideBasicAuto);
-        autoChooser.addOption("Right Side Neutral Zone", rightSideBasicAuto);
-        autoChooser.addOption("Center Fire Preload", middleBasicAuto);
+        autoChooser.addOption("Left Side Turreted 1", leftSideTurretedAuto1);
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
@@ -291,20 +289,17 @@ public class RobotContainer {
                                 Rotation2d.fromDegrees(90.0)),
                         () -> robotState.getTurretOdomPose().getY() > FieldConstants.RED_ALLIANCE_HUB_POSE.getY()),
                 robotState.isBlueAlliance);
-        
+
         Command trenchRunCommand = Commands.either(
-            Commands.either(
-                AutoBuilder.pathfindThenFollowPath(exitRight, pathConstraints),
-                AutoBuilder.pathfindThenFollowPath(enterRight, pathConstraints),
-                m_fieldZoneManager.inAlliance
-            ).repeatedly(),
-            Commands.either(
-                AutoBuilder.pathfindThenFollowPath(exitLeft, pathConstraints),
-                AutoBuilder.pathfindThenFollowPath(enterLeft, pathConstraints),
-                m_fieldZoneManager.inAlliance
-            ).repeatedly(),
-            m_fieldZoneManager.inHumanPlayer
-        ).repeatedly();
+                Commands.either(
+                        AutoBuilder.pathfindThenFollowPath(exitRight, pathConstraints),
+                        AutoBuilder.pathfindThenFollowPath(enterRight, pathConstraints),
+                        m_fieldZoneManager.inAlliance).repeatedly(),
+                Commands.either(
+                        AutoBuilder.pathfindThenFollowPath(exitLeft, pathConstraints),
+                        AutoBuilder.pathfindThenFollowPath(enterLeft, pathConstraints),
+                        m_fieldZoneManager.inAlliance).repeatedly(),
+                m_fieldZoneManager.inHumanPlayer).repeatedly();
         trenchRun.whileTrue(trenchRunCommand);
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);

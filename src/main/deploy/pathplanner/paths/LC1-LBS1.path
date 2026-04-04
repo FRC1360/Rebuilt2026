@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.783394311179578,
-        "y": 4.5263101067341545
+        "x": 7.76770168076783,
+        "y": 5.029623476164484
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.764496222124414,
-        "y": 3.8849009224618545
+        "x": 7.748803591712667,
+        "y": 4.388214291892184
       },
       "isLocked": false,
       "linkedName": "LC1"
@@ -31,7 +31,20 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "DEPLOY_INTAKE_STOP_ROLLERS",
+      "waypointRelativePos": 0.2735021424349882,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "PREPARE_TO_SHOOT",
+      "waypointRelativePos": 0.45055777186761226,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,

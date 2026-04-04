@@ -90,6 +90,7 @@ public class RobotState {
         turretDistanceToHoodAngleMap.put(4.47, 59.5);
         turretDistanceToHoodAngleMap.put(5.052, 58.5);
         turretDistanceToHoodAngleMap.put(5.50, 57.0);
+        turretDistanceToHoodAngleMap.put(7.0, 49.983);
 
         turretDistanceToFlywheelVelocityMap = new InterpolatingDoubleTreeMap();
         // turretDistanceToFlywheelVelocityMap.put(1.423, 50.0);
@@ -113,6 +114,7 @@ public class RobotState {
         turretDistanceToFlywheelVelocityMap.put(4.47, 58.0);
         turretDistanceToFlywheelVelocityMap.put(5.052, 63.0);
         turretDistanceToFlywheelVelocityMap.put(5.50, 65.0);
+        turretDistanceToFlywheelVelocityMap.put(7.0, 73.567);
 
         turretDistanceToTimeOfFlightMap = new InterpolatingDoubleTreeMap();
         turretDistanceToTimeOfFlightMap.put(1.53, 0.955);
@@ -124,6 +126,7 @@ public class RobotState {
         turretDistanceToTimeOfFlightMap.put(4.47, 1.113);
         turretDistanceToTimeOfFlightMap.put(5.052, 1.240);
         turretDistanceToTimeOfFlightMap.put(5.50, 1.280);
+        turretDistanceToTimeOfFlightMap.put(7.0, 1.385);
 
         currentIntakeState = IntakeConstants.INTAKE_DEPLOYED_BY_DEFAULT;
 

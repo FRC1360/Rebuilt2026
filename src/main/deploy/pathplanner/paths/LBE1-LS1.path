@@ -38,9 +38,9 @@
     {
       "name": "Constraints Zone",
       "minWaypointRelativePos": 0.11310073937153402,
-      "maxWaypointRelativePos": 0.8489992490757855,
+      "maxWaypointRelativePos": 0.6785608747044916,
       "constraints": {
-        "maxVelocity": 0.6,
+        "maxVelocity": 0.45,
         "maxAcceleration": 4.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -50,7 +50,20 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "EXECUTE_TURRETED_SHOOTING",
+      "waypointRelativePos": 0.16626957742316786,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "STOP_TURRETED_SHOOTING",
+      "waypointRelativePos": 0.6541906767139476,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,
