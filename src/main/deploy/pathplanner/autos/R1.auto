@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RSTART-RC1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RC1-RBS1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RB1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RBE1-RS1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RS1-RC2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RC2-RS2"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

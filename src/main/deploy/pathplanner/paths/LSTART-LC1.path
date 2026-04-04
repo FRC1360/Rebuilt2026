@@ -52,7 +52,7 @@
     "rotation": -90.15167933523871
   },
   "reversed": false,
-  "folder": null,
+  "folder": "L1",
   "idealStartingState": {
     "velocity": 0.0,
     "rotation": -89.93075519103526

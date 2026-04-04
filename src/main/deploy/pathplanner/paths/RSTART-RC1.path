@@ -3,35 +3,42 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.078746469703638,
-        "y": 4.932056099618544
+        "x": 4.50027352919601,
+        "y": 0.46414575997652496
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.045579652700772,
-        "y": 5.857534986194015
+        "x": 8.06235819271793,
+        "y": 0.46414575997652496
       },
       "isLocked": false,
-      "linkedName": "LBS1"
+      "linkedName": "RSTART"
     },
     {
       "anchor": {
-        "x": 2.908571926349765,
-        "y": 5.330242856880869
+        "x": 7.76770168076783,
+        "y": 2.970376523835516
       },
       "prevControl": {
-        "x": 4.107684577379359,
-        "y": 5.2635799348640635
+        "x": 7.704574021583559,
+        "y": 0.8265290509775371
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LBE2"
+      "linkedName": "RC1"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "DEPLOY_INTAKE_RUN_ROLLERS",
+      "waypointRelativePos": 0.025773862293144212,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,
@@ -41,14 +48,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 2.0,
-    "rotation": -27.88667227718826
+    "velocity": 4.0,
+    "rotation": 90.15167933523871
   },
   "reversed": false,
-  "folder": "L1",
+  "folder": "R1",
   "idealStartingState": {
-    "velocity": 4.0,
-    "rotation": -30.984073557042926
+    "velocity": 0.0,
+    "rotation": 89.93075519103526
   },
   "useDefaultConstraints": true
 }

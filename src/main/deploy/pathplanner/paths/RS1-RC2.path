@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.27514501723885,
-        "y": 7.579919628447769
+        "x": 4.2822619571596245,
+        "y": 0.4803900748239426
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.658634262182404,
-        "y": 7.579919628447769
+        "x": 5.665751202103179,
+        "y": 0.4803900748239426
       },
       "isLocked": false,
-      "linkedName": "LS1"
+      "linkedName": "RS1"
     },
     {
       "anchor": {
         "x": 5.75,
-        "y": 6.353996570569248
+        "y": 1.646003429430752
       },
       "prevControl": {
         "x": 5.75,
-        "y": 7.238523107743051
+        "y": 0.761476892256949
       },
       "nextControl": {
         "x": 5.75,
-        "y": 4.981043566262262
+        "y": 3.018956433737738
       },
       "isLocked": false,
       "linkedName": null
@@ -33,15 +33,15 @@
     {
       "anchor": {
         "x": 5.75,
-        "y": 4.085220666446596
+        "y": 3.914779333553404
       },
       "prevControl": {
         "x": 5.75,
-        "y": 5.7517071942404225
+        "y": 2.2482928057595775
       },
       "nextControl": {
         "x": 5.75,
-        "y": 2.41873413865277
+        "y": 5.58126586134723
       },
       "isLocked": false,
       "linkedName": null
@@ -49,21 +49,21 @@
     {
       "anchor": {
         "x": 6.970856899207746,
-        "y": 3.849115179357394
+        "y": 4.150884820642606
       },
       "prevControl": {
         "x": 6.970856899207746,
-        "y": 2.453071954383062
+        "y": 5.546928045616938
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LC2"
+      "linkedName": "RC2"
     }
   ],
   "rotationTargets": [
     {
       "waypointRelativePos": 2.0254725302419336,
-      "rotationDegrees": -89.62763698043116
+      "rotationDegrees": 89.62763698043116
     }
   ],
   "constraintZones": [],
@@ -79,13 +79,13 @@
   },
   "goalEndState": {
     "velocity": 4.0,
-    "rotation": 89.7952865637623
+    "rotation": -89.7952865637623
   },
   "reversed": false,
-  "folder": "L1",
+  "folder": "R1",
   "idealStartingState": {
     "velocity": 4.0,
-    "rotation": -89.61989609670069
+    "rotation": 89.61989609670069
   },
   "useDefaultConstraints": true
 }
