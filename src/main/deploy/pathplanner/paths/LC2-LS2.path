@@ -3,38 +3,43 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.839705128205129,
-        "y": 0.65
+        "x": 6.970856899207746,
+        "y": 3.849115179357394
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.8619598220997435,
-        "y": 0.65
+        "x": 6.970856899207746,
+        "y": 5.164447268461558
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LC2"
     },
     {
       "anchor": {
-        "x": 3.5838333333333345,
-        "y": 0.65
+        "x": 2.975559620745305,
+        "y": 5.5515515423268775
       },
       "prevControl": {
-        "x": 3.297019421986311,
-        "y": 0.65
+        "x": 4.414025867444252,
+        "y": 5.90450351195716
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 27.580883283444827
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,13 +47,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 36.1889401293415
   },
   "reversed": false,
-  "folder": "Trench Run Paths",
+  "folder": null,
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": -90.0
+    "velocity": 4.0,
+    "rotation": 89.7952865637623
   },
   "useDefaultConstraints": true
 }

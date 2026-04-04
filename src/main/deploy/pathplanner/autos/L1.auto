@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LSTART-LC1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LC1-LBS1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LB1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LBE1-LS1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LS1-LC2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LC2-LS2"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
