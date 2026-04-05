@@ -15,8 +15,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -65,9 +64,6 @@ public class RobotContainer {
     private final FlywheelSubsystem m_flywheelSubsystem = new FlywheelSubsystem();
     private final HoodSubsystem m_HoodSubsystem = new HoodSubsystem();
     private final TurretSubsystem m_TurretSubsystem = new TurretSubsystem();
-    private final Timer turretTimer = new Timer();
-    private final Timer hoodTimer = new Timer();
-    private final Timer flywheelTimer = new Timer();
 
     // Slow down speed when intaking and/or shooting
     private static final double SLOW_DRIVE_TRANSLATIONAL_MULTIPLIER = 0.3;
@@ -77,11 +73,11 @@ public class RobotContainer {
 
     public SendableChooser<Command> autoChooser;
     private PathPlannerAuto leftSideTurretedAuto1;
-    private PathPlannerPath exitLeft;
-    private PathPlannerPath enterLeft;
-    private PathPlannerPath exitRight;
-    private PathPlannerPath enterRight;
-    private PathConstraints pathConstraints;
+    // private PathPlannerPath exitLeft;
+    // private PathPlannerPath enterLeft;
+    // private PathPlannerPath exitRight;
+    // private PathPlannerPath enterRight;
+    // private PathConstraints pathConstraints;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -99,34 +95,30 @@ public class RobotContainer {
 
         // Run warmup command for pathplanner as per CTRE example
         CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
-
-        SmartDashboard.putNumber("turret time to pose", turretTimer.get());
-        SmartDashboard.putNumber("hood time to pose", hoodTimer.get());
-        SmartDashboard.putNumber("flywheel time to pose", flywheelTimer.get());
     }
 
     private void configureAllAutos() {
 
-        try {
-            enterLeft = PathPlannerPath.fromPathFile("Enter Alliance Left");
-            enterRight = PathPlannerPath.fromPathFile("Enter Alliance Right");
-            exitLeft = PathPlannerPath.fromPathFile("Leave Alliance Left");
-            exitRight = PathPlannerPath.fromPathFile("Leave Alliance Right");
-        } catch (FileVersionException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        // try {
+        //     enterLeft = PathPlannerPath.fromPathFile("Enter Alliance Left");
+        //     enterRight = PathPlannerPath.fromPathFile("Enter Alliance Right");
+        //     exitLeft = PathPlannerPath.fromPathFile("Leave Alliance Left");
+        //     exitRight = PathPlannerPath.fromPathFile("Leave Alliance Right");
+        // } catch (FileVersionException e) {
+        //     e.printStackTrace();
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // } catch (ParseException e) {
+        //     e.printStackTrace();
+        // }
 
         leftSideTurretedAuto1 = new PathPlannerAuto("L1");
 
-        pathConstraints = new PathConstraints(
-                3.0,
-                3.0,
-                Units.degreesToRadians(540),
-                Units.degreesToRadians(720));
+        // pathConstraints = new PathConstraints(
+                // 3.0,
+                // 3.0,
+                // Units.degreesToRadians(540),
+                // Units.degreesToRadians(720));
 
         Trigger shooterAtSetpoints = m_flywheelSubsystem.flywheelAtTarget
                 .and(m_HoodSubsystem.hoodAtTarget)
@@ -207,49 +199,34 @@ public class RobotContainer {
         Command joystickDriveAtShootOnTheMoveSpeed = DriveCommands.joystickDriveCommand(
                 drivetrain, m_controller,
                 SLOW_DRIVE_TRANSLATIONAL_MULTIPLIER, SLOW_DRIVE_ANGULAR_MULTIPLIER);
-        Command joystickDriveWhileFacingHub = Commands.either(
-                DriveCommands.joystickDriveFacingPoseCommand(drivetrain, m_controller,
-                        SLOW_DRIVE_TRANSLATIONAL_MULTIPLIER, FieldConstants.BLUE_ALLIANCE_HUB_POSE,
-                        Rotation2d.fromDegrees(-90.0))
-                        .until(robotState.isBlueAlliance.negate()),
-                DriveCommands.joystickDriveFacingPoseCommand(drivetrain, m_controller,
-                        SLOW_DRIVE_TRANSLATIONAL_MULTIPLIER, FieldConstants.RED_ALLIANCE_HUB_POSE,
-                        Rotation2d.fromDegrees(90.0))
-                        .until(robotState.isBlueAlliance),
-                robotState.isBlueAlliance);
-        Command joystickDriveWhilePassing = Commands.either(
-                Commands.either(
-                        DriveCommands.joystickDriveFacingPoseCommand(drivetrain, m_controller,
-                                1.0, FieldConstants.BLUE_HUMAN_SIDE_PASS_POSE,
-                                Rotation2d.fromDegrees(-90.0)),
-                        DriveCommands.joystickDriveFacingPoseCommand(drivetrain, m_controller,
-                                1.0, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE,
-                                Rotation2d.fromDegrees(-90.0)),
-                        () -> robotState.getTurretOdomPose().getY() < FieldConstants.BLUE_ALLIANCE_HUB_POSE.getY()),
-                Commands.either(
-                        DriveCommands.joystickDriveFacingPoseCommand(drivetrain, m_controller,
-                                1.0, FieldConstants.RED_HUMAN_SIDE_PASS_POSE,
-                                Rotation2d.fromDegrees(90.0)),
-                        DriveCommands.joystickDriveFacingPoseCommand(drivetrain, m_controller,
-                                1.0, FieldConstants.RED_DEPOT_SIDE_PASS_POSE,
-                                Rotation2d.fromDegrees(90.0)),
-                        () -> robotState.getTurretOdomPose().getY() > FieldConstants.RED_ALLIANCE_HUB_POSE.getY()),
-                robotState.isBlueAlliance);
 
-        Command trenchRunCommand = Commands.either(
-                Commands.either(
-                        AutoBuilder.pathfindThenFollowPath(exitRight, pathConstraints),
-                        AutoBuilder.pathfindThenFollowPath(enterRight, pathConstraints),
-                        m_fieldZoneManager.inAlliance).repeatedly(),
-                Commands.either(
-                        AutoBuilder.pathfindThenFollowPath(exitLeft, pathConstraints),
-                        AutoBuilder.pathfindThenFollowPath(enterLeft, pathConstraints),
-                        m_fieldZoneManager.inAlliance).repeatedly(),
-                m_fieldZoneManager.inHumanPlayer).repeatedly();
-        trenchRun.whileTrue(trenchRunCommand);
+        Trigger isTurnInputFacingRight = new Trigger(() -> m_controller.getRightX() > 0);
+        Command joystickDriveWithRightSideSweep = DriveCommands.joystickDriveWithCenterOfRotationCommand(
+                drivetrain, m_controller,
+                1.0, 1.0, new Translation2d(0.275, -0.33));
+        Command joystickDriveWithLeftSideSweep = DriveCommands.joystickDriveWithCenterOfRotationCommand(
+                drivetrain, m_controller,
+                1.0, 1.0, new Translation2d(0.275, 0.33));
+        Command joystickDriveWhileIntaking = Commands.either(
+            joystickDriveWithRightSideSweep.until(isTurnInputFacingRight.negate()), 
+            joystickDriveWithLeftSideSweep.until(isTurnInputFacingRight), 
+            isTurnInputFacingRight).repeatedly();
+
+        // Command trenchRunCommand = Commands.either(
+        //         Commands.either(
+        //                 AutoBuilder.pathfindThenFollowPath(exitRight, pathConstraints),
+        //                 AutoBuilder.pathfindThenFollowPath(enterRight, pathConstraints),
+        //                 m_fieldZoneManager.inAlliance).repeatedly(),
+        //         Commands.either(
+        //                 AutoBuilder.pathfindThenFollowPath(exitLeft, pathConstraints),
+        //                 AutoBuilder.pathfindThenFollowPath(enterLeft, pathConstraints),
+        //                 m_fieldZoneManager.inAlliance).repeatedly(),
+        //         m_fieldZoneManager.inHumanPlayer).repeatedly();
+        // trenchRun.whileTrue(trenchRunCommand);
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
         shootingIntoHubWithTurretInput.whileTrue(joystickDriveAtShootOnTheMoveSpeed);
+        intakeRollerInput.whileTrue(joystickDriveWhileIntaking);
 
         // Intaking
         Command setIntakePivotBasedOnState = Commands.either(
@@ -283,7 +260,7 @@ public class RobotContainer {
                         new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
                                 m_flywheelSubsystem, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE)
                                 .until(m_fieldZoneManager.inHumanPlayer),
-                        m_fieldZoneManager.inHumanPlayer),
+                        m_fieldZoneManager.inHumanPlayer).repeatedly(),
                 Commands.either(
                         new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
                                 m_flywheelSubsystem, FieldConstants.RED_HUMAN_SIDE_PASS_POSE)
@@ -291,7 +268,7 @@ public class RobotContainer {
                         new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
                                 m_flywheelSubsystem, FieldConstants.RED_DEPOT_SIDE_PASS_POSE)
                                 .until(m_fieldZoneManager.inHumanPlayer),
-                        m_fieldZoneManager.inHumanPlayer),
+                        m_fieldZoneManager.inHumanPlayer).repeatedly(),
                 robotState.isBlueAlliance);
         Command prepareToShootFromNetworktablesWithTurret = Commands.parallel(
                 new SetHoodAngleFromNetworkTables(m_HoodSubsystem, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE),

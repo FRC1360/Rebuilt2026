@@ -4,22 +4,16 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import org.photonvision.PhotonUtils;
-
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.util.RobotState;
 
 public class DriveCommands {
 
@@ -39,12 +33,7 @@ public class DriveCommands {
             .withHeadingPID(7.0, 0.0, 0.0)
             .withCenterOfRotation(TurretConstants.ROBOT_TO_TURRET_CENTER.getTranslation());
 
-    private static double modifyJoystickCurve(double input) {
-        double factor = 0.6;
-        return (factor * Math.pow(input, 3)) + ((1.0 - factor) * input);
-    }
-
-    private static Translation2d modifyJoystickForDrive(double inputX, double inputY) {
+    private static Translation2d modifyJoystickCurve(double inputX, double inputY) {
         Translation2d inputVector = new Translation2d(inputX, inputY);
         double inputMagnitude = inputVector.getNorm();
         Rotation2d inputAngle = inputVector.getAngle();
@@ -64,14 +53,15 @@ public class DriveCommands {
             double angularScalar) {
         return drivetrain.applyRequest(
                 () -> {
-                    Translation2d modifiedDriveInput = modifyJoystickForDrive(
+                    Translation2d modifiedDriveInput = modifyJoystickCurve(
                             -controller.getLeftY(),
                             -controller.getLeftX());
-                    Translation2d modifiedTurnInput = modifyJoystickForDrive(
+                    Translation2d modifiedTurnInput = modifyJoystickCurve(
                             -controller.getRightX(),
                             0.0);
 
                     return teleopFieldCentricDriveRequest
+                            .withCenterOfRotation(new Translation2d())
                             .withVelocityX(
                                     modifiedDriveInput.getX() * MAX_DRIVE_TRANSLATIONAL_SPEED * translationalScalar)
                             .withVelocityY(
@@ -81,56 +71,30 @@ public class DriveCommands {
                 });
     }
 
-    public static Command joystickDriveFacingAngleCommand(
+    public static Command joystickDriveWithCenterOfRotationCommand(
             CommandSwerveDrivetrain drivetrain,
             CommandXboxController controller,
             double translationalScalar,
-            Rotation2d fieldRelativeAngle) {
-
-        teleopFieldCentricDriveRequestFacingAngle.HeadingController.setTolerance(
-                Units.degreesToRadians(AUTO_AIM_TOLERANCE_DEGREES));
-
+            double angularScalar,
+            Translation2d centerOfRotation) {
         return drivetrain.applyRequest(
-                () -> teleopFieldCentricDriveRequestFacingAngle
-                        .withDeadband(
-                                MAX_DRIVE_TRANSLATIONAL_SPEED * DEADBAND_AS_DECIMAL * translationalScalar)
-                        .withVelocityX(
-                                modifyJoystickCurve(-controller.getLeftY()) * MAX_DRIVE_TRANSLATIONAL_SPEED
-                                        * translationalScalar)
-                        .withVelocityY(
-                                modifyJoystickCurve(-controller.getLeftX()) * MAX_DRIVE_TRANSLATIONAL_SPEED
-                                        * translationalScalar)
-                        .withTargetDirection(fieldRelativeAngle));
+                () -> {
+                    Translation2d modifiedDriveInput = modifyJoystickCurve(
+                            -controller.getLeftY(),
+                            -controller.getLeftX());
+                    Translation2d modifiedTurnInput = modifyJoystickCurve(
+                            -controller.getRightX(),
+                            0.0);
+
+                    return teleopFieldCentricDriveRequest
+                            .withCenterOfRotation(centerOfRotation)
+                            .withVelocityX(
+                                    modifiedDriveInput.getX() * MAX_DRIVE_TRANSLATIONAL_SPEED * translationalScalar)
+                            .withVelocityY(
+                                    modifiedDriveInput.getY() * MAX_DRIVE_TRANSLATIONAL_SPEED * translationalScalar)
+                            .withRotationalRate(
+                                    modifiedTurnInput.getX() * MAX_DRIVE_ANGULAR_SPEED * angularScalar);
+                });
     }
-
-    public static Command joystickDriveFacingPoseCommand(
-            CommandSwerveDrivetrain drivetrain,
-            CommandXboxController controller,
-            double translationalScalar,
-            Pose2d goalPose,
-            Rotation2d rotationOffset) {
-
-        teleopFieldCentricDriveRequestFacingAngle.HeadingController.setTolerance(
-                Units.degreesToRadians(AUTO_AIM_TOLERANCE_DEGREES));
-
-        RobotState robotState = RobotState.getInstance();
-
-        return drivetrain.applyRequest(
-                () -> teleopFieldCentricDriveRequestFacingAngle
-                        .withDeadband(
-                                MAX_DRIVE_TRANSLATIONAL_SPEED * DEADBAND_AS_DECIMAL * translationalScalar)
-                        .withVelocityX(
-                                modifyJoystickCurve(-controller.getLeftY()) * MAX_DRIVE_TRANSLATIONAL_SPEED
-                                        * translationalScalar)
-                        .withVelocityY(
-                                modifyJoystickCurve(-controller.getLeftX()) * MAX_DRIVE_TRANSLATIONAL_SPEED
-                                        * translationalScalar)
-                        .withTargetDirection(PhotonUtils.getYawToPose(
-                                new Pose2d(robotState.getTurretOdomPose().getTranslation(), new Rotation2d()),
-                                goalPose).plus(rotationOffset)));
-    }
-
-    public static Trigger headingControllerAtTarget = new Trigger(
-            () -> teleopFieldCentricDriveRequestFacingAngle.HeadingController.atSetpoint());
 
 }
