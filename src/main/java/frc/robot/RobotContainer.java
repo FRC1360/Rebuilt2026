@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.IntakeConstants;
@@ -32,11 +31,8 @@ import frc.robot.commands.SetShooterFromCompensatedPoseCommand;
 import frc.robot.commands.SetShooterFromPassingCompensatedPoseCommand;
 import frc.robot.commands.flywheel.SetFlywheelVelocityCommand;
 import frc.robot.commands.flywheel.SetFlywheelVelocityFromNetworkTables;
-import frc.robot.commands.flywheel.SetFlywheelVelocityFromPoseCommand;
 import frc.robot.commands.hood.SetHoodAngleCommand;
 import frc.robot.commands.hood.SetHoodAngleFromNetworkTables;
-import frc.robot.commands.hood.SetHoodAngleFromPose;
-import frc.robot.commands.index.ActivateAgitatedIndexCommand;
 import frc.robot.commands.index.ActivateAutoUnjammingIndex;
 import frc.robot.commands.index.SetIndexSpeedsCommand;
 import frc.robot.commands.intake.DeployIntakeCommand;
@@ -136,60 +132,6 @@ public class RobotContainer {
                 .and(m_HoodSubsystem.hoodAtTarget)
                 .and(m_TurretSubsystem.turretAtTarget);
 
-        Command runStaticShotSequence = Commands.either(
-                Commands.sequence(
-                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                FieldConstants.BLUE_ALLIANCE_HUB_POSE)
-                                .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem,
-                                        FieldConstants.BLUE_ALLIANCE_HUB_POSE))
-                                .until(shooterAtSetpoints).withTimeout(3.0),
-                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                FieldConstants.BLUE_ALLIANCE_HUB_POSE)
-                                .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem,
-                                        FieldConstants.BLUE_ALLIANCE_HUB_POSE))
-                                .alongWith(new ActivateAgitatedIndexCommand(m_indexSubsystem))
-                                .withTimeout(3.0),
-                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                FieldConstants.BLUE_ALLIANCE_HUB_POSE)
-                                .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem,
-                                        FieldConstants.BLUE_ALLIANCE_HUB_POSE))
-                                .alongWith(new ActivateAgitatedIndexCommand(m_indexSubsystem))
-                                .alongWith(new SetIntakePivotAngleCommand(m_intakeSubsystem, 45, 0.0))
-                                .withTimeout(1.5),
-                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                FieldConstants.BLUE_ALLIANCE_HUB_POSE)
-                                .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem,
-                                        FieldConstants.BLUE_ALLIANCE_HUB_POSE))
-                                .alongWith(new ActivateAgitatedIndexCommand(m_indexSubsystem))
-                                .alongWith(new RetractIntakeCommand(m_intakeSubsystem))
-                                .withTimeout(3.0)),
-                Commands.sequence(
-                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                FieldConstants.RED_ALLIANCE_HUB_POSE)
-                                .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem,
-                                        FieldConstants.RED_ALLIANCE_HUB_POSE))
-                                .until(shooterAtSetpoints).withTimeout(3.0),
-                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                FieldConstants.RED_ALLIANCE_HUB_POSE)
-                                .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem,
-                                        FieldConstants.RED_ALLIANCE_HUB_POSE))
-                                .alongWith(new ActivateAgitatedIndexCommand(m_indexSubsystem))
-                                .withTimeout(3.0),
-                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                FieldConstants.RED_ALLIANCE_HUB_POSE)
-                                .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem,
-                                        FieldConstants.RED_ALLIANCE_HUB_POSE))
-                                .alongWith(new ActivateAgitatedIndexCommand(m_indexSubsystem))
-                                .alongWith(new SetIntakePivotAngleCommand(m_intakeSubsystem, 45, 0.0))
-                                .withTimeout(1.5),
-                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                FieldConstants.RED_ALLIANCE_HUB_POSE)
-                                .alongWith(new SetHoodAngleFromPose(m_HoodSubsystem,
-                                        FieldConstants.RED_ALLIANCE_HUB_POSE))
-                                .alongWith(new ActivateAgitatedIndexCommand(m_indexSubsystem))
-                                .alongWith(new RetractIntakeCommand(m_intakeSubsystem))
-                                .withTimeout(3.0)),
-                robotState.isBlueAlliance);
         Command prepareTurretedShot = Commands.either(
                 new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem, m_flywheelSubsystem,
                         FieldConstants.BLUE_ALLIANCE_HUB_POSE),
@@ -206,7 +148,7 @@ public class RobotContainer {
                         .andThen(new ActivateAutoUnjammingIndex(m_indexSubsystem)))
                 .until(leftSideTurretedAuto1.event("STOP_TURRETED_SHOOTING"));
 
-        /* Configure stuff for right side */
+        /* Configure stuff for left side */
         leftSideTurretedAuto1.event("DEPLOY_INTAKE_RUN_ROLLERS").onTrue(
                 new DeployIntakeCommand(m_intakeSubsystem, () -> true));
         leftSideTurretedAuto1.event("DEPLOY_INTAKE_STOP_ROLLERS").onTrue(
@@ -231,23 +173,24 @@ public class RobotContainer {
                 .or(backdriveIndexInput)
                 .or(backdriveShooterInput);
 
-        Trigger shootingInput = m_controller.rightBumper().and(backdrivingAnySubsystem.negate());
-        Trigger shootingWithTurretInput = m_controller.rightTrigger(0.8).and(backdrivingAnySubsystem.negate());
+        Trigger generalShootingInput = m_controller.rightTrigger(0.8).and(backdrivingAnySubsystem.negate());
+        Trigger shootingIntoHubWithTurretInput = generalShootingInput.and(m_fieldZoneManager.inAlliance);
+        Trigger passingWithTurretInput = generalShootingInput
+                .and(m_fieldZoneManager.inEnemy.or(m_fieldZoneManager.inMiddle));
         Trigger shootingThroughNetworkTablesInput = m_controller.povDown().and(backdrivingAnySubsystem.negate());
-        Trigger passingInput = m_controller.leftBumper().and(backdrivingAnySubsystem.negate());
+
         Trigger intakePivotInput = m_controller.a();
         Trigger intakeRollerInput = m_controller.leftTrigger(0.8).and(backdriveIndexInput.negate());
-        Trigger intakeAgitateInput = m_controller.b();
+
         Trigger trenchRun = m_controller.y();
 
         Trigger runIndexOverrideInput = m_controller.x();
-        Trigger automaticShootCondition = (shootingInput.or(passingInput).or(shootingWithTurretInput)
-                .or(shootingThroughNetworkTablesInput))
+        Trigger automaticShootCondition = (generalShootingInput.or(shootingThroughNetworkTablesInput))
                 .and(m_flywheelSubsystem.flywheelAtTarget)
                 .and(m_HoodSubsystem.hoodAtTarget)
                 .and((m_TurretSubsystem.turretAtTarget
-                        .and(shootingInput.or(shootingWithTurretInput).or(shootingThroughNetworkTablesInput)))
-                        .or(m_TurretSubsystem.turretAtPassingTarget.and(passingInput)));
+                        .and(shootingIntoHubWithTurretInput.or(shootingThroughNetworkTablesInput)))
+                        .or(m_TurretSubsystem.turretAtPassingTarget.and(passingWithTurretInput)));
         Trigger preparedAndReadyToShoot = backdrivingAnySubsystem.negate()
                 .and(automaticShootCondition.or(runIndexOverrideInput));
 
@@ -261,7 +204,7 @@ public class RobotContainer {
         Command joystickDriveAtNormalSpeed = DriveCommands.joystickDriveCommand(
                 drivetrain, m_controller,
                 1.0, 1.0);
-        Command joystickDriveAtSlowSpeed = DriveCommands.joystickDriveCommand(
+        Command joystickDriveAtShootOnTheMoveSpeed = DriveCommands.joystickDriveCommand(
                 drivetrain, m_controller,
                 SLOW_DRIVE_TRANSLATIONAL_MULTIPLIER, SLOW_DRIVE_ANGULAR_MULTIPLIER);
         Command joystickDriveWhileFacingHub = Commands.either(
@@ -306,9 +249,7 @@ public class RobotContainer {
         trenchRun.whileTrue(trenchRunCommand);
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
-        shootingWithTurretInput.whileTrue(joystickDriveAtSlowSpeed);
-        shootingInput.whileTrue(joystickDriveWhileFacingHub);
-        // passingInput.whileTrue(joystickDriveWhilePassing);
+        shootingIntoHubWithTurretInput.whileTrue(joystickDriveAtShootOnTheMoveSpeed);
 
         // Intaking
         Command setIntakePivotBasedOnState = Commands.either(
@@ -318,104 +259,57 @@ public class RobotContainer {
                         .until(robotState.isIntakeCurrentlyDeployed),
                 robotState.isIntakeCurrentlyDeployed).repeatedly();
 
-        Command agitateIntake = Commands.repeatingSequence(
-                new SetIntakePivotAngleCommand(m_intakeSubsystem, 55.0, 0.1)
-                        .withTimeout(0.5),
-                new SetIntakePivotAngleCommand(m_intakeSubsystem, 5.0, 0.1)
-                        .withTimeout(0.5));
-
         m_intakeSubsystem.setDefaultCommand(setIntakePivotBasedOnState);
         intakePivotInput.onTrue(robotState.toggleIntakeState);
-        intakeAgitateInput.whileTrue(agitateIntake);
 
         // Shooting
-        Command prepareToShootAtHub = Commands.either(
-                Commands.parallel(
-                        new SetHoodAngleFromPose(m_HoodSubsystem,
-                                FieldConstants.BLUE_ALLIANCE_HUB_POSE),
-                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                FieldConstants.BLUE_ALLIANCE_HUB_POSE)),
-                Commands.parallel(
-                        new SetHoodAngleFromPose(m_HoodSubsystem,
-                                FieldConstants.RED_ALLIANCE_HUB_POSE),
-                        new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem,
-                                FieldConstants.RED_ALLIANCE_HUB_POSE)),
-                robotState.isBlueAlliance);
-        Command prepareToPass = Commands.either(
-                Commands.either(
-                        new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
-                                m_flywheelSubsystem, FieldConstants.BLUE_HUMAN_SIDE_PASS_POSE),
-                        new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
-                                m_flywheelSubsystem, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE),
-                        () -> robotState.getTurretOdomPose().getY() < FieldConstants.BLUE_ALLIANCE_HUB_POSE.getY()),
-                Commands.either(
-                        new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
-                                m_flywheelSubsystem, FieldConstants.RED_HUMAN_SIDE_PASS_POSE),
-                        new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
-                                m_flywheelSubsystem, FieldConstants.RED_DEPOT_SIDE_PASS_POSE),
-                        () -> robotState.getTurretOdomPose().getY() > FieldConstants.RED_ALLIANCE_HUB_POSE.getY()),
-                robotState.isBlueAlliance);
-        Command shootFromNetworkTables = Commands.either(
-                Commands.parallel(
-                        new SetHoodAngleFromNetworkTables(m_HoodSubsystem,
-                                FieldConstants.BLUE_ALLIANCE_HUB_POSE),
-                        new SetFlywheelVelocityFromNetworkTables(m_flywheelSubsystem)),
-                Commands.parallel(
-                        new SetHoodAngleFromNetworkTables(m_HoodSubsystem,
-                                FieldConstants.RED_ALLIANCE_HUB_POSE),
-                        new SetFlywheelVelocityFromNetworkTables(m_flywheelSubsystem)),
-                robotState.isBlueAlliance);
-
-        m_flywheelSubsystem.setDefaultCommand(new SetFlywheelVelocityCommand(m_flywheelSubsystem,
-                10.0));
-        m_HoodSubsystem.setDefaultCommand(new SetHoodAngleCommand(m_HoodSubsystem,
-                74));
-        m_indexSubsystem.setDefaultCommand(new SetIndexSpeedsCommand(m_indexSubsystem,
-                0.0, 0.3));
-        // m_TurretSubsystem.setDefaultCommand(new
-        // SetTurretToNonWrappedEncoderCommand(m_TurretSubsystem,
-        // TurretConstants.ENCODER_STARTUP_ANGLE_DEGREES));
-        m_TurretSubsystem.setDefaultCommand(Commands.either(
+        Command autoAimTurretAtAllianceHub = Commands.either(
                 new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE)
                         .until(robotState.isBlueAlliance.negate()),
                 new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE)
                         .until(robotState.isBlueAlliance),
-                robotState.isBlueAlliance));
-
-        shootingInput.whileTrue(prepareToShootAtHub);
-        passingInput.whileTrue(prepareToPass);
-        preparedAndReadyToShoot.whileTrue(new ActivateAutoUnjammingIndex(m_indexSubsystem));
-        shootingWithTurretInput.whileTrue(Commands.either(
+                robotState.isBlueAlliance);
+        Command prepareToShootAtHubWithTurret = Commands.either(
                 new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem, m_flywheelSubsystem,
                         FieldConstants.BLUE_ALLIANCE_HUB_POSE),
                 new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem, m_flywheelSubsystem,
                         FieldConstants.RED_ALLIANCE_HUB_POSE),
-                robotState.isBlueAlliance)
-                .alongWith(
-                        new RunCommand(() -> {
-                            turretTimer.start();
-                            if (m_TurretSubsystem.turretAtTarget.getAsBoolean() == true) {
-                                turretTimer.stop();
-                            }
-                        }))
-                .alongWith(
-                        new RunCommand(() -> {
-                            hoodTimer.start();
-                            if (m_HoodSubsystem.hoodAtTarget.getAsBoolean() == true) {
-                                hoodTimer.stop();
-                            }
-                        }))
-                .alongWith(
-                        new RunCommand(() -> {
-                            flywheelTimer.start();
-                            if (m_flywheelSubsystem.flywheelAtTarget.getAsBoolean() == true) {
-                                flywheelTimer.stop();
-                            }
-                        })));
-        shootingThroughNetworkTablesInput.whileTrue(Commands.parallel(
+                robotState.isBlueAlliance);
+        Command prepareToPassWithTurret = Commands.either(
+                Commands.either(
+                        new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
+                                m_flywheelSubsystem, FieldConstants.BLUE_HUMAN_SIDE_PASS_POSE)
+                                .until(m_fieldZoneManager.inDepot),
+                        new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
+                                m_flywheelSubsystem, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE)
+                                .until(m_fieldZoneManager.inHumanPlayer),
+                        m_fieldZoneManager.inHumanPlayer),
+                Commands.either(
+                        new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
+                                m_flywheelSubsystem, FieldConstants.RED_HUMAN_SIDE_PASS_POSE)
+                                .until(m_fieldZoneManager.inDepot),
+                        new SetShooterFromPassingCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem,
+                                m_flywheelSubsystem, FieldConstants.RED_DEPOT_SIDE_PASS_POSE)
+                                .until(m_fieldZoneManager.inHumanPlayer),
+                        m_fieldZoneManager.inHumanPlayer),
+                robotState.isBlueAlliance);
+        Command prepareToShootFromNetworktablesWithTurret = Commands.parallel(
                 new SetHoodAngleFromNetworkTables(m_HoodSubsystem, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE),
                 new SetFlywheelVelocityFromNetworkTables(m_flywheelSubsystem),
-                new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE)));
+                new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE));
+
+        m_flywheelSubsystem.setDefaultCommand(
+                new SetFlywheelVelocityCommand(m_flywheelSubsystem, 10.0));
+        m_HoodSubsystem.setDefaultCommand(
+                new SetHoodAngleCommand(m_HoodSubsystem, 74));
+        m_indexSubsystem.setDefaultCommand(
+                new SetIndexSpeedsCommand(m_indexSubsystem, 0.0, 0.3));
+        m_TurretSubsystem.setDefaultCommand(autoAimTurretAtAllianceHub);
+
+        shootingIntoHubWithTurretInput.whileTrue(prepareToShootAtHubWithTurret);
+        passingWithTurretInput.whileTrue(prepareToPassWithTurret);
+        shootingThroughNetworkTablesInput.whileTrue(prepareToShootFromNetworktablesWithTurret);
+        preparedAndReadyToShoot.whileTrue(new ActivateAutoUnjammingIndex(m_indexSubsystem));
 
         // Backdriving
         Command backdriveIntakeWhileKeepingState = Commands.either(

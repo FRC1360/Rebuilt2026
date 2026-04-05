@@ -72,18 +72,6 @@ public class RobotState {
         fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
         turretDistanceToHoodAngleMap = new InterpolatingDoubleTreeMap();
-        // turretDistanceToHoodAngleMap.put(1.423, 74.0);
-        // turretDistanceToHoodAngleMap.put(2.511, 71.0);
-        // turretDistanceToHoodAngleMap.put(2.75, 70.0);
-        // turretDistanceToHoodAngleMap.put(3.54, 65.0);
-        // turretDistanceToHoodAngleMap.put(4.26, 63.0);
-        // turretDistanceToHoodAngleMap.put(5.016, 60.0);
-        // turretDistanceToHoodAngleMap.put(1.445, 68.0);
-        // turretDistanceToHoodAngleMap.put(2.585, 62.0);
-        // turretDistanceToHoodAngleMap.put(3.017, 61.0);
-        // turretDistanceToHoodAngleMap.put(3.489, 60.0);
-        // turretDistanceToHoodAngleMap.put(4.085, 59.0);
-        // turretDistanceToHoodAngleMap.put(5.033, 57.0);
         turretDistanceToHoodAngleMap.put(1.53, 73.5);
         turretDistanceToHoodAngleMap.put(2.063, 70.0);
         turretDistanceToHoodAngleMap.put(2.501, 68.0);
@@ -96,18 +84,6 @@ public class RobotState {
         turretDistanceToHoodAngleMap.put(7.0, 49.983);
 
         turretDistanceToFlywheelVelocityMap = new InterpolatingDoubleTreeMap();
-        // turretDistanceToFlywheelVelocityMap.put(1.423, 50.0);
-        // turretDistanceToFlywheelVelocityMap.put(2.511,55.0);
-        // turretDistanceToFlywheelVelocityMap.put(2.75, 56.0);
-        // turretDistanceToFlywheelVelocityMap.put(3.54, 58.0);
-        // turretDistanceToFlywheelVelocityMap.put(4.26, 60.0);
-        // turretDistanceToFlywheelVelocityMap.put(5.016, 65.0);
-        // turretDistanceToFlywheelVelocityMap.put(1.445, 47.0);
-        // turretDistanceToFlywheelVelocityMap.put(2.585, 50.0);
-        // turretDistanceToFlywheelVelocityMap.put(3.017, 52.0);
-        // turretDistanceToFlywheelVelocityMap.put(3.489, 55.0);
-        // turretDistanceToFlywheelVelocityMap.put(4.085, 60.0);
-        // turretDistanceToFlywheelVelocityMap.put(5.033, 65.0);
         turretDistanceToFlywheelVelocityMap.put(1.53, 43.0);
         turretDistanceToFlywheelVelocityMap.put(2.063, 45.0);
         turretDistanceToFlywheelVelocityMap.put(2.501, 47.0);
