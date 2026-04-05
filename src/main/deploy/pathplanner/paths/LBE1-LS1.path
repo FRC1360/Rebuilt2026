@@ -8,34 +8,39 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.4935852779294032,
-        "y": 5.576202636008007
+        "x": 2.5043154112081516,
+        "y": 5.609662595524018
       },
       "isLocked": false,
       "linkedName": "LBE2"
     },
     {
       "anchor": {
-        "x": 4.27514501723885,
-        "y": 7.579919628447769
+        "x": 4.403055915665939,
+        "y": 7.289442321688501
       },
       "prevControl": {
-        "x": 1.463167132916885,
-        "y": 7.500125375269845
+        "x": 2.4766398858260548,
+        "y": 7.392415222434498
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "LS1"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.348722298306773,
+      "rotationDegrees": 135.0
+    }
+  ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.3454861111111108,
-      "maxWaypointRelativePos": 0.762309766548463,
+      "minWaypointRelativePos": 0.42435911643026,
+      "maxWaypointRelativePos": 0.9162695774231677,
       "constraints": {
-        "maxVelocity": 0.35,
+        "maxVelocity": 0.5,
         "maxAcceleration": 4.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -54,7 +59,7 @@
     },
     {
       "name": "STOP_TURRETED_SHOOTING",
-      "waypointRelativePos": 0.798038563829787,
+      "waypointRelativePos": 0.915235298463357,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -69,13 +74,13 @@
   },
   "goalEndState": {
     "velocity": 2.0,
-    "rotation": -89.61989609670069
+    "rotation": 89.16221366858917
   },
   "reversed": false,
   "folder": "L1",
   "idealStartingState": {
     "velocity": 2.0,
-    "rotation": -178.26823036832621
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.673895105531296,
-        "y": 5.832491544684013
+        "x": 5.489621549797853,
+        "y": 5.346948619040794
       },
       "isLocked": false,
       "linkedName": "LBS1"
@@ -31,9 +31,22 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "DEPLOY_INTAKE_STOP_ROLLERS",
+      "waypointRelativePos": 0.013574911347517739,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "DEPLOY_INTAKE_RUN_ROLLERS",
+      "waypointRelativePos": 0.9579731826241132,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
-    "maxVelocity": 2.0,
+    "maxVelocity": 3.0,
     "maxAcceleration": 4.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -42,12 +55,12 @@
   },
   "goalEndState": {
     "velocity": 2.0,
-    "rotation": -178.26823036832621
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": "L1",
   "idealStartingState": {
-    "velocity": 4.0,
+    "velocity": 3.0,
     "rotation": -179.7768983677714
   },
   "useDefaultConstraints": false

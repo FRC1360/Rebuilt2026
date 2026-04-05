@@ -3,12 +3,12 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.295,
+        "x": 7.795,
         "y": 4.858
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.295,
+        "x": 7.795,
         "y": 5.457999999999999
       },
       "isLocked": false,
@@ -47,7 +47,11 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 1.0,
-      "rotationDegrees": 179.05154397011847
+      "rotationDegrees": 180.0
+    },
+    {
+      "waypointRelativePos": 1.8651332171314745,
+      "rotationDegrees": 180.0
     }
   ],
   "constraintZones": [],
@@ -56,6 +60,18 @@
     {
       "name": "PREPARE_TO_SHOOT",
       "waypointRelativePos": 0.3,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "DEPLOY_INTAKE_STOP_ROLLERS",
+      "waypointRelativePos": 0.4672170508274233,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "DEPLOY_INTAKE_RUN_ROLLERS",
+      "waypointRelativePos": 1.8802452718676117,
       "endWaypointRelativePos": null,
       "command": null
     },
@@ -76,7 +92,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 178.89829388479367
+    "rotation": 130.53162810706135
   },
   "reversed": false,
   "folder": "L1",

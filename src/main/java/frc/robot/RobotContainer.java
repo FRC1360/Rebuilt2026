@@ -4,19 +4,9 @@
 
 package frc.robot;
 
-import java.io.IOException;
-
-import org.json.simple.parser.ParseException;
-
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.FileVersionException;
-
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,14 +20,17 @@ import frc.robot.commands.SetShooterFromCompensatedPoseCommand;
 import frc.robot.commands.SetShooterFromPassingCompensatedPoseCommand;
 import frc.robot.commands.flywheel.SetFlywheelVelocityCommand;
 import frc.robot.commands.flywheel.SetFlywheelVelocityFromNetworkTables;
+import frc.robot.commands.flywheel.SetFlywheelVelocityFromPoseCommand;
 import frc.robot.commands.hood.SetHoodAngleCommand;
 import frc.robot.commands.hood.SetHoodAngleFromNetworkTables;
+import frc.robot.commands.hood.SetHoodAngleFromPose;
 import frc.robot.commands.index.ActivateAutoUnjammingIndex;
 import frc.robot.commands.index.SetIndexSpeedsCommand;
 import frc.robot.commands.intake.DeployIntakeCommand;
 import frc.robot.commands.intake.RetractIntakeCommand;
 import frc.robot.commands.intake.SetIntakePivotAngleCommand;
 import frc.robot.commands.turret.AimTurretAtPoseCommand;
+import frc.robot.commands.turret.SetTurretToNonWrappedEncoderCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FlywheelSubsystem;
@@ -124,6 +117,18 @@ public class RobotContainer {
                 .and(m_HoodSubsystem.hoodAtTarget)
                 .and(m_TurretSubsystem.turretAtTarget);
 
+        Command prepareLeftSideTurretedShot = Commands.either(
+                Commands.parallel(
+                    new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE),
+                    new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE),
+                    new SetTurretToNonWrappedEncoderCommand(m_TurretSubsystem, -195.0)
+                ),
+                Commands.parallel(
+                    new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
+                    new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
+                    new SetTurretToNonWrappedEncoderCommand(m_TurretSubsystem, -195.0)
+                ),
+                robotState.isBlueAlliance);
         Command prepareTurretedShot = Commands.either(
                 new SetShooterFromCompensatedPoseCommand(m_TurretSubsystem, m_HoodSubsystem, m_flywheelSubsystem,
                         FieldConstants.BLUE_ALLIANCE_HUB_POSE),
@@ -145,7 +150,7 @@ public class RobotContainer {
                 new DeployIntakeCommand(m_intakeSubsystem, () -> true));
         leftSideTurretedAuto1.event("DEPLOY_INTAKE_STOP_ROLLERS").onTrue(
                 new DeployIntakeCommand(m_intakeSubsystem, () -> false));
-        leftSideTurretedAuto1.event("PREPARE_TO_SHOOT").onTrue(prepareTurretedShot);
+        leftSideTurretedAuto1.event("PREPARE_TO_SHOOT").onTrue(prepareLeftSideTurretedShot);
         leftSideTurretedAuto1.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
 
         autoChooser = new SendableChooser<Command>();
@@ -174,7 +179,7 @@ public class RobotContainer {
         Trigger intakePivotInput = m_controller.a();
         Trigger intakeRollerInput = m_controller.leftTrigger(0.8).and(backdriveIndexInput.negate());
 
-        Trigger trenchRun = m_controller.y();
+        Trigger trenchRunInput = m_controller.y();
 
         Trigger runIndexOverrideInput = m_controller.x();
         Trigger automaticShootCondition = (generalShootingInput.or(shootingThroughNetworkTablesInput))
