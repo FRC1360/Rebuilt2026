@@ -3,32 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.762447802947598,
-        "y": 4.127002422216158
+        "x": 6.96546050536754,
+        "y": 4.361870394377729
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.783640772834789,
-        "y": 6.122482600982534
+        "x": 6.976730178766376,
+        "y": 5.927706741266375
       },
       "isLocked": false,
       "linkedName": "LC2"
     },
     {
       "anchor": {
-        "x": 3.1621950623180495,
-        "y": 5.835903782296216
+        "x": 2.7951328238719064,
+        "y": 5.584879287208881
       },
       "prevControl": {
-        "x": 6.062290927492725,
-        "y": 5.813813227802039
+        "x": 5.695228689046583,
+        "y": 5.562788732714703
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "LS2"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.9022728704637093,
+      "rotationDegrees": -90.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
@@ -52,7 +57,7 @@
     },
     {
       "name": "EXECUTE_TURRETED_SHOOTING",
-      "waypointRelativePos": 0.95,
+      "waypointRelativePos": 1.0,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -66,14 +71,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": -89.75050887771398
+    "velocity": 0.0,
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": "L1",
   "idealStartingState": {
     "velocity": 4.0,
-    "rotation": -89.57762497153519
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }

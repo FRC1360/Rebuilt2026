@@ -26,6 +26,9 @@ import frc.robot.util.PIDLogger;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import frc.robot.util.ClosedLoopConstants;
 
@@ -67,6 +70,14 @@ public class IntakeSubsystem extends SubsystemBase {
                 this.pivotFeedForward.setKs(constants.kS);
                 this.pivotFeedForward.setKv(constants.kV);
             });
+
+    private final NetworkTable loggingTable = NetworkTableInstance.getDefault().getTable("Subsystems/" + getName());
+    private final DoublePublisher rollerStatorCurrentPublisher = loggingTable.getDoubleTopic("Roller Stator Current")
+            .publish();
+    private final DoublePublisher rollerSupplyCurrentPublisher = loggingTable.getDoubleTopic("Roller Supply Current")
+            .publish();
+    private final DoublePublisher rollerMotorSpeedPublisher = loggingTable.getDoubleTopic("Roller Speed RPM")
+            .publish();
 
     private final TalonFX rollerMotor = new TalonFX(IntakeConstants.ROLLER_VORTEX_CAN_ID);
     private final SparkFlex pivotMotor = new SparkFlex(IntakeConstants.PIVOT_VORTEX_CAN_ID, MotorType.kBrushless);
@@ -176,5 +187,9 @@ public class IntakeSubsystem extends SubsystemBase {
                 this.getPivotPosition(),
                 this.getPivotVelocity(),
                 pivotProfiledPIDController.getPositionError());
+
+        rollerStatorCurrentPublisher.accept(rollerMotor.getStatorCurrent().getValueAsDouble());
+        rollerSupplyCurrentPublisher.accept(rollerMotor.getSupplyCurrent().getValueAsDouble());
+        rollerMotorSpeedPublisher.accept(rollerMotor.getVelocity().getValueAsDouble());
     }
 }

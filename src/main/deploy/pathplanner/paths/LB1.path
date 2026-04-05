@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.830714098890102,
-        "y": 5.221955911117177
+        "x": 5.857940831968705,
+        "y": 5.435830376637555
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.5021755744970084,
-        "y": 5.221955911117177
+        "x": 4.529402307575611,
+        "y": 5.435830376637555
       },
       "isLocked": false,
       "linkedName": "LBS1"
@@ -20,8 +20,8 @@
         "y": 5.62322609625182
       },
       "prevControl": {
-        "x": 3.204085193913607,
-        "y": 5.227660086820598
+        "x": 3.5685016944141195,
+        "y": 5.370206968704513
       },
       "nextControl": null,
       "isLocked": false,
@@ -35,6 +35,12 @@
     {
       "name": "DEPLOY_INTAKE_STOP_ROLLERS",
       "waypointRelativePos": 0.013574911347517739,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "PREPARE_TO_SHOOT_WITH_TURRET",
+      "waypointRelativePos": 0.6612897182254197,
       "endWaypointRelativePos": null,
       "command": null
     },

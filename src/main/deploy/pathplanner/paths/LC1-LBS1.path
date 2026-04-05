@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.76770168076783,
+        "x": 8.518,
         "y": 5.029623476164484
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.76770168076783,
-        "y": 4.029623476164484
+        "x": 8.486118427037844,
+        "y": 4.154977142467249
       },
       "isLocked": false,
       "linkedName": "LC1"
     },
     {
       "anchor": {
-        "x": 5.830714098890102,
-        "y": 5.221955911117177
+        "x": 5.857940831968705,
+        "y": 5.435830376637555
       },
       "prevControl": {
-        "x": 6.365303146191637,
-        "y": 5.078713207610207
+        "x": 6.411388138948103,
+        "y": 5.435830376637555
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "PREPARE_TO_SHOOT",
-      "waypointRelativePos": 0.45055777186761226,
+      "waypointRelativePos": 0.055601728723404215,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -55,7 +55,7 @@
   "folder": "L1",
   "idealStartingState": {
     "velocity": 4.0,
-    "rotation": -90.15167933523871
+    "rotation": -110.0
   },
   "useDefaultConstraints": true
 }
