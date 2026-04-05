@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.13414443038439,
-        "y": 3.877264616343897
+        "x": 7.109722298034934,
+        "y": 3.6974583219614274
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.256259600288889,
-        "y": 2.567613368909559
+        "x": 7.231837467939433,
+        "y": 2.3878070745270894
       },
       "isLocked": false,
       "linkedName": "RC2"
     },
     {
       "anchor": {
-        "x": 2.7035879731514085,
-        "y": 2.747721812646714
+        "x": 2.13488404823057,
+        "y": 2.668212793991703
       },
       "prevControl": {
-        "x": 4.330994901701878,
-        "y": 2.584514698870305
+        "x": 3.7622909767810406,
+        "y": 2.5050056802152945
       },
       "nextControl": null,
       "isLocked": false,
@@ -39,7 +39,7 @@
   "eventMarkers": [
     {
       "name": "PREPARE_TO_SHOOT_WITH_TURRET",
-      "waypointRelativePos": 0.7823272631894486,
+      "waypointRelativePos": 0.9592513489208633,
       "endWaypointRelativePos": null,
       "command": null
     },

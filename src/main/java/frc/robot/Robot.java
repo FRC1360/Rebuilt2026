@@ -8,6 +8,7 @@ import com.ctre.phoenix6.HootAutoReplay;
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.pathfinding.Pathfinding;
+import com.revrobotics.util.StatusLogger;
 
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -48,6 +49,7 @@ public class Robot extends TimedRobot {
         
         SignalLogger.stop();
         DataLogManager.stop();
+        StatusLogger.stop();
     }
 
     @Override
@@ -66,6 +68,10 @@ public class Robot extends TimedRobot {
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().schedule(m_autonomousCommand);
         }
+
+        SignalLogger.stop();
+        DataLogManager.stop();
+        StatusLogger.stop();
     }
 
     @Override
@@ -79,6 +85,10 @@ public class Robot extends TimedRobot {
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().cancel(m_autonomousCommand);
         }
+
+        SignalLogger.stop();
+        DataLogManager.stop();
+        StatusLogger.stop();
     }
 
     @Override

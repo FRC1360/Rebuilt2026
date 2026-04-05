@@ -39,14 +39,14 @@
       "command": null
     },
     {
-      "name": "PREPARE_TO_SHOOT_WITH_TURRET",
-      "waypointRelativePos": 0.7987391336930452,
+      "name": "DEPLOY_INTAKE_RUN_ROLLERS",
+      "waypointRelativePos": 0.970276903477218,
       "endWaypointRelativePos": null,
       "command": null
     },
     {
-      "name": "DEPLOY_INTAKE_RUN_ROLLERS",
-      "waypointRelativePos": 0.970276903477218,
+      "name": "PREPARE_TO_SHOOT_WITH_TURRET",
+      "waypointRelativePos": 0.983466351918464,
       "endWaypointRelativePos": null,
       "command": null
     }

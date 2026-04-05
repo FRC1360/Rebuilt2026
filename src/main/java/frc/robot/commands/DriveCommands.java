@@ -21,7 +21,7 @@ public class DriveCommands {
     public static final double MAX_DRIVE_ANGULAR_SPEED = RotationsPerSecond.of(1.0).in(RadiansPerSecond);
 
     public static final double DEADBAND_AS_DECIMAL = 0.01;
-    public static final double CURVE_EXPONENT = 1.75;
+    public static final double CURVE_EXPONENT = 1.25;
 
     public static final double AUTO_AIM_TOLERANCE_DEGREES = 3;
 

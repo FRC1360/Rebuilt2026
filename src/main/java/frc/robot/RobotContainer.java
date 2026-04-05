@@ -66,6 +66,7 @@ public class RobotContainer {
 
     public SendableChooser<Command> autoChooser;
     private PathPlannerAuto leftSideTurretedAuto1;
+    private PathPlannerAuto rightSideTurretedAuto1;
     // private PathPlannerPath exitLeft;
     // private PathPlannerPath enterLeft;
     // private PathPlannerPath exitRight;
@@ -106,6 +107,7 @@ public class RobotContainer {
         // }
 
         leftSideTurretedAuto1 = new PathPlannerAuto("L1");
+        rightSideTurretedAuto1 = new PathPlannerAuto("R1");
 
         // pathConstraints = new PathConstraints(
                 // 3.0,
@@ -127,6 +129,18 @@ public class RobotContainer {
                     new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
                     new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
                     new SetTurretToNonWrappedEncoderCommand(m_TurretSubsystem, -195.0)
+                ),
+                robotState.isBlueAlliance);
+        Command prepareRightSideTurretedShot = Commands.either(
+                Commands.parallel(
+                    new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE),
+                    new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem, FieldConstants.BLUE_ALLIANCE_HUB_POSE),
+                    new SetTurretToNonWrappedEncoderCommand(m_TurretSubsystem, 165.0)
+                ),
+                Commands.parallel(
+                    new SetHoodAngleFromPose(m_HoodSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
+                    new SetFlywheelVelocityFromPoseCommand(m_flywheelSubsystem, FieldConstants.RED_ALLIANCE_HUB_POSE),
+                    new SetTurretToNonWrappedEncoderCommand(m_TurretSubsystem, 165.0)
                 ),
                 robotState.isBlueAlliance);
         Command prepareTurretedShot = Commands.either(
@@ -154,9 +168,19 @@ public class RobotContainer {
         leftSideTurretedAuto1.event("PREPARE_TO_SHOOT_WITH_TURRET").onTrue(prepareTurretedShot);
         leftSideTurretedAuto1.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
 
+        /* Configure stuff for right side */
+        rightSideTurretedAuto1.event("DEPLOY_INTAKE_RUN_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        rightSideTurretedAuto1.event("DEPLOY_INTAKE_STOP_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> false));
+        rightSideTurretedAuto1.event("PREPARE_TO_SHOOT").onTrue(prepareRightSideTurretedShot);
+        rightSideTurretedAuto1.event("PREPARE_TO_SHOOT_WITH_TURRET").onTrue(prepareTurretedShot);
+        rightSideTurretedAuto1.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
+
         autoChooser = new SendableChooser<Command>();
         autoChooser.setDefaultOption("Do Nothing", Commands.none());
         autoChooser.addOption("Left Side Turreted 1", leftSideTurretedAuto1);
+        autoChooser.addOption("Right Side Turreted 1", rightSideTurretedAuto1);
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
@@ -231,8 +255,8 @@ public class RobotContainer {
         // trenchRun.whileTrue(trenchRunCommand);
 
         drivetrain.setDefaultCommand(joystickDriveAtNormalSpeed);
+        intakeRollerInput.and(shootingIntoHubWithTurretInput.negate()).whileTrue(joystickDriveWhileIntaking);
         shootingIntoHubWithTurretInput.whileTrue(joystickDriveAtShootOnTheMoveSpeed);
-        intakeRollerInput.whileTrue(joystickDriveWhileIntaking);
 
         // Intaking
         Command setIntakePivotBasedOnState = Commands.either(
