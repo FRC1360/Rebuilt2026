@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.144692162481805,
-        "y": 5.62322609625182
+        "x": 3.388824640551643,
+        "y": 5.698232880355047
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.9048396733461357,
-        "y": 7.220677677562082
+        "x": 2.7390922553550467,
+        "y": 5.6872156965228875
       },
       "isLocked": false,
       "linkedName": "LBE2"
     },
     {
       "anchor": {
-        "x": 4.5094196915938864,
-        "y": 7.289591919123
+        "x": 4.266138268412559,
+        "y": 7.562549469997066
       },
       "prevControl": {
-        "x": 2.508280582126993,
-        "y": 7.289591919123
+        "x": 2.587038164641893,
+        "y": 7.562549469997066
       },
       "nextControl": null,
       "isLocked": false,
@@ -32,10 +32,10 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.10798980496453899,
-      "maxWaypointRelativePos": 0.8813534278959811,
+      "minWaypointRelativePos": 0.0,
+      "maxWaypointRelativePos": 0.93894259592326,
       "constraints": {
-        "maxVelocity": 0.39,
+        "maxVelocity": 0.45,
         "maxAcceleration": 4.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -48,13 +48,13 @@
   "eventMarkers": [
     {
       "name": "EXECUTE_TURRETED_SHOOTING",
-      "waypointRelativePos": 0.13093786938534274,
+      "waypointRelativePos": 0.0,
       "endWaypointRelativePos": null,
       "command": null
     },
     {
       "name": "STOP_TURRETED_SHOOTING",
-      "waypointRelativePos": 0.8576758274231676,
+      "waypointRelativePos": 0.8925547062350122,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -69,13 +69,13 @@
   },
   "goalEndState": {
     "velocity": 2.0,
-    "rotation": 90.0
+    "rotation": 179.87939178935343
   },
   "reversed": false,
   "folder": "L1",
   "idealStartingState": {
     "velocity": 2.0,
-    "rotation": 90.0
+    "rotation": -179.69159528005383
   },
   "useDefaultConstraints": true
 }

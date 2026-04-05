@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.518,
-        "y": 5.029623476164484
+        "x": 8.465816369571597,
+        "y": 4.902382078931924
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.486118427037844,
-        "y": 4.154977142467249
+        "x": 8.465816369571597,
+        "y": 3.995718574137065
       },
       "isLocked": false,
       "linkedName": "LC1"
     },
     {
       "anchor": {
-        "x": 5.857940831968705,
-        "y": 5.435830376637555
+        "x": 5.711279159330986,
+        "y": 5.698232880355047
       },
       "prevControl": {
-        "x": 6.411388138948103,
-        "y": 5.435830376637555
+        "x": 6.743206228950904,
+        "y": 5.698232880355047
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "PREPARE_TO_SHOOT",
-      "waypointRelativePos": 0.055601728723404215,
+      "waypointRelativePos": 0.5932254196642682,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -49,13 +49,13 @@
   },
   "goalEndState": {
     "velocity": 4.0,
-    "rotation": 90.0
+    "rotation": -179.97989842265986
   },
   "reversed": false,
   "folder": "L1",
   "idealStartingState": {
     "velocity": 4.0,
-    "rotation": -110.0
+    "rotation": -113.55142433724178
   },
   "useDefaultConstraints": true
 }

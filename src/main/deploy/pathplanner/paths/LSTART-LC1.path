@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.560817412663756,
-        "y": 7.4718514601528385
+        "x": 8.04784285197556,
+        "y": 7.590534725278756
       },
       "isLocked": false,
       "linkedName": "LSTART"
     },
     {
       "anchor": {
-        "x": 8.518,
-        "y": 5.029623476164484
+        "x": 8.465816369571597,
+        "y": 4.902382078931924
       },
       "prevControl": {
-        "x": 8.521772482259825,
-        "y": 7.401640397561864
+        "x": 8.465816369571597,
+        "y": 7.047158777852731
       },
       "nextControl": null,
       "isLocked": false,
@@ -32,23 +32,10 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.611360446217494,
+      "minWaypointRelativePos": 0.6990454597966729,
       "maxWaypointRelativePos": 1.0,
       "constraints": {
         "maxVelocity": 1.5,
-        "maxAcceleration": 4.0,
-        "maxAngularVelocity": 540.0,
-        "maxAngularAcceleration": 720.0,
-        "nominalVoltage": 12.0,
-        "unlimited": false
-      }
-    },
-    {
-      "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.0,
-      "maxWaypointRelativePos": 0.5589216127098321,
-      "constraints": {
-        "maxVelocity": 5.0,
         "maxAcceleration": 4.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -76,7 +63,7 @@
   },
   "goalEndState": {
     "velocity": 4.0,
-    "rotation": -110.0
+    "rotation": -113.55142433724178
   },
   "reversed": false,
   "folder": "L1",
