@@ -66,9 +66,10 @@ public final class Constants {
         public static final double PIVOT_VELOCITY_CONVERSION_RATIO = ((1.0 / 64.28571) * 360.0) / 60.0;
 
         public static final double PIVOT_STARTUP_ANGLE = 121.3;
-        public static final double PIVOT_RETRACTED_ANGLE = 120.0;
-        public static final double PIVOT_DEPLOYED_ANGLE = -0.4;
         public static final double PIVOT_PID_TOLERANCE = 2.0;
+        public static final double PIVOT_RETRACTED_ANGLE = 120.0;
+        public static final double PIVOT_DEPLOYED_ANGLE = 10.0;
+        public static final double PIVOT_DEPLOYED_AND_ACTIVATED_ANGLE = -0.4;
 
         // Used in RobotState to manage toggling functionality
         public static final boolean INTAKE_DEPLOYED_BY_DEFAULT = false;

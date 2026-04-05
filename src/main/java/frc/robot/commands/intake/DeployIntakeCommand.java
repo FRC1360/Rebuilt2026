@@ -11,10 +11,10 @@ public class DeployIntakeCommand extends Command {
     private final BooleanSupplier wheelsActivatedSupplier;
 
     public DeployIntakeCommand(IntakeSubsystem intakeSubsystem, BooleanSupplier wheelsActivatedSupplier) {
-      this.intakeSubsystem = intakeSubsystem;
-      this.wheelsActivatedSupplier = wheelsActivatedSupplier;
-      addRequirements(intakeSubsystem);
-      }
+        this.intakeSubsystem = intakeSubsystem;
+        this.wheelsActivatedSupplier = wheelsActivatedSupplier;
+        addRequirements(intakeSubsystem);
+    }
 
     @Override
     public void initialize() {
@@ -24,10 +24,15 @@ public class DeployIntakeCommand extends Command {
 
     @Override
     public void execute() {
-        intakeSubsystem.setPivotVoltage(intakeSubsystem.closedLoopCalculate(IntakeConstants.PIVOT_DEPLOYED_ANGLE));
-
-        if (wheelsActivatedSupplier.getAsBoolean()) intakeSubsystem.setRollerSpeed(IntakeConstants.ROLLER_ACTIVATED_SPEED);
-        else intakeSubsystem.setRollerSpeed(0.0);
+        if (wheelsActivatedSupplier.getAsBoolean()) {
+            intakeSubsystem.setPivotVoltage(
+                    intakeSubsystem.closedLoopCalculate(IntakeConstants.PIVOT_DEPLOYED_AND_ACTIVATED_ANGLE));
+            intakeSubsystem.setRollerSpeed(IntakeConstants.ROLLER_ACTIVATED_SPEED);
+        } else {
+            intakeSubsystem.setPivotVoltage(
+                    intakeSubsystem.closedLoopCalculate(IntakeConstants.PIVOT_DEPLOYED_ANGLE));
+            intakeSubsystem.setRollerSpeed(0.0);
+        }
     }
 
     @Override
@@ -36,6 +41,6 @@ public class DeployIntakeCommand extends Command {
 
     @Override
     public boolean isFinished() {
-       return false;
+        return false;
     }
 }
