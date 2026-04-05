@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.970856899207746,
-        "y": 4.150884820642606
+        "x": 7.13414443038439,
+        "y": 3.877264616343897
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.970856899207746,
-        "y": 2.835552731538442
+        "x": 7.256259600288889,
+        "y": 2.567613368909559
       },
       "isLocked": false,
       "linkedName": "RC2"
     },
     {
       "anchor": {
-        "x": 2.659098890101892,
-        "y": 2.282128593522561
+        "x": 2.7035879731514085,
+        "y": 2.747721812646714
       },
       "prevControl": {
-        "x": 4.097565136800845,
-        "y": 1.929176623892278
+        "x": 4.330994901701878,
+        "y": 2.584514698870305
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,17 +30,26 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.5,
-      "rotationDegrees": -27.580883283444827
-    },
-    {
-      "waypointRelativePos": 0.7519219995019919,
-      "rotationDegrees": -29.521722282820544
+      "waypointRelativePos": 0.8835606728830643,
+      "rotationDegrees": -90.0
     }
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "PREPARE_TO_SHOOT_WITH_TURRET",
+      "waypointRelativePos": 0.7823272631894486,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "EXECUTE_TURRETED_SHOOTING",
+      "waypointRelativePos": 0.9771432853717028,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,
@@ -51,7 +60,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 172.6809232178353
+    "rotation": -135.0
   },
   "reversed": false,
   "folder": "R1",

@@ -3,42 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.908571926349765,
-        "y": 2.669757143119131
+        "x": 3.388824640551643,
+        "y": 2.301767119644953
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.3200436262513062,
-        "y": 2.5814452250520294
+        "x": 2.7390922553550467,
+        "y": 2.3127843034771125
       },
       "isLocked": false,
       "linkedName": "RBE2"
     },
     {
       "anchor": {
-        "x": 4.2822619571596245,
-        "y": 0.4803900748239426
+        "x": 4.311373056044601,
+        "y": 0.5247402710534026
       },
       "prevControl": {
-        "x": 1.9763573020344385,
-        "y": 0.48039007482394286
+        "x": 2.632272952273935,
+        "y": 0.5247402710534028
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "RS1"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.15688634072580648,
-      "rotationDegrees": -152.32382454141967
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.11310073937153402,
-      "maxWaypointRelativePos": 0.6785608747044916,
+      "minWaypointRelativePos": 0.0,
+      "maxWaypointRelativePos": 0.93894259592326,
       "constraints": {
         "maxVelocity": 0.45,
         "maxAcceleration": 4.0,
@@ -53,13 +48,13 @@
   "eventMarkers": [
     {
       "name": "EXECUTE_TURRETED_SHOOTING",
-      "waypointRelativePos": 0.16626957742316786,
+      "waypointRelativePos": 0.0,
       "endWaypointRelativePos": null,
       "command": null
     },
     {
       "name": "STOP_TURRETED_SHOOTING",
-      "waypointRelativePos": 0.6541906767139476,
+      "waypointRelativePos": 0.8925547062350122,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -74,13 +69,13 @@
   },
   "goalEndState": {
     "velocity": 2.0,
-    "rotation": 89.61989609670069
+    "rotation": -179.87939178935343
   },
   "reversed": false,
   "folder": "R1",
   "idealStartingState": {
     "velocity": 2.0,
-    "rotation": 27.88667227718826
+    "rotation": 179.69159528005383
   },
   "useDefaultConstraints": true
 }
