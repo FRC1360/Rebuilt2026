@@ -3,81 +3,56 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.795,
-        "y": 4.858
+        "x": 5.762447802947598,
+        "y": 4.127002422216158
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.795,
-        "y": 5.457999999999999
+        "x": 5.783640772834789,
+        "y": 6.122482600982534
       },
       "isLocked": false,
       "linkedName": "LC2"
     },
     {
       "anchor": {
-        "x": 6.151550730076419,
-        "y": 5.543540529475983
+        "x": 3.1621950623180495,
+        "y": 5.835903782296216
       },
       "prevControl": {
-        "x": 6.828229792121544,
-        "y": 5.530974344978166
-      },
-      "nextControl": {
-        "x": 5.717079159303092,
-        "y": 5.551608829832276
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 2.3211084197598253,
-        "y": 5.543540529475983
-      },
-      "prevControl": {
-        "x": 5.221204284934499,
-        "y": 5.521449974981806
+        "x": 6.062290927492725,
+        "y": 5.813813227802039
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "LS2"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 1.0,
-      "rotationDegrees": 180.0
-    },
-    {
-      "waypointRelativePos": 1.8651332171314745,
-      "rotationDegrees": 180.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
       "name": "PREPARE_TO_SHOOT",
-      "waypointRelativePos": 0.3,
+      "waypointRelativePos": 0.15,
       "endWaypointRelativePos": null,
       "command": null
     },
     {
       "name": "DEPLOY_INTAKE_STOP_ROLLERS",
-      "waypointRelativePos": 0.4672170508274233,
+      "waypointRelativePos": 0.25,
       "endWaypointRelativePos": null,
       "command": null
     },
     {
       "name": "DEPLOY_INTAKE_RUN_ROLLERS",
-      "waypointRelativePos": 1.8802452718676117,
+      "waypointRelativePos": 0.95,
       "endWaypointRelativePos": null,
       "command": null
     },
     {
       "name": "EXECUTE_TURRETED_SHOOTING",
-      "waypointRelativePos": 1.9,
+      "waypointRelativePos": 0.95,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -92,13 +67,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 130.53162810706135
+    "rotation": -89.75050887771398
   },
   "reversed": false,
   "folder": "L1",
   "idealStartingState": {
     "velocity": 4.0,
-    "rotation": 89.7952865637623
+    "rotation": -89.57762497153519
   },
   "useDefaultConstraints": true
 }
