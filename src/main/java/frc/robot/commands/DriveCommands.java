@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import java.util.function.Supplier;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
@@ -11,7 +13,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants.TurretConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
@@ -28,12 +29,7 @@ public class DriveCommands {
     private static final SwerveRequest.FieldCentric teleopFieldCentricDriveRequest = new SwerveRequest.FieldCentric()
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
-    private static final SwerveRequest.FieldCentricFacingAngle teleopFieldCentricDriveRequestFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
-            .withHeadingPID(7.0, 0.0, 0.0)
-            .withCenterOfRotation(TurretConstants.ROBOT_TO_TURRET_CENTER.getTranslation());
-
-    private static Translation2d modifyJoystickCurve(double inputX, double inputY) {
+    public static Translation2d modifyJoystickCurve(double inputX, double inputY) {
         Translation2d inputVector = new Translation2d(inputX, inputY);
         double inputMagnitude = inputVector.getNorm();
         Rotation2d inputAngle = inputVector.getAngle();
@@ -94,6 +90,31 @@ public class DriveCommands {
                                     modifiedDriveInput.getY() * MAX_DRIVE_TRANSLATIONAL_SPEED * translationalScalar)
                             .withRotationalRate(
                                     modifiedTurnInput.getX() * MAX_DRIVE_ANGULAR_SPEED * angularScalar);
+                });
+    }
+
+    /**
+     * Field-centric drive that uses the heading PID on {@link CommandSwerveDrivetrain#facingAngleRequest}
+     * to automatically face a supplied target angle. Right-stick rotation is ignored;
+     * the heading controller manages chassis rotation.
+     */
+    public static Command joystickDriveFacingAngle(
+            CommandSwerveDrivetrain drivetrain,
+            CommandXboxController controller,
+            double translationalScalar,
+            Supplier<Rotation2d> targetHeadingSupplier) {
+        return drivetrain.applyRequest(
+                () -> {
+                    Translation2d modifiedDriveInput = modifyJoystickCurve(
+                            -controller.getLeftY(),
+                            -controller.getLeftX());
+
+                    return drivetrain.facingAngleRequest
+                            .withVelocityX(
+                                    modifiedDriveInput.getX() * MAX_DRIVE_TRANSLATIONAL_SPEED * translationalScalar)
+                            .withVelocityY(
+                                    modifiedDriveInput.getY() * MAX_DRIVE_TRANSLATIONAL_SPEED * translationalScalar)
+                            .withTargetDirection(targetHeadingSupplier.get());
                 });
     }
 

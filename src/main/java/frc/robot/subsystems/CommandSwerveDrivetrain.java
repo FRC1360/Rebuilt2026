@@ -12,6 +12,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -29,8 +30,10 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DrivetrainConstants;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -51,6 +54,20 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
+
+    /**
+     * Field-centric facing-angle request used for swerve-mode shooting.
+     * Commands that aim with the drivetrain instead of the turret apply this
+     * request directly via {@code setControl}.
+     */
+    public final SwerveRequest.FieldCentricFacingAngle facingAngleRequest =
+            new SwerveRequest.FieldCentricFacingAngle()
+                    .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
+                    .withHeadingPID(7.0, 0.0, 0.0)
+                    .withCenterOfRotation(TurretConstants.ROBOT_TO_TURRET_CENTER.getTranslation());
+
+    public final Trigger swerveAtTargetHeading = new Trigger(
+            () -> facingAngleRequest.HeadingController.atSetpoint());
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -155,6 +172,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         swerveCameras[0] = backLeftSwerveCamera;
         swerveCameras[1] = backRightBackSwerveCamera;
         swerveCameras[2] = backRightRightSwerveCamera;
+        
+        facingAngleRequest.HeadingController.setTolerance(Math.toRadians(3.0));
     }
 
     /**
@@ -183,6 +202,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         swerveCameras[0] = backLeftSwerveCamera;
         swerveCameras[1] = backRightBackSwerveCamera;
         swerveCameras[2] = backRightRightSwerveCamera;
+
+        facingAngleRequest.HeadingController.setTolerance(Math.toRadians(3.0));
     }
 
     /**
@@ -219,6 +240,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         swerveCameras[0] = backLeftSwerveCamera;
         swerveCameras[1] = backRightBackSwerveCamera;
         swerveCameras[2] = backRightRightSwerveCamera;
+
+        facingAngleRequest.HeadingController.setTolerance(Math.toRadians(3.0));
     }
 
     private void configureAutoBuilder() {
