@@ -356,10 +356,6 @@ public class RobotContainer {
                         m_fieldZoneManager.inHumanPlayer).repeatedly(),
                 robotState.isBlueAlliance);
 
-        Command backdriveConveyorBeforeShooterAtSetpointsWithPredelay = Commands.sequence(
-                Commands.none().withTimeout(0.10),
-                new SetIndexSpeedsCommand(m_indexSubsystem, -0.1, IndexConstants.MAGAZINE_SPEED));
-
         m_flywheelSubsystem.setDefaultCommand(
                 new SetFlywheelVelocityCommand(m_flywheelSubsystem, 10.0));
         m_HoodSubsystem.setDefaultCommand(
@@ -376,10 +372,11 @@ public class RobotContainer {
         shootingThroughNetworkTablesWithTurretInput.whileTrue(prepareToShootFromNetworktablesWithTurret);
         shootingIntoHubWithSwerveInput.whileTrue(prepareToShootAtHubWithSwerve);
         passingWithSwerveInput.whileTrue(prepareToPassWithSwerve);
-        generalShootingInput.whileTrue(
-                (backdriveConveyorBeforeShooterAtSetpointsWithPredelay
-                        .until(preparedAndReadyToShoot).andThen(new ActivateAutoUnjammingIndex(m_indexSubsystem))
-                        .until(preparedAndReadyToShoot.negate())).repeatedly());
+        generalShootingInput.whileTrue(Commands.none().withTimeout(0.10).andThen(Commands.repeatingSequence(
+                new SetIndexSpeedsCommand(m_indexSubsystem, -0.1, IndexConstants.MAGAZINE_SPEED)
+                        .until(preparedAndReadyToShoot),
+                new ActivateAutoUnjammingIndex(m_indexSubsystem)
+                        .until(preparedAndReadyToShoot.negate()))));
 
         // Backdriving
         Command backdriveIntakeWhileKeepingState = Commands.either(
