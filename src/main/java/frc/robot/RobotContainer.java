@@ -377,8 +377,9 @@ public class RobotContainer {
         shootingIntoHubWithSwerveInput.whileTrue(prepareToShootAtHubWithSwerve);
         passingWithSwerveInput.whileTrue(prepareToPassWithSwerve);
         generalShootingInput.whileTrue(
-                backdriveConveyorBeforeShooterAtSetpointsWithPredelay
-                        .until(preparedAndReadyToShoot).andThen(new ActivateAutoUnjammingIndex(m_indexSubsystem)));
+                (backdriveConveyorBeforeShooterAtSetpointsWithPredelay
+                        .until(preparedAndReadyToShoot).andThen(new ActivateAutoUnjammingIndex(m_indexSubsystem))
+                        .until(preparedAndReadyToShoot.negate())).repeatedly());
 
         // Backdriving
         Command backdriveIntakeWhileKeepingState = Commands.either(
