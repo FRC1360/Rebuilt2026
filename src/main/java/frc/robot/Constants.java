@@ -137,7 +137,7 @@ public final class Constants {
         public static final double VELOCITY_CONVERSION_FACTOR = (4 * Math.PI) / (60 * 12);
         public static final double POSITION_CONVERSION_FACTOR = (4 * Math.PI) / (12);
 
-        public static final double DEFAULT_FUDGE_FACTOR = 0.0;
+        public static final double DEFAULT_FUDGE_FACTOR = 1.0;
         public static final double FUDGE_INCREMENT_VALUE = 0.5;
     }
 

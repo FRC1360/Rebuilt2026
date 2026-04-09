@@ -53,8 +53,8 @@ public class ActivateAutoUnjammingIndex extends Command {
         unjamThresholdEntry = createEntry(loggingTable, "Unjam Threshold Current",
                 DEFAULT_HOPPER_UNJAM_THRESHOLD_CURRENT);
         unjamSpeedEntry = createEntry(loggingTable, "Unjam Speed", -0.5);
-        unjamDurationEntry = createEntry(loggingTable, "Unjam Duration Seconds", 0.25);
-        unjamCooldownEntry = createEntry(loggingTable, "Unjam Cooldown Seconds", 0.5);
+        unjamDurationEntry = createEntry(loggingTable, "Unjam Duration Seconds", 0.5);
+        unjamCooldownEntry = createEntry(loggingTable, "Unjam Cooldown Seconds", 0.8);
 
         unjamThreshold = DEFAULT_HOPPER_UNJAM_THRESHOLD_CURRENT;
 

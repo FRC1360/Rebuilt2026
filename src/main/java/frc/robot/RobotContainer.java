@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.IndexConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.DriveCommands;
@@ -181,7 +182,12 @@ public class RobotContainer {
                 .or(backdriveShooterInput);
 
         /* Shooting Logic */
-        Trigger generalShootingInput = m_controller.rightTrigger(0.8).and(backdrivingAnySubsystem.negate());
+        Trigger safeShootingInput = m_controller.rightBumper()
+                .and(m_fieldZoneManager.inTrench.negate())
+                .and(backdrivingAnySubsystem.negate());
+        Trigger unsafeShootingInput = m_controller.rightTrigger(0.8)
+                .and(backdrivingAnySubsystem.negate());
+        Trigger generalShootingInput = safeShootingInput.or(unsafeShootingInput);
 
         Trigger shootingIntoHubWithTurretInput = generalShootingInput.and(m_fieldZoneManager.inAlliance)
                 .and(swerveModeActive.negate());
@@ -350,6 +356,10 @@ public class RobotContainer {
                         m_fieldZoneManager.inHumanPlayer).repeatedly(),
                 robotState.isBlueAlliance);
 
+        Command backdriveConveyorBeforeShooterAtSetpointsWithPredelay = Commands.sequence(
+                Commands.none().withTimeout(0.10),
+                new SetIndexSpeedsCommand(m_indexSubsystem, -0.1, IndexConstants.MAGAZINE_SPEED));
+
         m_flywheelSubsystem.setDefaultCommand(
                 new SetFlywheelVelocityCommand(m_flywheelSubsystem, 10.0));
         m_HoodSubsystem.setDefaultCommand(
@@ -366,7 +376,9 @@ public class RobotContainer {
         shootingThroughNetworkTablesWithTurretInput.whileTrue(prepareToShootFromNetworktablesWithTurret);
         shootingIntoHubWithSwerveInput.whileTrue(prepareToShootAtHubWithSwerve);
         passingWithSwerveInput.whileTrue(prepareToPassWithSwerve);
-        preparedAndReadyToShoot.whileTrue(new ActivateAutoUnjammingIndex(m_indexSubsystem));
+        generalShootingInput.whileTrue(
+                backdriveConveyorBeforeShooterAtSetpointsWithPredelay
+                        .until(preparedAndReadyToShoot).andThen(new ActivateAutoUnjammingIndex(m_indexSubsystem)));
 
         // Backdriving
         Command backdriveIntakeWhileKeepingState = Commands.either(
