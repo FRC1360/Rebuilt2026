@@ -40,7 +40,7 @@ public final class Constants {
         public static final double MIN_ANGLE = 57.0;
         public static final double MAX_ANGLE = 74.0;
 
-        public static final double DEFAULT_FUDGE_FACTOR = -1.0;
+        public static final double DEFAULT_FUDGE_FACTOR = -1.5;
         public static final double FUDGE_INCREMENT_VALUE = 0.5;
     }
 

@@ -57,7 +57,7 @@ public class FlywheelSubsystem extends SubsystemBase {
             0.0,
             0.0,
             0.05901,
-            0.10232,
+            0.1045,
             0.0,
             0.0);
 

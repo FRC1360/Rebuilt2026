@@ -76,6 +76,7 @@ public class RobotContainer {
     public SendableChooser<Command> autoChooser;
     private PathPlannerAuto leftSideTurretedAuto1;
     private PathPlannerAuto rightSideTurretedAuto1;
+    private PathPlannerAuto middleTurretedAuto1;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -99,6 +100,7 @@ public class RobotContainer {
 
         leftSideTurretedAuto1 = new PathPlannerAuto("L1");
         rightSideTurretedAuto1 = new PathPlannerAuto("R1");
+        middleTurretedAuto1 = new PathPlannerAuto("M1");
 
         Trigger shooterAtSetpoints = m_flywheelSubsystem.flywheelAtTarget
                 .and(m_HoodSubsystem.hoodAtTarget)
@@ -162,10 +164,19 @@ public class RobotContainer {
         rightSideTurretedAuto1.event("PREPARE_TO_SHOOT_WITH_TURRET").onTrue(prepareTurretedShot);
         rightSideTurretedAuto1.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
 
+        /* Configure stuff for middle */
+        middleTurretedAuto1.event("DEPLOY_INTAKE_RUN_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        middleTurretedAuto1.event("DEPLOY_INTAKE_STOP_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> false));
+        middleTurretedAuto1.event("PREPARE_TO_SHOOT_WITH_TURRET").onTrue(prepareTurretedShot);
+        middleTurretedAuto1.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
+
         autoChooser = new SendableChooser<Command>();
         autoChooser.setDefaultOption("Do Nothing", Commands.none());
         autoChooser.addOption("Left Side Turreted 1", leftSideTurretedAuto1);
         autoChooser.addOption("Right Side Turreted 1", rightSideTurretedAuto1);
+        autoChooser.addOption("Middle Preload Turreted 1", middleTurretedAuto1);
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
