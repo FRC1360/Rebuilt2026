@@ -20,6 +20,9 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotController;
@@ -33,6 +36,12 @@ import frc.robot.util.ClosedLoopConstants;
 import frc.robot.util.PIDLogger;
 
 public class FlywheelSubsystem extends SubsystemBase {
+
+    private final NetworkTable loggingTable = NetworkTableInstance.getDefault().getTable("Subsystems/" + getName());
+    private final DoublePublisher flywheelLeaderOutputCurrentPublisher = loggingTable
+            .getDoubleTopic("Flywheel Leader Current").publish();
+    private final DoublePublisher flywheelFollowerOutputCurrentPublisher = loggingTable
+            .getDoubleTopic("Flywheel Follower Current").publish();
 
     private final SparkFlex flywheelMotor = new SparkFlex(FlywheelConstants.VORTEX_LEADER_CAN_ID, MotorType.kBrushless);
     private final SparkFlex flywheelFollower = new SparkFlex(FlywheelConstants.VORTEX_FOLLOWER_CAN_ID,
@@ -180,6 +189,9 @@ public class FlywheelSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        flywheelLeaderOutputCurrentPublisher.accept(flywheelMotor.getOutputCurrent());
+        flywheelFollowerOutputCurrentPublisher.accept(flywheelFollower.getOutputCurrent());
+
         pidLogger.logControllerOutputs(
                 0.0,
                 flywheelPIDController.getSetpoint(),

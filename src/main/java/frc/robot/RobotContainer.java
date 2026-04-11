@@ -26,6 +26,7 @@ import frc.robot.commands.SetShooterFromPassingCompensatedPoseCommand;
 import frc.robot.commands.flywheel.SetFlywheelVelocityCommand;
 import frc.robot.commands.flywheel.SetFlywheelVelocityFromNetworkTables;
 import frc.robot.commands.flywheel.SetFlywheelVelocityFromPoseCommand;
+import frc.robot.commands.flywheel.SetFlywheelVoltageCommand;
 import frc.robot.commands.hood.SetHoodAngleCommand;
 import frc.robot.commands.hood.SetHoodAngleFromNetworkTables;
 import frc.robot.commands.hood.SetHoodAngleFromPose;
@@ -368,7 +369,7 @@ public class RobotContainer {
                 robotState.isBlueAlliance);
 
         m_flywheelSubsystem.setDefaultCommand(
-                new SetFlywheelVelocityCommand(m_flywheelSubsystem, 10.0));
+                new SetFlywheelVoltageCommand(m_flywheelSubsystem, 3.6));
         m_HoodSubsystem.setDefaultCommand(
                 new SetHoodAngleCommand(m_HoodSubsystem, 74));
         m_indexSubsystem.setDefaultCommand(
