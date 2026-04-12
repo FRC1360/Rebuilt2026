@@ -25,7 +25,7 @@ public class FieldZoneManager {
     private double[][] trenchesYPositions = { { 0.0, Inches.of(49.94).in(Meters) },
             { Inches.of(267.75).in(Meters), Inches.of(317.69).in(Meters) } };
 
-    private double centerAxisBuffer = 2; 
+    private double centerAxisBuffer = 1; 
     private double middleZoneBuffer = 2; 
 
     private static FieldZoneManager instance = null;

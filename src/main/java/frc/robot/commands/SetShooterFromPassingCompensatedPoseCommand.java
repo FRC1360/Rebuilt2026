@@ -81,7 +81,7 @@ public class SetShooterFromPassingCompensatedPoseCommand extends Command {
     @Override
     public void execute() {
         // Calculate sotm output and store output poses
-        shootOnTheMoveOutput = robotState.calculateParametersForShootOnTheMove(nonCompensatedGoalPose.getTranslation());
+        shootOnTheMoveOutput = robotState.calculateParametersForPassOnTheMove(nonCompensatedGoalPose.getTranslation());
         compensatedGoalTranslation = shootOnTheMoveOutput.getGoalTranslation();
         for (int index = 0; index < ShootingConstants.MAX_ITERATION_COUNT; index++) {
             iteratedPoses[index] = new Pose2d(
