@@ -1,0 +1,91 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 8.595125090975255,
+        "y": 1.8559637691048034
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 8.595125090975255,
+        "y": 3.2402816061244213
+      },
+      "isLocked": false,
+      "linkedName": "O3_SWEEPEND"
+    },
+    {
+      "anchor": {
+        "x": 6.803645947052401,
+        "y": 6.828881686681223
+      },
+      "prevControl": {
+        "x": 7.231428905586835,
+        "y": 6.432691335262681
+      },
+      "nextControl": {
+        "x": 6.221612195232896,
+        "y": 7.367931108988355
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 4.436266546124454,
+        "y": 7.4312108237809325
+      },
+      "prevControl": {
+        "x": 5.977601430794325,
+        "y": 7.419938949395654
+      },
+      "nextControl": {
+        "x": 2.8363093290848553,
+        "y": 7.4429114067961235
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.423931723071324,
+        "y": 6.634155692776565
+      },
+      "prevControl": {
+        "x": 2.829091441502911,
+        "y": 7.40941946415575
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "O3_T2"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.5,
+      "rotationDegrees": 180.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0.0,
+    "rotation": 180.0
+  },
+  "reversed": false,
+  "folder": "3O",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -113.55
+  },
+  "useDefaultConstraints": true
+}

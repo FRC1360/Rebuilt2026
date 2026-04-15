@@ -3,41 +3,46 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.53,
+        "x": 1.06284439819869,
         "y": 5.96
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.7697561053980557,
-        "y": 5.96
+        "x": 1.6430829808042215,
+        "y": 7.046097161572053
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "DEPOT"
     },
     {
       "anchor": {
-        "x": 1.06284439819869,
-        "y": 5.96
+        "x": 4.4144751864992715,
+        "y": 7.421536856350072
       },
       "prevControl": {
-        "x": 2.0628443981986924,
-        "y": 5.96
+        "x": 1.726209288573508,
+        "y": 7.398798046306404
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "DEPOT"
+      "linkedName": "O3_T1"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.7,
+      "rotationDegrees": -1.0
+    }
+  ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
       "minWaypointRelativePos": 0,
-      "maxWaypointRelativePos": 1.0,
+      "maxWaypointRelativePos": 0.7,
       "constraints": {
-        "maxVelocity": 1.4,
+        "maxVelocity": 4.0,
         "maxAcceleration": 4.0,
-        "maxAngularVelocity": 540.0,
+        "maxAngularVelocity": 90.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
         "unlimited": false
@@ -45,26 +50,7 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "PREPARE_TO_SHOOT_WITH_TURRET",
-      "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "DEPLOY_INTAKE_RUN_ROLLERS",
-      "waypointRelativePos": 0.05,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "EXECUTE_TURRETED_SHOOTING",
-      "waypointRelativePos": 0.5,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,
@@ -74,11 +60,11 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 180.0
+    "velocity": 4.0,
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "M2",
+  "folder": "3O",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0
