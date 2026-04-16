@@ -81,7 +81,7 @@ public class RobotState {
         turretDistanceToHoodAngleMap.put(4.47, 59.5);
         turretDistanceToHoodAngleMap.put(5.052, 58.5);
         turretDistanceToHoodAngleMap.put(5.50, 57.0);
-        turretDistanceToHoodAngleMap.put(7.0, 49.983);
+        // turretDistanceToHoodAngleMap.put(7.0, 49.983);
 
         turretDistanceToFlywheelVelocityMap = new InterpolatingDoubleTreeMap();
         turretDistanceToFlywheelVelocityMap.put(1.53, 43.0);
@@ -93,8 +93,8 @@ public class RobotState {
         turretDistanceToFlywheelVelocityMap.put(4.47, 58.0);
         turretDistanceToFlywheelVelocityMap.put(5.052, 63.0);
         turretDistanceToFlywheelVelocityMap.put(5.50, 65.0);
-        turretDistanceToFlywheelVelocityMap.put(7.0, 73.567);
-        turretDistanceToFlywheelVelocityMap.put(10.0, 91.0);
+        // turretDistanceToFlywheelVelocityMap.put(7.0, 73.567);
+        // turretDistanceToFlywheelVelocityMap.put(10.0, 91.0);
 
         turretDistanceToTimeOfFlightMap = new InterpolatingDoubleTreeMap();
         turretDistanceToTimeOfFlightMap.put(1.53, 0.955);

@@ -385,7 +385,7 @@ public class RobotContainer {
         shootingIntoHubWithSwerveInput.whileTrue(prepareToShootAtHubWithSwerve);
         passingWithSwerveInput.whileTrue(prepareToPassWithSwerve);
         generalShootingInput.whileTrue(Commands.none().withTimeout(0.10).andThen(Commands.repeatingSequence(
-                new SetIndexSpeedsCommand(m_indexSubsystem, -0.1, IndexConstants.MAGAZINE_SPEED)
+                new SetIndexSpeedsCommand(m_indexSubsystem, 0.0, IndexConstants.MAGAZINE_SPEED)
                         .until(preparedAndReadyToShoot),
                 new ActivateAutoUnjammingIndex(m_indexSubsystem)
                         .until(preparedAndReadyToShoot.negate()))));

@@ -19,13 +19,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "O3_B1-SWEEPEND"
+            "pathName": "O3_B1-S1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "O3_SWEEPEND-T2"
+            "pathName": "O3_S1-S2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "O3_S2-T2"
           }
         }
       ]
