@@ -68,7 +68,8 @@ public final class Constants {
         public static final double PIVOT_STARTUP_ANGLE = 121.3;
         public static final double PIVOT_PID_TOLERANCE = 2.0;
         public static final double PIVOT_RETRACTED_ANGLE = 120.0;
-        public static final double PIVOT_DEPLOYED_ANGLE = 10.0;
+        // public static final double PIVOT_DEPLOYED_ANGLE = 10.0;
+        public static final double PIVOT_DEPLOYED_ANGLE = -0.4;
         public static final double PIVOT_DEPLOYED_AND_ACTIVATED_ANGLE = -0.4;
 
         // Used in RobotState to manage toggling functionality
@@ -146,10 +147,10 @@ public final class Constants {
                 new Translation3d(-((0.704850 / 2.0) - 0.094180), (0.704850 / 2.0) - 0.094180, 0.208540),
                 new Rotation3d(0, -Math.toRadians(10), Math.toRadians(134.136029)));
         public static final Transform3d BACK_RIGHT_BACK_SWERVECAM_ROBOT_RELATIVE_TRANSFORM = new Transform3d(
-                new Translation3d(-0.288, -0.288, 0.241),
+                new Translation3d(-0.288, -0.288, 0.241 + 0.00318),
                 new Rotation3d(0, -Math.toRadians(27), Math.toRadians(180.0)));
         public static final Transform3d BACK_RIGHT_RIGHT_SWERVECAM_ROBOT_RELATIVE_TRANSFORM = new Transform3d(
-                new Translation3d(-0.279, -0.309, 0.241),
+                new Translation3d(-0.279, -0.309, 0.241 + 0.00318),
                 new Rotation3d(0, -Math.toRadians(12), Math.toRadians(-90.0)));
     }
 
