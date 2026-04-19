@@ -31,6 +31,7 @@ import frc.robot.commands.hood.SetHoodAngleCommand;
 import frc.robot.commands.hood.SetHoodAngleFromNetworkTables;
 import frc.robot.commands.hood.SetHoodAngleFromPose;
 import frc.robot.commands.index.ActivateAutoUnjammingIndex;
+import frc.robot.commands.index.ActivateIndexCommand;
 import frc.robot.commands.index.SetIndexSpeedsCommand;
 import frc.robot.commands.intake.DeployIntakeCommand;
 import frc.robot.commands.intake.RetractIntakeCommand;
@@ -125,16 +126,16 @@ public class RobotContainer {
                 .and(m_HoodSubsystem.hoodAtTarget)
                 .and(m_TurretSubsystem.turretAtTarget);
         Trigger isAutoShootingDone = leftSideTurretedAuto1.event("STOP_TURRETED_SHOOTING")
-            .or(rightSideTurretedAuto1.event("STOP_TURRETED_SHOOTING"))
-            .or(middleTurretedAuto1.event("STOP_TURRETED_SHOOTING"))
-            .or(tripleOffenseAutoTTT.event("STOP_TURRETED_SHOOTING"))
-            .or(tripleOffenseAutoTTB.event("STOP_TURRETED_SHOOTING"))
-            .or(tripleOffenseAutoTBT.event("STOP_TURRETED_SHOOTING"))
-            .or(tripleOffenseAutoTBB.event("STOP_TURRETED_SHOOTING"))
-            .or(tripleOffenseAutoBTT.event("STOP_TURRETED_SHOOTING"))
-            .or(tripleOffenseAutoBTB.event("STOP_TURRETED_SHOOTING"))
-            .or(tripleOffenseAutoBBT.event("STOP_TURRETED_SHOOTING"))
-            .or(tripleOffenseAutoBBB.event("STOP_TURRETED_SHOOTING"));
+                .or(rightSideTurretedAuto1.event("STOP_TURRETED_SHOOTING"))
+                .or(middleTurretedAuto1.event("STOP_TURRETED_SHOOTING"))
+                .or(tripleOffenseAutoTTT.event("STOP_TURRETED_SHOOTING"))
+                .or(tripleOffenseAutoTTB.event("STOP_TURRETED_SHOOTING"))
+                .or(tripleOffenseAutoTBT.event("STOP_TURRETED_SHOOTING"))
+                .or(tripleOffenseAutoTBB.event("STOP_TURRETED_SHOOTING"))
+                .or(tripleOffenseAutoBTT.event("STOP_TURRETED_SHOOTING"))
+                .or(tripleOffenseAutoBTB.event("STOP_TURRETED_SHOOTING"))
+                .or(tripleOffenseAutoBBT.event("STOP_TURRETED_SHOOTING"))
+                .or(tripleOffenseAutoBBB.event("STOP_TURRETED_SHOOTING"));
 
         Command prepareLeftSideTurretedShot = Commands.either(
                 Commands.parallel(
@@ -267,8 +268,6 @@ public class RobotContainer {
         tripleOffenseAutoBBB.event("PREPARE_TO_SHOOT_WITH_TURRET").onTrue(prepareTurretedShot);
         tripleOffenseAutoBBB.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
 
-        
-
         autoChooser = new SendableChooser<Command>();
         autoChooser.setDefaultOption("Do Nothing", Commands.none());
         autoChooser.addOption("Left Side Turreted 1", leftSideTurretedAuto1);
@@ -291,19 +290,20 @@ public class RobotContainer {
          */
         /* Backdriving Logic */
         Trigger backdriveIntakeInput = m_controller.povLeft();
-        Trigger backdriveIndexInput = m_controller.povUp();
+        Trigger backdriveIndexInput = m_controller.leftBumper();
+        Trigger backdriveIndexAndIntakeInput = m_controller.povUp();
         Trigger backdriveShooterInput = m_controller.povRight();
         Trigger backdrivingAnySubsystem = backdriveIntakeInput
                 .or(backdriveIndexInput)
                 .or(backdriveShooterInput);
 
         /* Shooting Logic */
-        Trigger safeShootingInput = m_controller.rightBumper()
-                .and(m_fieldZoneManager.inTrench.negate())
-                .and(backdrivingAnySubsystem.negate());
-        Trigger unsafeShootingInput = m_controller.rightTrigger(0.8)
-                .and(backdrivingAnySubsystem.negate());
-        Trigger generalShootingInput = safeShootingInput.or(unsafeShootingInput);
+        Trigger nonUnjammingShootingInput = m_controller.rightBumper()
+                .and(backdrivingAnySubsystem.negate().or(backdriveIndexInput));
+        Trigger autoUnjammingShootingInput = m_controller.rightTrigger(0.8)
+                .and(nonUnjammingShootingInput.negate())
+                .and(backdrivingAnySubsystem.negate().or(backdriveIndexInput));
+        Trigger generalShootingInput = autoUnjammingShootingInput.or(nonUnjammingShootingInput);
 
         Trigger shootingIntoHubWithTurretInput = generalShootingInput.and(m_fieldZoneManager.inAlliance)
                 .and(swerveModeActive.negate());
@@ -471,6 +471,12 @@ public class RobotContainer {
                                 FieldConstants.RED_DEPOT_SIDE_PASS_POSE).until(m_fieldZoneManager.inHumanPlayer),
                         m_fieldZoneManager.inHumanPlayer).repeatedly(),
                 robotState.isBlueAlliance);
+        Command runIndexBasedOnJammingMode = Commands.either(
+                new ActivateAutoUnjammingIndex(m_indexSubsystem)
+                        .until(autoUnjammingShootingInput.negate()),
+                new ActivateIndexCommand(m_indexSubsystem)
+                        .until(autoUnjammingShootingInput),
+                autoUnjammingShootingInput).repeatedly();
 
         m_flywheelSubsystem.setDefaultCommand(
                 new SetFlywheelVoltageCommand(m_flywheelSubsystem, 3.6));
@@ -488,11 +494,12 @@ public class RobotContainer {
         shootingThroughNetworkTablesWithTurretInput.whileTrue(prepareToShootFromNetworktablesWithTurret);
         shootingIntoHubWithSwerveInput.whileTrue(prepareToShootAtHubWithSwerve);
         passingWithSwerveInput.whileTrue(prepareToPassWithSwerve);
-        generalShootingInput.whileTrue(Commands.none().withTimeout(0.10).andThen(Commands.repeatingSequence(
-                new SetIndexSpeedsCommand(m_indexSubsystem, -0.1, IndexConstants.MAGAZINE_SPEED)
-                        .until(preparedAndReadyToShoot),
-                new ActivateAutoUnjammingIndex(m_indexSubsystem)
-                        .until(preparedAndReadyToShoot.negate()))));
+        generalShootingInput.and(backdriveIndexInput.negate()).and(backdriveIndexAndIntakeInput.negate()).whileTrue(
+                Commands.none().withTimeout(0.10).andThen(Commands.repeatingSequence(
+                        new SetIndexSpeedsCommand(m_indexSubsystem, -0.1, IndexConstants.MAGAZINE_SPEED)
+                                .until(preparedAndReadyToShoot),
+                        runIndexBasedOnJammingMode
+                                .until(preparedAndReadyToShoot.negate()))));
 
         // Backdriving
         Command backdriveIntakeWhileKeepingState = Commands.either(
@@ -503,8 +510,18 @@ public class RobotContainer {
                 robotState.isIntakeCurrentlyDeployed).repeatedly();
         backdriveIntakeInput.whileTrue(backdriveIntakeWhileKeepingState);
 
-        Command backdriveIndex = new SetIndexSpeedsCommand(m_indexSubsystem, -0.4, -1.0);
+        Command backdriveIndex = new SetIndexSpeedsCommand(m_indexSubsystem, -0.6, IndexConstants.MAGAZINE_SPEED);
         backdriveIndexInput.whileTrue(backdriveIndex);
+
+        Command backdriveIntakeWhileKeepingStateAlongWithIndex = Commands.parallel(
+                new SetIndexSpeedsCommand(m_indexSubsystem, -0.6, IndexConstants.MAGAZINE_SPEED),
+                Commands.either(
+                        new SetIntakePivotAngleCommand(m_intakeSubsystem, IntakeConstants.PIVOT_DEPLOYED_ANGLE, -0.5)
+                                .until(robotState.isIntakeCurrentlyDeployed.negate()),
+                        new SetIntakePivotAngleCommand(m_intakeSubsystem, IntakeConstants.PIVOT_RETRACTED_ANGLE, -0.5)
+                                .until(robotState.isIntakeCurrentlyDeployed),
+                        robotState.isIntakeCurrentlyDeployed).repeatedly());
+        backdriveIndexAndIntakeInput.whileTrue(backdriveIntakeWhileKeepingStateAlongWithIndex);
 
         Command backdriveShooter = new SetFlywheelVelocityCommand(m_flywheelSubsystem, -30.0)
                 .alongWith(new SetIndexSpeedsCommand(m_indexSubsystem, -0.4, -1.0));
