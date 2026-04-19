@@ -20,7 +20,7 @@
         "y": 7.421536856350072
       },
       "prevControl": {
-        "x": 1.726209288573508,
+        "x": 1.7262092885735085,
         "y": 7.398798046306404
       },
       "nextControl": null,
@@ -37,12 +37,12 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0,
-      "maxWaypointRelativePos": 0.7,
+      "minWaypointRelativePos": 0.15,
+      "maxWaypointRelativePos": 0.75,
       "constraints": {
         "maxVelocity": 4.0,
         "maxAcceleration": 4.0,
-        "maxAngularVelocity": 90.0,
+        "maxAngularVelocity": 80.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
         "unlimited": false
@@ -50,7 +50,20 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "EXECUTE_TURRETED_SHOOTING",
+      "waypointRelativePos": 0.15,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "STOP_TURRETED_SHOOTING",
+      "waypointRelativePos": 0.8,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,

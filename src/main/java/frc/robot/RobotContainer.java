@@ -79,6 +79,15 @@ public class RobotContainer {
     private PathPlannerAuto rightSideTurretedAuto1;
     private PathPlannerAuto middleTurretedAuto1;
 
+    private PathPlannerAuto tripleOffenseAutoTTT;
+    private PathPlannerAuto tripleOffenseAutoTTB;
+    private PathPlannerAuto tripleOffenseAutoTBT;
+    private PathPlannerAuto tripleOffenseAutoTBB;
+    private PathPlannerAuto tripleOffenseAutoBTT;
+    private PathPlannerAuto tripleOffenseAutoBTB;
+    private PathPlannerAuto tripleOffenseAutoBBT;
+    private PathPlannerAuto tripleOffenseAutoBBB;
+
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
@@ -103,9 +112,29 @@ public class RobotContainer {
         rightSideTurretedAuto1 = new PathPlannerAuto("R1");
         middleTurretedAuto1 = new PathPlannerAuto("M1");
 
+        tripleOffenseAutoTTT = new PathPlannerAuto("O3_T-T-T");
+        tripleOffenseAutoTTB = new PathPlannerAuto("O3_T-T-B");
+        tripleOffenseAutoTBT = new PathPlannerAuto("O3_T-B-T");
+        tripleOffenseAutoTBB = new PathPlannerAuto("O3_T-B-B");
+        tripleOffenseAutoBTT = new PathPlannerAuto("O3_B-T-T");
+        tripleOffenseAutoBTB = new PathPlannerAuto("O3_B-T-B");
+        tripleOffenseAutoBBT = new PathPlannerAuto("O3_B-B-T");
+        tripleOffenseAutoBBB = new PathPlannerAuto("O3_B-B-B");
+
         Trigger shooterAtSetpoints = m_flywheelSubsystem.flywheelAtTarget
                 .and(m_HoodSubsystem.hoodAtTarget)
                 .and(m_TurretSubsystem.turretAtTarget);
+        Trigger isAutoShootingDone = leftSideTurretedAuto1.event("STOP_TURRETED_SHOOTING")
+            .or(rightSideTurretedAuto1.event("STOP_TURRETED_SHOOTING"))
+            .or(middleTurretedAuto1.event("STOP_TURRETED_SHOOTING"))
+            .or(tripleOffenseAutoTTT.event("STOP_TURRETED_SHOOTING"))
+            .or(tripleOffenseAutoTTB.event("STOP_TURRETED_SHOOTING"))
+            .or(tripleOffenseAutoTBT.event("STOP_TURRETED_SHOOTING"))
+            .or(tripleOffenseAutoTBB.event("STOP_TURRETED_SHOOTING"))
+            .or(tripleOffenseAutoBTT.event("STOP_TURRETED_SHOOTING"))
+            .or(tripleOffenseAutoBTB.event("STOP_TURRETED_SHOOTING"))
+            .or(tripleOffenseAutoBBT.event("STOP_TURRETED_SHOOTING"))
+            .or(tripleOffenseAutoBBB.event("STOP_TURRETED_SHOOTING"));
 
         Command prepareLeftSideTurretedShot = Commands.either(
                 Commands.parallel(
@@ -145,7 +174,7 @@ public class RobotContainer {
                 robotState.isBlueAlliance)
                 .alongWith(Commands.none().until(shooterAtSetpoints)
                         .andThen(new ActivateAutoUnjammingIndex(m_indexSubsystem)))
-                .until(leftSideTurretedAuto1.event("STOP_TURRETED_SHOOTING"));
+                .until(isAutoShootingDone);
 
         /* Configure stuff for left side */
         leftSideTurretedAuto1.event("DEPLOY_INTAKE_RUN_ROLLERS").onTrue(
@@ -173,11 +202,86 @@ public class RobotContainer {
         middleTurretedAuto1.event("PREPARE_TO_SHOOT_WITH_TURRET").onTrue(prepareTurretedShot);
         middleTurretedAuto1.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
 
+        /* Configure All Triple Offensive Autos */
+        tripleOffenseAutoTTT.event("DEPLOY_INTAKE_RUN_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        tripleOffenseAutoTTT.event("DEPLOY_INTAKE_STOP_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> false));
+        tripleOffenseAutoTTT.event("PREPARE_TO_SHOOT").onTrue(prepareRightSideTurretedShot);
+        tripleOffenseAutoTTT.event("PREPARE_TO_SHOOT_WITH_TURRET").onTrue(prepareTurretedShot);
+        tripleOffenseAutoTTT.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
+
+        tripleOffenseAutoTTB.event("DEPLOY_INTAKE_RUN_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        tripleOffenseAutoTTB.event("DEPLOY_INTAKE_STOP_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> false));
+        tripleOffenseAutoTTB.event("PREPARE_TO_SHOOT").onTrue(prepareRightSideTurretedShot);
+        tripleOffenseAutoTTB.event("PREPARE_TO_SHOOT_WITH_TURRET").onTrue(prepareTurretedShot);
+        tripleOffenseAutoTTB.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
+
+        tripleOffenseAutoTBT.event("DEPLOY_INTAKE_RUN_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        tripleOffenseAutoTBT.event("DEPLOY_INTAKE_STOP_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> false));
+        tripleOffenseAutoTBT.event("PREPARE_TO_SHOOT").onTrue(prepareRightSideTurretedShot);
+        tripleOffenseAutoTBT.event("PREPARE_TO_SHOOT_WITH_TURRET").onTrue(prepareTurretedShot);
+        tripleOffenseAutoTBT.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
+
+        tripleOffenseAutoTBB.event("DEPLOY_INTAKE_RUN_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        tripleOffenseAutoTBB.event("DEPLOY_INTAKE_STOP_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> false));
+        tripleOffenseAutoTBB.event("PREPARE_TO_SHOOT").onTrue(prepareRightSideTurretedShot);
+        tripleOffenseAutoTBB.event("PREPARE_TO_SHOOT_WITH_TURRET").onTrue(prepareTurretedShot);
+        tripleOffenseAutoTBB.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
+
+        tripleOffenseAutoBTT.event("DEPLOY_INTAKE_RUN_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        tripleOffenseAutoBTT.event("DEPLOY_INTAKE_STOP_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> false));
+        tripleOffenseAutoBTT.event("PREPARE_TO_SHOOT").onTrue(prepareRightSideTurretedShot);
+        tripleOffenseAutoBTT.event("PREPARE_TO_SHOOT_WITH_TURRET").onTrue(prepareTurretedShot);
+        tripleOffenseAutoBTT.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
+
+        tripleOffenseAutoBTB.event("DEPLOY_INTAKE_RUN_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        tripleOffenseAutoBTB.event("DEPLOY_INTAKE_STOP_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> false));
+        tripleOffenseAutoBTB.event("PREPARE_TO_SHOOT").onTrue(prepareRightSideTurretedShot);
+        tripleOffenseAutoBTB.event("PREPARE_TO_SHOOT_WITH_TURRET").onTrue(prepareTurretedShot);
+        tripleOffenseAutoBTB.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
+
+        tripleOffenseAutoBBT.event("DEPLOY_INTAKE_RUN_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        tripleOffenseAutoBBT.event("DEPLOY_INTAKE_STOP_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> false));
+        tripleOffenseAutoBBT.event("PREPARE_TO_SHOOT").onTrue(prepareRightSideTurretedShot);
+        tripleOffenseAutoBBT.event("PREPARE_TO_SHOOT_WITH_TURRET").onTrue(prepareTurretedShot);
+        tripleOffenseAutoBBT.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
+
+        tripleOffenseAutoBBB.event("DEPLOY_INTAKE_RUN_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> true));
+        tripleOffenseAutoBBB.event("DEPLOY_INTAKE_STOP_ROLLERS").onTrue(
+                new DeployIntakeCommand(m_intakeSubsystem, () -> false));
+        tripleOffenseAutoBBB.event("PREPARE_TO_SHOOT").onTrue(prepareRightSideTurretedShot);
+        tripleOffenseAutoBBB.event("PREPARE_TO_SHOOT_WITH_TURRET").onTrue(prepareTurretedShot);
+        tripleOffenseAutoBBB.event("EXECUTE_TURRETED_SHOOTING").onTrue(executeTurretedShot);
+
+        
+
         autoChooser = new SendableChooser<Command>();
         autoChooser.setDefaultOption("Do Nothing", Commands.none());
         autoChooser.addOption("Left Side Turreted 1", leftSideTurretedAuto1);
         autoChooser.addOption("Right Side Turreted 1", rightSideTurretedAuto1);
         autoChooser.addOption("Middle Preload Turreted 1", middleTurretedAuto1);
+        autoChooser.addOption("Triple Offensive T-T-T", tripleOffenseAutoTTT);
+        autoChooser.addOption("Triple Offensive T-T-B", tripleOffenseAutoTTB);
+        autoChooser.addOption("Triple Offensive T-B-T", tripleOffenseAutoTBT);
+        autoChooser.addOption("Triple Offensive T-B-B", tripleOffenseAutoTBB);
+        autoChooser.addOption("Triple Offensive B-T-T", tripleOffenseAutoBTT);
+        autoChooser.addOption("Triple Offensive B-T-B", tripleOffenseAutoBTB);
+        autoChooser.addOption("Triple Offensive B-B-T", tripleOffenseAutoBBT);
+        autoChooser.addOption("Triple Offensive B-B-B", tripleOffenseAutoBBB);
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
@@ -385,7 +489,7 @@ public class RobotContainer {
         shootingIntoHubWithSwerveInput.whileTrue(prepareToShootAtHubWithSwerve);
         passingWithSwerveInput.whileTrue(prepareToPassWithSwerve);
         generalShootingInput.whileTrue(Commands.none().withTimeout(0.10).andThen(Commands.repeatingSequence(
-                new SetIndexSpeedsCommand(m_indexSubsystem, 0.0, IndexConstants.MAGAZINE_SPEED)
+                new SetIndexSpeedsCommand(m_indexSubsystem, -0.1, IndexConstants.MAGAZINE_SPEED)
                         .until(preparedAndReadyToShoot),
                 new ActivateAutoUnjammingIndex(m_indexSubsystem)
                         .until(preparedAndReadyToShoot.negate()))));
