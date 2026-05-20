@@ -7,6 +7,7 @@ package frc.robot;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -37,6 +38,7 @@ import frc.robot.commands.intake.DeployIntakeCommand;
 import frc.robot.commands.intake.RetractIntakeCommand;
 import frc.robot.commands.intake.SetIntakePivotAngleCommand;
 import frc.robot.commands.turret.AimTurretAtPoseCommand;
+import frc.robot.commands.turret.SetTurretToFieldRelativeAngleCommand;
 import frc.robot.commands.turret.SetTurretToNonWrappedEncoderCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -70,8 +72,8 @@ public class RobotContainer {
     private final Trigger swerveModeActive = new Trigger(() -> swerveModeEnabled);
 
     // Slow down speed when intaking and/or shooting
-    private static final double SLOW_DRIVE_TRANSLATIONAL_MULTIPLIER = 0.3;
-    private static final double SLOW_DRIVE_ANGULAR_MULTIPLIER = 0.8;
+    private static final double SLOW_DRIVE_TRANSLATIONAL_MULTIPLIER = 0.2;
+    private static final double SLOW_DRIVE_ANGULAR_MULTIPLIER = 0.2;
 
     private final SwerveTelemetry swerveLogger = new SwerveTelemetry(DriveCommands.MAX_DRIVE_TRANSLATIONAL_SPEED);
 
@@ -350,7 +352,7 @@ public class RobotContainer {
         // Driving
         Command joystickDriveAtNormalSpeed = DriveCommands.joystickDriveCommand(
                 drivetrain, m_controller,
-                1.0, 1.0);
+                0.2, 0.2);
         Command joystickDriveAtShootOnTheMoveSpeed = DriveCommands.joystickDriveCommand(
                 drivetrain, m_controller,
                 SLOW_DRIVE_TRANSLATIONAL_MULTIPLIER, SLOW_DRIVE_ANGULAR_MULTIPLIER);
@@ -358,10 +360,10 @@ public class RobotContainer {
         Trigger isTurnInputFacingRight = new Trigger(() -> m_controller.getRightX() > 0);
         Command joystickDriveWithRightSideSweep = DriveCommands.joystickDriveWithCenterOfRotationCommand(
                 drivetrain, m_controller,
-                1.0, 1.0, new Translation2d(0.275, -0.33));
+                0.2, 0.2, new Translation2d(0.275, -0.33));
         Command joystickDriveWithLeftSideSweep = DriveCommands.joystickDriveWithCenterOfRotationCommand(
                 drivetrain, m_controller,
-                1.0, 1.0, new Translation2d(0.275, 0.33));
+                0.2, 0.2, new Translation2d(0.275, 0.33));
         Command joystickDriveWhileIntaking = Commands.either(
                 joystickDriveWithRightSideSweep.until(isTurnInputFacingRight.negate()),
                 joystickDriveWithLeftSideSweep.until(isTurnInputFacingRight),
@@ -444,6 +446,10 @@ public class RobotContainer {
                 new SetHoodAngleFromNetworkTables(m_HoodSubsystem, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE),
                 new SetFlywheelVelocityFromNetworkTables(m_flywheelSubsystem),
                 new AimTurretAtPoseCommand(m_TurretSubsystem, FieldConstants.BLUE_DEPOT_SIDE_PASS_POSE));
+        Command prepareToShootFromConstantSetpoints = Commands.parallel(
+                new SetHoodAngleCommand(m_HoodSubsystem, 65.0),
+                new SetFlywheelVelocityCommand(m_flywheelSubsystem, 30.0),
+                new SetTurretToFieldRelativeAngleCommand(m_TurretSubsystem, new Rotation2d()));
 
         Command prepareToShootAtHubWithSwerve = Commands.either(
                 new SetShooterForSwerveShootingCommand(
@@ -479,18 +485,20 @@ public class RobotContainer {
                 autoUnjammingShootingInput).repeatedly();
 
         m_flywheelSubsystem.setDefaultCommand(
-                new SetFlywheelVoltageCommand(m_flywheelSubsystem, 3.6));
+                new SetFlywheelVoltageCommand(m_flywheelSubsystem, 1.2));
         m_HoodSubsystem.setDefaultCommand(
                 new SetHoodAngleCommand(m_HoodSubsystem, 74));
         m_indexSubsystem.setDefaultCommand(
                 new SetIndexSpeedsCommand(m_indexSubsystem, 0.0, 0.3));
-        m_TurretSubsystem.setDefaultCommand(Commands.either(
-                keepTurretStationary.until(swerveModeActive.negate()),
-                autoAimTurretOnField.until(swerveModeActive),
-                swerveModeActive).repeatedly());
+        // m_TurretSubsystem.setDefaultCommand(Commands.either(
+        // keepTurretStationary.until(swerveModeActive.negate()),
+        // autoAimTurretOnField.until(swerveModeActive),
+        // swerveModeActive).repeatedly());
+        m_TurretSubsystem.setDefaultCommand(
+                new SetTurretToFieldRelativeAngleCommand(m_TurretSubsystem, new Rotation2d()));
 
-        shootingIntoHubWithTurretInput.whileTrue(prepareToShootAtHubWithTurret);
-        passingWithTurretInput.whileTrue(prepareToPassWithTurret);
+        shootingIntoHubWithTurretInput.whileTrue(prepareToShootFromConstantSetpoints);
+        passingWithTurretInput.whileTrue(prepareToShootFromConstantSetpoints);
         shootingThroughNetworkTablesWithTurretInput.whileTrue(prepareToShootFromNetworktablesWithTurret);
         shootingIntoHubWithSwerveInput.whileTrue(prepareToShootAtHubWithSwerve);
         passingWithSwerveInput.whileTrue(prepareToPassWithSwerve);
